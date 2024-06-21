@@ -2,24 +2,27 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import * as React from 'react';
-import { RootTabParamList } from './navigation';
+import { RootStackParamList, RootTabParamList } from './navigation';
 import { View } from 'react-native';
 import { HomeScreen } from '../screens/home/home-screen';
 import { ProfileScreen } from '../screens/profile/profile-screen';
 
-
+type BottomTabNavigatorProps = {
+    route: { params: RootStackParamList['MainTabs'] };
+};
 
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-export function BottomTabNavigator() {
-
+export function BottomTabNavigator({ route }: BottomTabNavigatorProps) {
+    const  user  = route.params;
+    console.log(user);
+    
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
                 tabBarIcon: ({ color, size }) => {
                     let iconName: string;
-                    let isCart = false;
 
                     switch (route.name) {
                         case 'Home':
@@ -48,7 +51,7 @@ export function BottomTabNavigator() {
                 headerShown: false,
             })}
         >
-            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Home" component={HomeScreen} initialParams={user}/>
             <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>
     );

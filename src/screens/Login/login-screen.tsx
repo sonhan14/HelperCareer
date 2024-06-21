@@ -6,18 +6,21 @@ import { images } from "../../images";
 import { color } from "../../constants/colors/color";
 import Animated, { BounceInRight, FadeIn, FadeOut, LightSpeedOutRight } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
-import { HomeScreenNavigationProp } from "../../navigations/navigation";
+import { RootStackParamList } from "../../navigations/navigation";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 
-
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 
 export const LoginScreen = () => {
-    const navigation = useNavigation<HomeScreenNavigationProp>();
+    const navigation = useNavigation<LoginScreenNavigationProp>();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [notificationVisible, setNotificationVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     useEffect(() => {
         if (notificationVisible) {
@@ -38,21 +41,20 @@ export const LoginScreen = () => {
         try {
             let response = await auth().signInWithEmailAndPassword(email, password)
             if (response && response.user) {
-                navigation.replace('MainTabs')
+                navigation.replace('MainTabs', {userId: response.user.uid})
             }
         } catch (e) {
             if (e instanceof Error) {
                 setNotificationVisible(true);
                 setErrorMessage(e.message)
                 console.log(e.message);
-                
             }
         }
     }
 
     return (
         <View style={{ flex: 1, position: 'relative' }}>
-            
+
             <View style={styles.login_image_container}>
                 <Image source={images.wellcome_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
             </View>
@@ -85,14 +87,31 @@ export const LoginScreen = () => {
                 </View>
                 <View style={styles.input_container}>
                     <Text style={styles.text_blue}>Password</Text>
-                    <TextInput
-                        style={[styles.text_input]}
-                        placeholder="At least 8 characters"
-                        placeholderTextColor={'#8897AD'}
-                        onChangeText={setPassword}
-                        value={password}
-                        autoCapitalize="none"
-                    />
+                    <View style={styles.text_input_container}>
+                        <TextInput
+                            style={[styles.text_input]}
+                            placeholder="At least 8 characters"
+                            placeholderTextColor={'#8897AD'}
+                            onChangeText={setPassword}
+                            value={password}
+                            autoCapitalize="none"
+                            secureTextEntry={!showPassword}
+                        />
+
+                        <TouchableOpacity
+                            style={styles.eyeIconContainer}
+                            onPress={() => {
+                                setShowPassword(!showPassword)
+                            }}
+                        >
+                            <Icon
+                                name={showPassword ? 'eye' : 'eye-slash'}
+                                size={20}
+                                color="black"
+                            />
+                        </TouchableOpacity>
+                    </View>
+
                 </View>
                 <View style={styles.forgot_password_container}>
                     <TouchableOpacity style={styles.forgot_password}>
@@ -103,7 +122,7 @@ export const LoginScreen = () => {
                     onPress={() => { __doSingIn(email, password) }}
                     style={isLoginDisabled ? styles.signin_button_disable : styles.signin_button}
                     disabled={isLoginDisabled}
-                    >
+                >
                     <Text style={styles.text_button}>Sign In</Text>
                 </TouchableOpacity>
             </View>
@@ -111,7 +130,7 @@ export const LoginScreen = () => {
             <View style={styles.sign_up_container}>
                 <View style={styles.sign_up_title}>
                     <Text style={styles.text_15}>Don't you have an account? </Text>
-                    <TouchableOpacity onPress={() => {navigation.navigate('Register')}}>
+                    <TouchableOpacity onPress={() => { navigation.navigate('Register') }}>
                         <Text style={styles.text_blue}>Sign up</Text>
                     </TouchableOpacity>
                 </View>
@@ -211,7 +230,7 @@ const styles = StyleSheet.create({
     },
     text_input: {
         width: '100%',
-        flex: 1,
+        height: '70%',
         backgroundColor: color.text_input,
         paddingHorizontal: 10,
         borderRadius: 10,
@@ -243,5 +262,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1,
-    }
+    },
+    text_input_container: {
+        height: '100%',
+        flexDirection: 'row',
+        position: 'relative'
+    },
+    eyeIconContainer: {
+        height: '70%',
+        justifyContent: 'center',
+        marginTop: 5,
+        position: 'absolute',
+        right: 10
+    },
 })

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "665343042795",
-    "project_id": "helpercareer",
-    "storage_bucket": "helpercareer.appspot.com"
+    "project_number": "494392345854",
+    "project_id": "vmafinalproject",
+    "storage_bucket": "vmafinalproject.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:665343042795:android:e467ea8acb07f53f238aae",
+        "mobilesdk_app_id": "1:494392345854:android:07d0edf7313eaadbd711af",
         "android_client_info": {
           "package_name": "com.helpercareer"
         }
@@ -15,7 +15,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCK9NKXomsLTvMRKTGcdye-8ELZYGKeWdE"
+          "current_key": "AIzaSyATp5OSHHw2iXru1HGO_fzY-OMoH5FpLR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494392345854:android:a72e4d0b3a7749aed711af",
+        "android_client_info": {
+          "package_name": "com.taskfinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATp5OSHHw2iXru1HGO_fzY-OMoH5FpLR0"
         }
       ],
       "services": {

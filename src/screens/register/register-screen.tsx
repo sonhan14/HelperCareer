@@ -3,31 +3,43 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "reac
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { layout } from "../../constants/dimensions/dimension";
 import { color } from "../../constants/colors/color";
-import Animated, { BounceInRight, LightSpeedOutRight } from "react-native-reanimated";
+import Animated, { BounceInRight, LightSpeedInRight, LightSpeedOutLeft, LightSpeedOutRight } from "react-native-reanimated";
 import { images } from "../../images";
-import { HomeScreenNavigationProp } from "../../navigations/navigation";
+import {RootStackParamList } from "../../navigations/navigation";
 import { useNavigation } from "@react-navigation/native";
 import firestore from '@react-native-firebase/firestore';
 
+import Icon from "react-native-vector-icons/FontAwesome";
+import { __isValidEmail, doPasswordsMatch, isValidPassword } from "./register-validation";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
 export const RegisterScreen: React.FC = () => {
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [rePassword, setRePassword] = useState<string>('');
-    const [phone, setPhone] = useState<string>('');
-    const [fetching, setFetching] = useState<boolean>(false);
-    const [error, setError] = useState<string>('');
-    const [isValid, setValid] = useState<boolean>(true);
+    const [account, setAccount] = useState({
+        email: '',
+        password: '',
+        rePassword: '',
+        phone: ''
+    })
+
+    const [isValid, setIsValid] = useState({
+        passwordError: '',
+        emailError: ''
+    })
     const [notificationVisible, setNotificationVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
-    const navigation = useNavigation<HomeScreenNavigationProp>();
+    const navigation = useNavigation<RegisterScreenNavigationProp>();
 
 
-    const isEmailValid = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-    const isLoginDisabled = !email || !password || !rePassword || !phone || !isEmailValid(email);
+    const [showPassword, setShowPassword] = useState({
+        showPassword: false,
+        showRePassword: false
+    })
+
+
+
+    const isLoginDisabled = !account.email || !account.password || !account.rePassword || !account.phone || !__isValidEmail(account.email);
 
     useEffect(() => {
         if (notificationVisible) {
@@ -37,54 +49,91 @@ export const RegisterScreen: React.FC = () => {
         }
     }, [notificationVisible]);
 
-    const __doSignUp = () => {
+    useEffect(() => {
+        if (account.password) {
+            if (!isValidPassword(account.password)) {
+                setIsValid(prev => ({
+                    ...prev,
+                    passwordError: 'Password must contain at least 8 characters, including uppercase, lowercase, number, and special character.'
+                }));
+            } else {
+                setIsValid(prev => ({
+                    ...prev,
+                    passwordError: ''
+                }));
+            }
+        } else {
+            setIsValid(prev => ({
+                ...prev,
+                passwordError: ''
+            }));
+        }
+    }, [account.password]);
 
-        if (!password || !password.trim() || password.length < 8) {
+    useEffect(() => {
+        if (account.email) {
+            if (!__isValidEmail(account.email)) {
+                setIsValid(prev => ({
+                    ...prev,
+                    emailError: 'Email must have type Example@email.com'
+                }));
+            } else {
+                setIsValid(prev => ({
+                    ...prev,
+                    emailError: ''
+                }));
+            }
+        } else {
+            setIsValid(prev => ({
+                ...prev,
+                emailError: ''
+            }));
+        }
+    }, [account.email]);
+
+
+    const __doSignUp = () => {
+        if (!account.password || !account.password.trim() || account.password.length < 8) {
             setErrorMessage("Weak password, minimum 8 chars")
             setNotificationVisible(true)
             return;
-        } else if (!__isValidEmail(email)) {
+        } else if (!__isValidEmail(account.email)) {
             setErrorMessage("Invalid Email")
+            setNotificationVisible(true)
+            return;
+        } else if (!isValidPassword(account.password)) {
+            setErrorMessage("Password must contain at least 8 characters, including uppercase, lowercase, number, and special character.")
+            setNotificationVisible(true)
+            return;
+        } else if (!doPasswordsMatch(account.password, account.rePassword)) {
+            setErrorMessage("Password and Re-password are not the same")
             setNotificationVisible(true)
             return;
         }
 
-        __doCreateUser(email, password, rePassword, parseInt(phone));
+        __doCreateUser(account.email, account.password, parseInt(account.phone));
     };
 
-    const __doCreateUser = async (email: string, password: string, rePassword: string, phone: number) => {
-        if (rePassword === password) {
-            try {
-                let response = await auth().createUserWithEmailAndPassword(email, password);
-                if (response) {
-                    setErrorMessage("Create account successfully")
-                    setNotificationVisible(true)
-                }
-
-            } catch (e: unknown) {
-                const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
-                if (error.code === 'auth/email-already-in-use') {
-                    setErrorMessage('That email address is already in use!')
-                }
-
-                if (error.code === 'auth/invalid-email') {
-                    setErrorMessage('That email address is invalid!')
-                }
-                    
+    const __doCreateUser = async (email: string, password: string, phone: number) => {
+        try {
+            let response = await auth().createUserWithEmailAndPassword(email, password);
+            if (response) {
+                setErrorMessage("Create account successfully")
                 setNotificationVisible(true)
             }
-        }
-        else if (rePassword !== password) {
-            setErrorMessage("Password and Re-password are not the same")
+        } catch (e: unknown) {
+            const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
+            if (error.code === 'auth/email-already-in-use') {
+                setErrorMessage('That email address is already in use!')
+            }
+            if (error.code === 'auth/invalid-email') {
+                setErrorMessage('That email address is invalid!')
+            }
             setNotificationVisible(true)
         }
-
     };
 
-    const __isValidEmail = (email: string): boolean => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
+
 
     return (
         <View style={{ flex: 1, position: 'relative' }}>
@@ -106,46 +155,98 @@ export const RegisterScreen: React.FC = () => {
                         style={[styles.text_input]}
                         placeholder="Example@email.com"
                         placeholderTextColor={'#8897AD'}
-                        onChangeText={setEmail}
-                        value={email}
+                        onChangeText={(text) => { setAccount(prev => ({ ...prev, email: text })) }}
+                        value={account.email}
                         keyboardType="email-address"
                         autoCapitalize="none"
                     />
                 </View>
+                {isValid.emailError ? (
+                    <Animated.View
+                        entering={LightSpeedInRight.duration(500)}
+                        exiting={LightSpeedOutRight.duration(500)}
+                        style={styles.error_container}>
+                        <Text style={styles.error_text}>{isValid.emailError}</Text>
+                    </Animated.View>
+
+                ) : <Animated.View
+                    entering={LightSpeedInRight.duration(500)}
+                    exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                }
                 <View style={styles.input_container}>
                     <Text style={styles.text_input_blue}>Password: </Text>
-                    <TextInput
-                        style={[styles.text_input]}
-                        placeholder="At least 8 characters"
-                        placeholderTextColor={'#8897AD'}
-                        onChangeText={setPassword}
-                        value={password}
-                        autoCapitalize="none"
-                    />
+                    <View style={styles.text_input_container}>
+                        <TextInput
+                            style={[styles.text_input]}
+                            placeholder="At least 8 characters"
+                            placeholderTextColor={'#8897AD'}
+                            onChangeText={(text) => { setAccount(prev => ({ ...prev, password: text })) }}
+                            value={account.password}
+                            autoCapitalize="none"
+                            secureTextEntry={!showPassword.showPassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeIconContainer}
+                            onPress={() => {
+                                setShowPassword(prev => ({
+                                    ...prev,
+                                    showPassword: !showPassword.showPassword
+                                }))
+                            }}
+                        >
+                            <Icon
+                                name={showPassword.showPassword ? 'eye' : 'eye-slash'}
+                                size={20}
+                                color="black"
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+
                 </View>
-                <View style={styles.input_container}>
+                {isValid.passwordError ? (
+                    <Animated.View
+                        entering={LightSpeedInRight.duration(500)}
+                        exiting={LightSpeedOutRight.duration(500)}
+                        style={styles.error_container}>
+                        <Text style={styles.error_text}>{isValid.passwordError}</Text>
+                    </Animated.View>
+
+                ) : <Animated.View
+                    entering={LightSpeedInRight.duration(500)}
+                    exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                }
+
+                <Animated.View style={[styles.input_container]}>
                     <Text style={styles.text_input_blue}>Re-Password: </Text>
-                    <TextInput
-                        style={[styles.text_input]}
-                        placeholder="At least 8 characters"
-                        placeholderTextColor={'#8897AD'}
-                        onChangeText={setRePassword}
-                        value={rePassword}
-                        autoCapitalize="none"
-                    />
-                </View>
-                <View style={styles.input_container}>
-                    <Text style={styles.text_input_blue}>Phone: </Text>
-                    <TextInput
-                        style={[styles.text_input]}
-                        placeholder="0123456789"
-                        placeholderTextColor={'#8897AD'}
-                        onChangeText={setPhone}
-                        value={phone}
-                        autoCapitalize="none"
-                        keyboardType='numeric'
-                    />
-                </View>
+                    <View style={styles.text_input_container}>
+                        <TextInput
+                            style={[styles.text_input]}
+                            placeholder="At least 8 characters"
+                            placeholderTextColor={'#8897AD'}
+                            onChangeText={(text) => { setAccount(prev => ({ ...prev, rePassword: text })) }}
+                            value={account.rePassword}
+                            autoCapitalize="none"
+                            secureTextEntry={!showPassword.showRePassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeIconContainer}
+                            onPress={() => {
+                                setShowPassword(prev => ({
+                                    ...prev,
+                                    showRePassword: !showPassword.showRePassword
+                                }))
+                            }}
+                        >
+                            <Icon
+                                name={showPassword.showPassword ? 'eye' : 'eye-slash'}
+                                size={20}
+                                color="black"
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                </Animated.View>
 
                 <TouchableOpacity
                     onPress={() => { __doSignUp() }}
@@ -230,16 +331,15 @@ const styles = StyleSheet.create({
         width: layout.width,
         height: layout.height * 0.5,
         paddingHorizontal: 20,
-        justifyContent: 'space-between',
 
     },
     input_container: {
         width: '100%',
         height: '20%',
-        flexDirection: 'row',
+        marginBottom: 10,
         justifyContent: 'space-between',
-        alignItems: 'center'
     },
+
     forgot_password_container: {
         width: '100%',
         height: '10%',
@@ -256,7 +356,8 @@ const styles = StyleSheet.create({
         height: '15%',
         borderRadius: 10,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginTop: 20
     },
     signin_button: {
         backgroundColor: '#49B4F1',
@@ -264,10 +365,11 @@ const styles = StyleSheet.create({
         height: '15%',
         borderRadius: 10,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginTop: 20
     },
     text_input: {
-        width: '70%',
+        width: '100%',
         height: '70%',
         backgroundColor: color.text_input,
         paddingHorizontal: 10,
@@ -300,5 +402,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1,
-    }
+    },
+    error_container: {
+
+    },
+    error_text: {
+        color: 'red',
+        fontSize: 12,
+    },
+    text_input_container: {
+        height: '100%',
+        flexDirection: 'row',
+        position: 'relative'
+    },
+    eyeIconContainer: {
+        height: '70%',
+        justifyContent: 'center',
+        marginTop: 5,
+        position: 'absolute',
+        right: 10
+    },
 })
