@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "665343042795",
+    "project_id": "helpercareer",
+    "storage_bucket": "helpercareer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:665343042795:android:e467ea8acb07f53f238aae",
+        "android_client_info": {
+          "package_name": "com.helpercareer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCK9NKXomsLTvMRKTGcdye-8ELZYGKeWdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
