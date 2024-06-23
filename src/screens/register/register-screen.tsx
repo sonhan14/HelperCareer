@@ -12,6 +12,7 @@ import firestore from '@react-native-firebase/firestore';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { __isValidEmail, doPasswordsMatch, isValidPassword } from "./register-validation";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { ProfileModal } from "./register-modal";
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -20,7 +21,6 @@ export const RegisterScreen: React.FC = () => {
         email: '',
         password: '',
         rePassword: '',
-        phone: ''
     })
 
     const [isValid, setIsValid] = useState({
@@ -28,6 +28,10 @@ export const RegisterScreen: React.FC = () => {
         emailError: ''
     })
     const [notificationVisible, setNotificationVisible] = useState(false);
+    const [isModal, setIsModal] = useState({
+        showModal: false,
+        dataModal: '' 
+    });
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigation = useNavigation<RegisterScreenNavigationProp>();
 
@@ -39,7 +43,7 @@ export const RegisterScreen: React.FC = () => {
 
 
 
-    const isLoginDisabled = !account.email || !account.password || !account.rePassword || !account.phone || !__isValidEmail(account.email);
+    const isRegister = !account.email || !account.password || !account.rePassword || !__isValidEmail(account.email);
 
     useEffect(() => {
         if (notificationVisible) {
@@ -111,15 +115,17 @@ export const RegisterScreen: React.FC = () => {
             return;
         }
 
-        __doCreateUser(account.email, account.password, parseInt(account.phone));
+        __doCreateUser(account.email, account.password,);
     };
 
-    const __doCreateUser = async (email: string, password: string, phone: number) => {
+    const __doCreateUser = async (email: string, password: string) => {
         try {
             let response = await auth().createUserWithEmailAndPassword(email, password);
             if (response) {
-                setErrorMessage("Create account successfully")
-                setNotificationVisible(true)
+                // setErrorMessage("Create account successfully")
+                // setNotificationVisible(true)
+                setIsModal(prev => ({...prev, showModal: true, dataModal: response.user.uid}))
+
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
@@ -250,8 +256,8 @@ export const RegisterScreen: React.FC = () => {
 
                 <TouchableOpacity
                     onPress={() => { __doSignUp() }}
-                    style={isLoginDisabled ? styles.signin_button_disable : styles.signin_button}
-                    disabled={isLoginDisabled}
+                    style={isRegister ? styles.signin_button_disable : styles.signin_button}
+                    disabled={isRegister}
                 >
                     <Text style={styles.text_button}>Sign Up</Text>
                 </TouchableOpacity>
@@ -277,6 +283,8 @@ export const RegisterScreen: React.FC = () => {
                 :
                 null
             }
+
+            {isModal ? <ProfileModal isModal={isModal.showModal} userId={isModal.dataModal}/> : null}
         </View>
     )
 };
