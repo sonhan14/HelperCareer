@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import auth from "@react-native-firebase/auth";
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
@@ -21,6 +21,7 @@ export const LoginScreen = () => {
     const [notificationVisible, setNotificationVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false)
 
     useEffect(() => {
         if (notificationVisible) {
@@ -38,17 +39,20 @@ export const LoginScreen = () => {
     const isLoginDisabled = !email || !password || !isEmailValid(email);
 
     const __doSingIn = async (email: any, password: any) => {
+        setLoading(true)
         try {
             let response = await auth().signInWithEmailAndPassword(email, password)
             if (response && response.user) {
-                navigation.replace('MainTabs', {userId: response.user.uid})
+                navigation.replace('MainTabs', { userId: response.user.uid })
             }
+            setLoading(false)
         } catch (e) {
             if (e instanceof Error) {
                 setNotificationVisible(true);
                 setErrorMessage(e.message)
                 console.log(e.message);
             }
+            setLoading(false)
         }
     }
 
@@ -123,7 +127,11 @@ export const LoginScreen = () => {
                     style={isLoginDisabled ? styles.signin_button_disable : styles.signin_button}
                     disabled={isLoginDisabled}
                 >
-                    <Text style={styles.text_button}>Sign In</Text>
+                    {!loading ?
+                        <Text style={styles.text_button}>Sign In</Text>
+                        :
+                        <ActivityIndicator size="small" color="#ffffff" />}
+
                 </TouchableOpacity>
             </View>
 

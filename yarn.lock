@@ -3046,6 +3046,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/storage@npm:^20.1.0":
+  version: 20.1.0
+  resolution: "@react-native-firebase/storage@npm:20.1.0"
+  peerDependencies:
+    "@react-native-firebase/app": 20.1.0
+  checksum: 67c91a60b404767d1d5b76e6456397cc88dadafe8ddbb41206d259a3d9df01c27667b2863b7c3528e726317d4a8e83ccce9e0ea4d1da324a5a47f81e324c0a0d
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.74.84":
   version: 0.74.84
   resolution: "@react-native/assets-registry@npm:0.74.84"
@@ -3864,6 +3873,7 @@ __metadata:
     "@react-native-firebase/app": ^20.1.0
     "@react-native-firebase/auth": ^20.1.0
     "@react-native-firebase/firestore": ^20.1.0
+    "@react-native-firebase/storage": ^20.1.0
     "@react-native/babel-preset": 0.74.84
     "@react-native/eslint-config": 0.74.84
     "@react-native/metro-config": 0.74.84
@@ -3883,6 +3893,7 @@ __metadata:
     react: 18.2.0
     react-native: 0.74.2
     react-native-gesture-handler: ^2.17.0
+    react-native-image-crop-picker: ^0.41.2
     react-native-maps: ^1.15.6
     react-native-paper: ^5.12.3
     react-native-reanimated: ^3.12.1
@@ -9124,6 +9135,15 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 21747ef920325dc1d85cce8fe74e5bc1a7f5662fb765f87db06026138bd9bd94e822488b3e6c97032c3ea9b96331e1722e6a3a98af2e3d4e2193b902354b8b88
+  languageName: node
+  linkType: hard
+
+"react-native-image-crop-picker@npm:^0.41.2":
+  version: 0.41.2
+  resolution: "react-native-image-crop-picker@npm:0.41.2"
+  peerDependencies:
+    react-native: ">=0.40.0"
+  checksum: c1333b3b761e948bd0bc856773f68dcc859c7ce39dda3e14d2c32c17d55927735bfc5cbbb7ac5e8bac21feda87c93399f2a596aca7d5b0611cc1e8203d97ad2e
   languageName: node
   linkType: hard
 

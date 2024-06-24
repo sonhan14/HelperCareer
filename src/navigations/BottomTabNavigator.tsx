@@ -52,7 +52,7 @@ export function BottomTabNavigator({ route }: BottomTabNavigatorProps) {
             })}
         >
             <Tab.Screen name="Home" component={HomeScreen} initialParams={user}/>
-            <Tab.Screen name="Profile" component={ProfileScreen} />
+            <Tab.Screen name="Profile" component={ProfileScreen} initialParams={user} />
         </Tab.Navigator>
     );
 }

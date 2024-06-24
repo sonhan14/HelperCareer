@@ -7,13 +7,15 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Animated, { FadeIn } from "react-native-reanimated"
 import firestore from '@react-native-firebase/firestore';
 
+
+
 type accountInfo = {
     full_name: string,
     birth_day: Date,
     phone: string,
     intro: string,
     gender: string,
-    user_id: string
+
 }
 
 export const ProfileModal = ({ isModal, userId }: { isModal: boolean , userId : string}) => {
@@ -25,10 +27,9 @@ export const ProfileModal = ({ isModal, userId }: { isModal: boolean , userId : 
         phone: '',
         intro: '',
         gender: '',
-        user_id: userId
     })
 
-    console.log(userId);
+
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showGenderOptions, setShowGenderOptions] = useState(false);
@@ -54,7 +55,8 @@ export const ProfileModal = ({ isModal, userId }: { isModal: boolean , userId : 
             birthday: account.birth_day,
             introduction: account.intro,
             phone: account.phone,
-            user_id: userId
+            user_id: userId,
+            rating: 5.0,
         })
         .then(() => {
             console.log("Added!!!");

@@ -6,7 +6,7 @@ export type RootStackParamList = {
 
 export type RootTabParamList = {
     Home: { userId: string };
-    Profile: undefined;
+    Profile: { userId: string };
 };
 
 
