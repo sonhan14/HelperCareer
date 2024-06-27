@@ -114,7 +114,8 @@ export const HomeScreen = () => {
 
 const styles = StyleSheet.create({
     page: {
-        flex: 1,
+        height: layout.height,
+        width: layout.width,
         justifyContent: 'center',
         alignItems: 'center',
     },

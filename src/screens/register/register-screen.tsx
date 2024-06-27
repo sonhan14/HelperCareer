@@ -32,7 +32,8 @@ export const RegisterScreen: React.FC = () => {
     const [notificationVisible, setNotificationVisible] = useState(false);
     const [isModal, setIsModal] = useState({
         showModal: false,
-        dataModal: '' 
+        userId: '',
+        email: ''
     });
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigation = useNavigation<RegisterScreenNavigationProp>();
@@ -125,7 +126,9 @@ export const RegisterScreen: React.FC = () => {
         try {
             let response = await auth().createUserWithEmailAndPassword(email, password);
             if (response) {
-                setIsModal(prev => ({...prev, showModal: true, dataModal: response.user.uid}))
+                
+                
+                setIsModal(prev => ({...prev, showModal: true, userId: response.user.uid, email: account.email}))
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
@@ -295,7 +298,7 @@ export const RegisterScreen: React.FC = () => {
                 null
             }
 
-            {isModal ? <ProfileModal isModal={isModal.showModal} userId={isModal.dataModal} navigation={navigation} /> : null}
+            {isModal ? <ProfileModal isModal={isModal.showModal} userId={isModal.userId} email={isModal.email} navigation={navigation} /> : null}
         </View>
     )
 };

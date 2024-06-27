@@ -18,7 +18,7 @@ type accountInfo = {
 
 }
 
-export const ProfileModal = ({ isModal, userId, navigation}: { isModal: boolean , userId : string, navigation: any}) => {
+export const ProfileModal = ({ isModal, userId, navigation, email}: { isModal: boolean , userId : string, navigation: any, email: string}) => {
     
     
     const [account, setAccount] = useState<accountInfo>({
@@ -57,6 +57,7 @@ export const ProfileModal = ({ isModal, userId, navigation}: { isModal: boolean 
             phone: account.phone,
             user_id: userId,
             rating: 5.0,
+            email: email
         })
         .then(() => {
             navigation.replace('MainTabs', { userId: userId })

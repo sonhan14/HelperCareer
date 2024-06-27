@@ -4,5 +4,6 @@ export const color = {
     primary_text: '#0C1421',
     secondary_text: '#313957',
     button_color: '#162D3A',
-    text_input: '#CFDFE2'
+    text_input: '#CFDFE2',
+    light_background: '#eaf2f9'
 }

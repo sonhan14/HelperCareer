@@ -61,7 +61,9 @@ export const ProfileScreen = () => {
     }
 
     const getData = async () => {
-        // setLoading(true)
+        setLoading(prev => ({
+            ...prev, avatarLoading: true, coverLoading: true
+        }))
         const user_Id = auth().currentUser?.uid
         if (user_Id) {
             setUserId(user_Id)
@@ -85,8 +87,9 @@ export const ProfileScreen = () => {
             };
             setUser(formattedUserData);
 
-
-
+            setLoading(prev => ({
+                ...prev, avatarLoading: false, coverLoading: false
+            }))
         } else {
             console.log("No user found with the given ID");
         }
@@ -137,13 +140,19 @@ export const ProfileScreen = () => {
     }, []);
 
     const pickImages = async (type: number) => {
+        const currentImageState = { ...image };
         try {
             const pickedImage = await ImagePicker.openPicker({
                 multiple: false,
                 mediaType: 'photo',
             });
+            if (!pickedImage) {
+                // User canceled image picking
+                return;
+            }
             if (pickedImage) {
                 const imagePath = pickedImage.path;
+                
                 type === 0 ?
                     setImage(prev => ({
                         ...prev, avatar: imagePath
@@ -160,7 +169,7 @@ export const ProfileScreen = () => {
 
             }
         } catch (error) {
-            console.error(error);
+            setImage(currentImageState);
         }
     };
 
