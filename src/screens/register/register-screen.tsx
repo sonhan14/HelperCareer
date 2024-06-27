@@ -13,10 +13,12 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { __isValidEmail, doPasswordsMatch, isValidPassword } from "./register-validation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ProfileModal } from "./register-modal";
+import { CustomButton } from "../../components/custom-button";
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
 export const RegisterScreen: React.FC = () => {
+    const [loading, setLoading] = useState<boolean>(false)
     const [account, setAccount] = useState({
         email: '',
         password: '',
@@ -119,13 +121,11 @@ export const RegisterScreen: React.FC = () => {
     };
 
     const __doCreateUser = async (email: string, password: string) => {
+        setLoading(true);
         try {
             let response = await auth().createUserWithEmailAndPassword(email, password);
             if (response) {
-                // setErrorMessage("Create account successfully")
-                // setNotificationVisible(true)
                 setIsModal(prev => ({...prev, showModal: true, dataModal: response.user.uid}))
-
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
@@ -136,6 +136,8 @@ export const RegisterScreen: React.FC = () => {
                 setErrorMessage('That email address is invalid!')
             }
             setNotificationVisible(true)
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -254,6 +256,15 @@ export const RegisterScreen: React.FC = () => {
 
                 </Animated.View>
 
+                <CustomButton
+                    title="Sign Up"
+                    onPress={__doSignUp}
+                    style={styles.signin_button}
+                    disabled={isRegister}
+                    disabledStyle={styles.signin_button_disable}
+                    loading={loading}
+                />
+
                 <TouchableOpacity
                     onPress={() => { __doSignUp() }}
                     style={isRegister ? styles.signin_button_disable : styles.signin_button}
@@ -284,7 +295,7 @@ export const RegisterScreen: React.FC = () => {
                 null
             }
 
-            {isModal ? <ProfileModal isModal={isModal.showModal} userId={isModal.dataModal}/> : null}
+            {isModal ? <ProfileModal isModal={isModal.showModal} userId={isModal.dataModal} navigation={navigation} /> : null}
         </View>
     )
 };
