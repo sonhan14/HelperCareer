@@ -1,7 +1,7 @@
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RootStackParamList } from "../../navigations/navigation";
-import firestore from '@react-native-firebase/firestore';
-import { useEffect, useState } from "react";
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { useEffect, useLayoutEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
@@ -37,9 +37,8 @@ const formatDate = (date: Date): string => {
 
 
 export const ProfileScreen = () => {
-    const [userId, setUserId] = useState<string | null>('');
+    const userID = auth().currentUser?.uid
     const [user, setUser] = useState<iUser | null>(null);
-    const [profileId, setProfileId] = useState<string>('')
     const navigation = useNavigation<LoginScreenNavigationProp>();
     const [image, setImage] = useState({
         avatar: images.avartar_pic,
@@ -61,32 +60,22 @@ export const ProfileScreen = () => {
     }
 
     const getData = async () => {
+
         setLoading(prev => ({
             ...prev, avatarLoading: true, coverLoading: true
         }))
-        const user_Id = auth().currentUser?.uid
-        if (user_Id) {
-            setUserId(user_Id)
-        }
-
-        const snapshot = await firestore().collection('profile').where('user_id', '==', user_Id).get();
-
-
-        if (!snapshot.empty) {
-            const doc = snapshot.docs[0];
-            setProfileId(doc.id)
-            const userData = doc.data();
+        const snapshot = await firestore().collection('users').doc(userID).get();
+        if (snapshot.exists) {
+            const doc = snapshot.data();
             const formattedUserData: iUser = {
-                birthday: formatDate(userData.birthday.toDate()), // Convert Firestore Timestamp to JavaScript Date
-                full_name: userData.full_name,
-                gender: userData.gender,
-                introduction: userData.introduction,
-                phone: userData.phone,
-                rating: userData.rating,
-
+                birthday: formatDate(doc?.birthday.toDate()),
+                full_name: doc?.full_name,
+                gender: doc?.gender,
+                introduction: doc?.introduction,
+                phone: doc?.phone,
+                rating: doc?.rating,
             };
             setUser(formattedUserData);
-
             setLoading(prev => ({
                 ...prev, avatarLoading: false, coverLoading: false
             }))
@@ -103,40 +92,43 @@ export const ProfileScreen = () => {
         setLoading(prev => ({
             ...prev, coverLoading: true
         }))
-        const avatarRef = storage().ref(`users/${userId}/avatar.jpg`);
-        const coverRef = storage().ref(`users/${userId}/cover.jpg`);
-
+        const avatarRef = storage().ref(`users/${userID}/avatar.jpg`);
         try {
             const avatarDownloadUrl = await avatarRef.getDownloadURL();
-            const coverDownloadUrl = await coverRef.getDownloadURL();
             setImage(prev => ({
                 ...prev, avatar: avatarDownloadUrl
             }));
-            setImage(prev => ({
-                ...prev, cover: coverDownloadUrl
-            }));
             setLoading(prev => ({
                 ...prev, avatarLoading: false
-            }))
-            setLoading(prev => ({
-                ...prev, coverLoading: false
             }))
         } catch (error) {
             setImage(prev => ({
                 ...prev, avatar: images.avartar_pic
             }));
+        }
+
+        const coverRef = storage().ref(`users/${userID}/cover.jpg`);
+        try {
+            const coverDownloadUrl = await coverRef.getDownloadURL();
+            setImage(prev => ({
+                ...prev, cover: coverDownloadUrl
+            }));
+            
+            setLoading(prev => ({
+                ...prev, coverLoading: false
+            }))
+        } catch (error) {
             setImage(prev => ({
                 ...prev, cover: images.background_pic
             }));
         }
     }
 
-    useEffect(() => {
-        getData();
-    }, []);
 
     useEffect(() => {
+        getData();
         getImgae()
+        
     }, []);
 
     const pickImages = async (type: number) => {
@@ -164,7 +156,7 @@ export const ProfileScreen = () => {
                 const uploadUri = Platform.OS === 'ios' ? imagePath.replace('file://', '') : imagePath;
                 const fileName = type === 0 ? 'avatar.jpg' : 'cover.jpg';
 
-                const storageRef = storage().ref(`users/${userId}/${fileName}`);
+                const storageRef = storage().ref(`users/${userID}/${fileName}`);
                 await storageRef.putFile(uploadUri);
 
             }
@@ -178,7 +170,7 @@ export const ProfileScreen = () => {
         <SafeAreaView style={styles.container}>
             {!loading.coverLoading ?
                 <TouchableOpacity style={styles.title_container} onPress={() => { pickImages(1) }}>
-                    <Image source={image.cover === images.background_pic ? images.background_pic : { uri: image.cover }}
+                    <Image source={image.cover === images.background_pic ? images.background_pic: {uri: image.cover}}
                         resizeMode='cover'
                         style={{ width: '100%', height: '100%' }} />
                     <TouchableOpacity style={styles.cover_image} onPress={() => { pickImages(1) }}>
@@ -199,7 +191,7 @@ export const ProfileScreen = () => {
                             <Icon name="camera" size={15} color={'white'} />
                         </View>
 
-                        <Image source={image.avatar === images.avartar_pic ? images.avartar_pic : { uri: image.avatar }}
+                        <Image source={image.avatar === images.avartar_pic ? images.avartar_pic : {uri: image.avatar}}
                             resizeMode='cover'
                             style={{ height: '100%', width: '100%', borderRadius: 100 }} />
                     </TouchableOpacity>

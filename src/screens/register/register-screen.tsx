@@ -267,14 +267,6 @@ export const RegisterScreen: React.FC = () => {
                     disabledStyle={styles.signin_button_disable}
                     loading={loading}
                 />
-
-                <TouchableOpacity
-                    onPress={() => { __doSignUp() }}
-                    style={isRegister ? styles.signin_button_disable : styles.signin_button}
-                    disabled={isRegister}
-                >
-                    <Text style={styles.text_button}>Sign Up</Text>
-                </TouchableOpacity>
             </View>
 
             <View style={styles.sign_up_container}>

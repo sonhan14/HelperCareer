@@ -19,8 +19,6 @@ const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export function BottomTabNavigator({ route }: BottomTabNavigatorProps) {
     const user = route.params;
-    console.log(user);
-
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({

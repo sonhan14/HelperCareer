@@ -48,16 +48,17 @@ export const ProfileModal = ({ isModal, userId, navigation, email}: { isModal: b
     const handleAddInfo = async () => {
 
         firestore()
-        .collection('profile')
-        .add({
+        .collection('users')
+        .doc(userId)
+        .set({
             full_name: account.full_name,
             gender: account.gender,
             birthday: account.birth_day,
             introduction: account.intro,
             phone: account.phone,
-            user_id: userId,
             rating: 5.0,
-            email: email
+            email: email,
+            role: 'Owner'
         })
         .then(() => {
             navigation.replace('MainTabs', { userId: userId })
