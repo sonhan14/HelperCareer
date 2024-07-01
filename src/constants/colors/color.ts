@@ -5,5 +5,6 @@ export const color = {
     secondary_text: '#313957',
     button_color: '#162D3A',
     text_input: '#CFDFE2',
-    light_background: '#eaf2f9'
+    light_background: '#eaf2f9',
+    blue_chat: '#2e64e5'
 }

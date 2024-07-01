@@ -10,7 +10,8 @@ import firestore from '@react-native-firebase/firestore';
 
 
 type accountInfo = {
-    full_name: string,
+    first_name: string,
+    last_name: string,
     birth_day: Date,
     phone: string,
     intro: string,
@@ -18,11 +19,12 @@ type accountInfo = {
 
 }
 
-export const ProfileModal = ({ isModal, userId, navigation, email}: { isModal: boolean , userId : string, navigation: any, email: string}) => {
-    
-    
+export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: boolean, userId: string, navigation: any, email: string }) => {
+
+
     const [account, setAccount] = useState<accountInfo>({
-        full_name: '',
+        first_name: '',
+        last_name: '',
         birth_day: new Date(),
         phone: '',
         intro: '',
@@ -48,25 +50,25 @@ export const ProfileModal = ({ isModal, userId, navigation, email}: { isModal: b
     const handleAddInfo = async () => {
 
         firestore()
-        .collection('users')
-        .doc(userId)
-        .set({
-            full_name: account.full_name,
-            gender: account.gender,
-            birthday: account.birth_day,
-            introduction: account.intro,
-            phone: account.phone,
-            rating: 5.0,
-            email: email,
-            role: 'Owner'
-        })
-        .then(() => {
-            navigation.replace('MainTabs', { userId: userId })
-            
-        })
+            .collection('users')
+            .doc(userId)
+            .set({
+                first_name: account.first_name,
+                last_name: account.last_name,
+                gender: account.gender,
+                birthday: account.birth_day,
+                introduction: account.intro,
+                phone: account.phone,
+                rating: 5.0,
+                email: email,
+                role: 'Owner'
+            })
+            .then(() => {
+                navigation.replace('MainTabs', { userId: userId })
+            })
     }
 
-    const isRegister = !account.full_name || !account.birth_day || !account.intro || !account.phone;
+    const isRegister = !account.last_name || !account.first_name || !account.birth_day || !account.intro || !account.phone;
 
     return (
         <Modal
@@ -88,14 +90,25 @@ export const ProfileModal = ({ isModal, userId, navigation, email}: { isModal: b
                     <View style={styles.sign_in_container}>
                         <View style={styles.input_container}>
                             <Text style={styles.text_input_blue}>Full Name: </Text>
-                            <TextInput
-                                style={[styles.text_input]}
-                                placeholder="William Fang"
-                                placeholderTextColor={'#8897AD'}
-                                onChangeText={(text) => { setAccount(prev => ({ ...prev, full_name: text })) }}
-                                value={account.full_name}
-                                autoCapitalize='words'
-                            />
+                            <View style={styles.name_container}>
+                                <TextInput
+                                    style={[styles.text_input, {width: '40%'}]}
+                                    placeholder="William"
+                                    placeholderTextColor={'#8897AD'}
+                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
+                                    value={account.first_name}
+                                    autoCapitalize='words'
+                                />
+                                <TextInput
+                                    style={[styles.text_input, {width: '40%'}]}
+                                    placeholder="Fang"
+                                    placeholderTextColor={'#8897AD'}
+                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
+                                    value={account.last_name}
+                                    autoCapitalize='words'
+                                />
+                            </View>
+
                         </View>
 
                         <View style={styles.birthday_container}>
@@ -160,7 +173,7 @@ export const ProfileModal = ({ isModal, userId, navigation, email}: { isModal: b
                             />
                         </View>
                         <TouchableOpacity
-                            onPress={() => {handleAddInfo()}}
+                            onPress={() => { handleAddInfo() }}
                             style={isRegister ? styles.signin_button_disable : styles.signin_button}
                             disabled={isRegister}
                         >
@@ -294,4 +307,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: color.link_text,
     },
+    name_container: {
+        width: '100%',
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    }
 })

@@ -12,17 +12,13 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import ImagePicker from 'react-native-image-crop-picker';
 import storage from '@react-native-firebase/storage';
+import { iUser } from "../../../types/userType";
+import ProfileImageSection from "../../components/cover-avatar";
+import SweepButton from "../../components/sweep-button";
 
 
 
-type iUser = {
-    birthday: string;
-    full_name: string;
-    gender: string;
-    introduction: string;
-    phone: string;
-    rating: number;
-};
+
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -69,7 +65,8 @@ export const ProfileScreen = () => {
             const doc = snapshot.data();
             const formattedUserData: iUser = {
                 birthday: formatDate(doc?.birthday.toDate()),
-                full_name: doc?.full_name,
+                first_name: doc?.first_name,
+                last_name: doc?.last_name,
                 gender: doc?.gender,
                 introduction: doc?.introduction,
                 phone: doc?.phone,
@@ -98,9 +95,7 @@ export const ProfileScreen = () => {
             setImage(prev => ({
                 ...prev, avatar: avatarDownloadUrl
             }));
-            setLoading(prev => ({
-                ...prev, avatarLoading: false
-            }))
+
         } catch (error) {
             setImage(prev => ({
                 ...prev, avatar: images.avartar_pic
@@ -113,22 +108,26 @@ export const ProfileScreen = () => {
             setImage(prev => ({
                 ...prev, cover: coverDownloadUrl
             }));
-            
-            setLoading(prev => ({
-                ...prev, coverLoading: false
-            }))
+
+
         } catch (error) {
             setImage(prev => ({
                 ...prev, cover: images.background_pic
             }));
         }
+        setLoading(prev => ({
+            ...prev, coverLoading: false
+        }))
+        setLoading(prev => ({
+            ...prev, avatarLoading: false
+        }))
     }
 
 
     useEffect(() => {
         getData();
         getImgae()
-        
+
     }, []);
 
     const pickImages = async (type: number) => {
@@ -144,7 +143,7 @@ export const ProfileScreen = () => {
             }
             if (pickedImage) {
                 const imagePath = pickedImage.path;
-                
+
                 type === 0 ?
                     setImage(prev => ({
                         ...prev, avatar: imagePath
@@ -168,49 +167,13 @@ export const ProfileScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            {!loading.coverLoading ?
-                <TouchableOpacity style={styles.title_container} onPress={() => { pickImages(1) }}>
-                    <Image source={image.cover === images.background_pic ? images.background_pic: {uri: image.cover}}
-                        resizeMode='cover'
-                        style={{ width: '100%', height: '100%' }} />
-                    <TouchableOpacity style={styles.cover_image} onPress={() => { pickImages(1) }}>
-                        <Icon name="camera" size={15} color={'black'} />
-                        <Text style={[styles.text_15, { marginLeft: 5 }]}>Change cover image</Text>
-                    </TouchableOpacity>
-                </TouchableOpacity>
-
-                :
-                <ActivityIndicator size="large" color="#0000ff" />
-            }
-
-
-            <View style={styles.avatar_info_container}>
-                {!loading.avatarLoading ?
-                    <TouchableOpacity style={styles.avatar_container} onPress={() => { pickImages(0) }}>
-                        <View style={styles.camera_avatar_container}>
-                            <Icon name="camera" size={15} color={'white'} />
-                        </View>
-
-                        <Image source={image.avatar === images.avartar_pic ? images.avartar_pic : {uri: image.avatar}}
-                            resizeMode='cover'
-                            style={{ height: '100%', width: '100%', borderRadius: 100 }} />
-                    </TouchableOpacity>
-                    :
-                    <ActivityIndicator size="large" color="#0000ff" />
-                }
-
-
-                <View style={styles.name_info_container}>
-                    <Text style={styles.text_20}>
-                        {user?.full_name}
-                    </Text>
-                    <Text style={styles.text_15}>
-                        {user?.birthday}
-                    </Text>
-                </View>
-
-            </View>
-
+            <ProfileImageSection
+                image={image}
+                loading={loading}
+                pickImages={pickImages}
+                user={user}
+                isEditable={true}
+            />
             <View style={styles.review_container}>
                 <View style={styles.task_container}>
                     <Text style={styles.task_number}>
@@ -234,25 +197,9 @@ export const ProfileScreen = () => {
                 <Text style={styles.text_15}>{user?.introduction}</Text>
             </View>
 
-            <TouchableOpacity style={styles.manage_container}>
-                <View style={styles.manage_title}>
-                    <Icon name="tasks" size={20} color={'black'} style={{ marginRight: 10 }} />
-                    <Text style={styles.text_15}>Manage Tasks</Text>
-                </View>
-                <View>
-                    <Icon name="angle-right" size={30} color={'black'} />
-                </View>
-            </TouchableOpacity>
+            <SweepButton onPress={()=>{}} iconName="tasks" label="Manage Tasks"/>
 
-            <TouchableOpacity style={styles.manage_container}>
-                <View style={styles.manage_title}>
-                    <Icon name="edit" size={20} color={'black'} style={{ marginRight: 10 }} />
-                    <Text style={styles.text_15}>Edit Profile</Text>
-                </View>
-                <View>
-                    <Icon name="angle-right" size={30} color={'black'} />
-                </View>
-            </TouchableOpacity>
+            <SweepButton onPress={()=>{}} iconName="edit" label="Edit Profile"/>
 
 
             <View style={styles.logout_container}>

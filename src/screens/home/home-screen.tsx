@@ -2,41 +2,45 @@ import { PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View 
 
 import { useEffect, useState } from "react";
 import { RootStackParamList, RootTabParamList } from "../../navigations/navigation";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import Mapbox, { Image, Images, LocationPuck, ShapeSource, SymbolLayer } from '@rnmapbox/maps';
 import firestore from '@react-native-firebase/firestore';
 import { getDistance, getPreciseDistance } from 'geolib';
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 interface Location {
     latitude: number;
     longitude: number;
+    id: string
 }
-type HomeScreenRouteProp = RouteProp<RootTabParamList, 'Home'>;
+type HomeScreenRouteProp = StackNavigationProp<RootStackParamList>;
 Mapbox.setAccessToken('sk.eyJ1Ijoic29uaGFuMTQiLCJhIjoiY2x4dHI1N2Y1MDh3cDJxc2NteTBibjJkaSJ9.prG3DQ46R1SMRD80ztH3Mg');
 
 export const HomeScreen = () => {
-    const [userLocations, setUserLocations] = useState<Location[]>([]);
+    const navigation = useNavigation<HomeScreenRouteProp>()
+    const [userLocations, setUserLocations] = useState<Location[]>([])
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
 
 
     const fetchUserLocations = async () => {
         try {
             const querySnapshot = await firestore()
-                .collection('profile')
+                .collection('users')
                 .where('role', '==', 'employee')
                 .get();
-
 
             const locations: Location[] = [];
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-
+                
+                
                 if (data.location) {
                     locations.push({
                         latitude: data.location.latitude,
                         longitude: data.location.longitude,
+                        id: doc.id,
                     });
                 }
             });
@@ -52,35 +56,43 @@ export const HomeScreen = () => {
             // setUserLocations(locations);
             const geoJson = convertToGeoJson(locations);
             setGeoJsonData(geoJson);
-            
-
-
         } catch (error) {
             console.error('Error fetching locations from Firestore: ', error);
         }
     };
 
-    const convertToGeoJson = (locations: Location[]): any => {
-        const features = locations.map(location => ({
+    const convertToGeoJson = (locations: Location[]): GeoJSON.FeatureCollection<GeoJSON.Point> => {
+        const features: GeoJSON.Feature<GeoJSON.Point>[] = locations.map(location => ({
             type: 'Feature',
             geometry: {
                 type: 'Point',
                 coordinates: [location.longitude, location.latitude]
             },
             properties: {
-                title: 'Employee Location'
+                title: 'Employee Location',
+                userId: location.id, // Add user ID
             }
         }));
-
+    
         return {
             type: 'FeatureCollection',
             features: features
         };
     };
+    
 
     useEffect(() => {
         fetchUserLocations();
     }, []);
+
+    const handlePress = (event: any): void => {
+        const features = event.features;
+        if (features.length > 0) {
+            const userId = features[0].properties.userId;
+            
+            navigation.navigate('EmployeeProfile', {employeeId: userId})
+        }
+    };
 
 
 
@@ -95,14 +107,14 @@ export const HomeScreen = () => {
                     <LocationPuck puckBearingEnabled puckBearing='heading' />
 
                     {geoJsonData && (
-                        <ShapeSource id="employee_locations" shape={geoJsonData}>
-                            
-                            <SymbolLayer 
+                        <ShapeSource id="employee_locations" shape={geoJsonData} onPress={handlePress}>
+
+                            <SymbolLayer
                                 id="employee_locations"
-                                style={{ iconImage: 'avatar', iconSize: 0.6 , iconAnchor: 'bottom', iconAllowOverlap: true, }} // Adjust iconSize as needed
+                                style={{ iconImage: 'avatar', iconSize: 0.6, iconAnchor: 'bottom', iconAllowOverlap: true, }} // Adjust iconSize as needed
                             />
-                            <Mapbox.Images images={{avatar: images.avartar_pic}}>
-                                    
+                            <Mapbox.Images images={{ avatar: images.avartar_pic }}>
+
                             </Mapbox.Images>
                         </ShapeSource>
                     )}

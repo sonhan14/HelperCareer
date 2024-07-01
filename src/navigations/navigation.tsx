@@ -1,7 +1,9 @@
 export type RootStackParamList = {
     Login: undefined;
     MainTabs: { userId: string };
-    Register: undefined
+    Register: undefined,
+    ChatBox: {receiverId: string, chatId: string},
+    EmployeeProfile: {employeeId: string,},
 };
 
 export type RootTabParamList = {

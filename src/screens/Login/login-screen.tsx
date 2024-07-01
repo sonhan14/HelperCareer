@@ -47,7 +47,6 @@ export const LoginScreen = () => {
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
-
                 switch (error.code) {
                     case 'auth/invalid-credential':
                         setErrorMessage('Incorrect email or password.');
