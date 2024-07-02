@@ -6,6 +6,7 @@ import { Searchbar } from "react-native-paper"
 import React, { useEffect, useRef, useState } from "react"
 import { Circle, G, Svg } from "react-native-svg"
 import { TaskItem } from "./task-item"
+import { TaskModal } from "./task-modal"
 
 const AnimatedCicle = Animated.createAnimatedComponent(Circle)
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -22,6 +23,9 @@ export const TaskScreen = () => {
     const circumference = radius * Math.PI * 2;
     const circleRef = useRef<React.ElementRef<typeof Circle>>(null)
     const inputRef = useRef<React.ElementRef<typeof TextInput>>(null)
+    const [isModal, setIsModal] = useState({
+        showModal: false,
+    });
 
 
     const progress = useRef(new Animated.Value(0)).current;
@@ -69,12 +73,21 @@ export const TaskScreen = () => {
 
 
     }, [tasksDone])
+
+    const openModal = () => {
+        setIsModal(prev => ({...prev, showModal: true}))
+    }
+
+    const closeModal = () => {
+        setIsModal(prev => ({...prev, showModal: false}))
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.main_container}>
                 <View style={styles.header_container}>
                     <Text style={styles.text_header}>Manage Tasks</Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => openModal()}>
                         <Icon name="pluscircleo" size={30} color={'black'} />
                     </TouchableOpacity>
                 </View>
@@ -146,7 +159,7 @@ export const TaskScreen = () => {
 
                 <TaskItem />
             </View>
-
+            {isModal ? <TaskModal isModal={isModal.showModal} closeModal={() => closeModal()}/> : null}
         </View>
     )
 }

@@ -20,11 +20,6 @@ const formatDate = (date: Date): string => {
     return `${day}/${month}/${year}`;
 };
 
-type avatarType = {
-    id: string,
-    name: string,
-    avatar: any
-}
 
 type messagesBox = {
     id: string,
@@ -54,8 +49,8 @@ export const ChatScreen = () => {
     const [boxData, setBOxData] = useState<messagesBox[]>([])
 
     const AvatarFlatlist = () => {
-        const renderItem = ({ item }: { item: avatarType }) => (
-            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }}>
+        const renderItem = ({ item }: { item: messagesBox }) => (
+            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.received_id, item.id)}>
                 <Image
                     source={images.avartar_pic}
                     style={{ width: 60, height: 60, borderRadius: 30 }}

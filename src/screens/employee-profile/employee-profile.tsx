@@ -147,7 +147,7 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
         <View style={styles.container}>
             <Appbar.Header style={styles.header_container}>
                 <Appbar.BackAction onPress={() => { handleBack() }} />
-                <Appbar.Content title={user?.first_name + "'s Profile"} titleStyle={{ color: 'black', fontWeight: '700' }} />
+                <Appbar.Content title={user ? `${user.first_name}'s Profile` : 'Loading...'} titleStyle={{ color: 'black', fontWeight: '700' }} />
             </Appbar.Header>
             <View style={styles.profile_image}>
                 <ProfileImageSection
