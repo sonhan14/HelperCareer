@@ -1,4 +1,4 @@
-import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Appbar, TextInput } from "react-native-paper"
 import { layout } from "../../constants/dimensions/dimension"
 import { useState } from "react"
@@ -11,6 +11,8 @@ import axios from 'axios';
 import Mapbox, { LocationPuck } from "@rnmapbox/maps";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Marker } from "react-native-maps";
+import { images } from "../../images";
+import { KeyboardAvoidingView } from "react-native";
 
 
 type Task = {
@@ -172,6 +174,7 @@ export const TaskModal = ({ isModal, closeModal }: { isModal: boolean, closeModa
 
     }
 
+
     return (
         <Modal
             animationType={'slide'}
@@ -181,7 +184,7 @@ export const TaskModal = ({ isModal, closeModal }: { isModal: boolean, closeModa
                 <Appbar.BackAction onPress={() => { handleBack() }} />
                 <Appbar.Content title={'Add new task'} titleStyle={{ color: 'black', fontWeight: '700' }} />
             </Appbar.Header>
-
+            <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
             <View style={styles.main_container}>
                 <TextInput
                     mode="outlined"
@@ -228,7 +231,7 @@ export const TaskModal = ({ isModal, closeModal }: { isModal: boolean, closeModa
                     <Animated.View style={[styles.search_container, animatedStyle]}>
                         <TextInput
                             // left={<TextInput.Icon icon="magnify" />}
-                            outlineStyle={{ borderWidth: 0, borderRadius: 20 }}
+                            //    u otlineStyle={{ borderWidth: 1, borderRadius: 20 }}
                             mode="outlined"
                             style={styles.input_search}
                             placeholder="Search for an address"
@@ -249,19 +252,28 @@ export const TaskModal = ({ isModal, closeModal }: { isModal: boolean, closeModa
                     </Animated.View>
                     <Mapbox.MapView style={styles.map_box} >
                         <Mapbox.Camera
-                            followZoomLevel={11}
-                            // followUserLocation
-                            followUserMode={Mapbox.UserTrackingModes.FollowWithHeading}
+                            zoomLevel={12}
                             centerCoordinate={selectedLocation ? selectedLocation.center : [0, 0]}
                         />
-                        {selectedLocation && (
-                            <Marker
-                                id="selectedLocationMarker"
-                                coordinate={{ latitude: selectedLocation.center[1], longitude: selectedLocation.center[0] }}
-                                title={selectedLocation.full_address}
-                            />
-                        )}
                         <LocationPuck puckBearingEnabled puckBearing='heading' />
+                        {selectedLocation && (
+                            <Mapbox.ShapeSource id="selectedLocation" shape={{
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: selectedLocation.center
+                                },
+                                properties: {}
+                            }}>
+                                <Mapbox.SymbolLayer
+                                    id="selectedLocationSymbol"
+                                    style={{ iconImage: 'avatar', iconSize: 0.6, iconAnchor: 'bottom', iconAllowOverlap: true, }}
+                                />
+                                <Mapbox.Images images={{ avatar: images.avartar_pic }}>
+
+                                </Mapbox.Images>
+                            </Mapbox.ShapeSource>
+                        )}
                     </Mapbox.MapView>
                 </View>
 
@@ -298,8 +310,10 @@ export const TaskModal = ({ isModal, closeModal }: { isModal: boolean, closeModa
                     loading={loading}
                 />
             </View>
+            </KeyboardAvoidingView>
 
         </Modal>
+
     )
 }
 
@@ -321,7 +335,7 @@ const styles = StyleSheet.create({
     },
     input_search: {
         height: 40,
-        width: '80%',
+        width: '100%',
         backgroundColor: 'white',
 
     },

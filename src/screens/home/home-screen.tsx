@@ -10,6 +10,7 @@ import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
 import { StackNavigationProp } from "@react-navigation/stack";
 import axios from 'axios';
+import auth from '@react-native-firebase/auth';
 
 interface Location {
     latitude: number;
@@ -28,11 +29,11 @@ Mapbox.setAccessToken('sk.eyJ1Ijoic29uaGFuMTQiLCJhIjoiY2x4dHI1N2Y1MDh3cDJxc2NteT
 
 export const HomeScreen = () => {
     const navigation = useNavigation<HomeScreenRouteProp>()
-    const [userLocations, setUserLocations] = useState<Location[]>([])
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
+    const [taskGeoJsonData, setTaskGeoJsonData] = useState<any>(null);
     const [query, setQuery] = useState<string>('');
-    const [results, setResults] = useState<Feature[]>([]);
-    const [selectedLocation, setSelectedLocation] = useState<Feature | null>(null);
+    const currentUser = auth().currentUser
+
 
     const fetchUserLocations = async () => {
         try {
@@ -41,13 +42,28 @@ export const HomeScreen = () => {
                 .where('role', '==', 'employee')
                 .get();
 
+            const taskQuerySnapshot = await firestore()
+                .collection('tasks')
+                .where('user_id', '==', currentUser?.uid)
+                .get();
+
             const locations: Location[] = [];
+            const taskLocations: Location[] = [];
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-
-
                 if (data.location) {
                     locations.push({
+                        latitude: data.location.latitude,
+                        longitude: data.location.longitude,
+                        id: doc.id,
+                    });
+                }
+            });
+
+            taskQuerySnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.location) {
+                    taskLocations.push({
                         latitude: data.location.latitude,
                         longitude: data.location.longitude,
                         id: doc.id,
@@ -65,7 +81,12 @@ export const HomeScreen = () => {
             // });
             // setUserLocations(locations);
             const geoJson = convertToGeoJson(locations);
+            const taskGeoJson = convertToGeoJson(taskLocations);
+
+            console.log(taskGeoJson);
+            
             setGeoJsonData(geoJson);
+            setTaskGeoJsonData(taskGeoJson)
         } catch (error) {
             console.error('Error fetching locations from Firestore: ', error);
         }
@@ -104,42 +125,7 @@ export const HomeScreen = () => {
         }
     };
 
-    const searchAddress = async (text: string) => {
-        setQuery(text);
-        if (text.length > 2) {
-            try {
-                const response = await axios.get('https://api.mapbox.com/search/geocode/v6/forward', {
-                    params: {
-                        q: text,
-                        access_token: 'sk.eyJ1Ijoic29uaGFuMTQiLCJhIjoiY2x4dHI1N2Y1MDh3cDJxc2NteTBibjJkaSJ9.prG3DQ46R1SMRD80ztH3Mg',
-                        proximity: '105.7827,21.0285', // Center point in Hanoi
-                        bbox: '102.14441,8.17966,109.46464,23.393395', // Bounding box around Vietnam
-                        language: 'vi',
-                        country: 'VN'
-                    },
-                });
 
-                const features = response.data.features.map((feature: any) => ({
-                    id: feature.id,
-                    full_address: feature.properties.full_address,
-                    center: feature.geometry.coordinates,
-                }));
-                console.log(features);
-
-                setResults(features);
-            } catch (error) {
-                console.error('Error fetching data from Mapbox:', error);
-            }
-        } else {
-            setResults([]);
-        }
-    };
-
-    const selectLocation = (location: Feature) => {
-        setSelectedLocation(location);
-        setResults([]);
-        setQuery(location.full_address);
-    };
 
 
     return (
@@ -149,17 +135,8 @@ export const HomeScreen = () => {
                     style={styles.input}
                     placeholder="Search for an address"
                     value={query}
-                    onChangeText={searchAddress}
+                    onChangeText={() => {}}
                 />
-                {/* <FlatList
-                    data={results}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity style={styles.item} onPress={() => selectLocation(item)}>
-                            <Text>{item.full_address}</Text>
-                        </TouchableOpacity>
-                    )}
-                /> */}
                 <Mapbox.MapView style={styles.map} >
                     <Mapbox.Camera
                         followZoomLevel={11}
@@ -174,6 +151,18 @@ export const HomeScreen = () => {
                                 style={{ iconImage: 'avatar', iconSize: 0.6, iconAnchor: 'bottom', iconAllowOverlap: true, }} // Adjust iconSize as needed
                             />
                             <Mapbox.Images images={{ avatar: images.avartar_pic }}>
+
+                            </Mapbox.Images>
+                        </ShapeSource>
+                    )}
+                    {taskGeoJsonData && (
+                        <ShapeSource id="task_locations" shape={taskGeoJsonData} onPress={() => {}}>
+                                
+                            <SymbolLayer
+                                id="task_locations"
+                                style={{ iconImage: 'taskImage', iconSize: 0.25, iconAnchor: 'bottom', iconAllowOverlap: true, }} // Adjust iconSize as needed
+                            />
+                            <Mapbox.Images images={{ taskImage: images.task_image }}>
 
                             </Mapbox.Images>
                         </ShapeSource>
