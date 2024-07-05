@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Text, TextInput, TouchableOpacity, View } from "react-native"
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth, { firebase, FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { images } from "../../images";
 import Animated, { BounceInRight, FadeIn, FadeOut, LightSpeedOutRight } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
@@ -9,6 +9,9 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { login_styles } from "./login.style";
 import { CustomButton } from "../../components/custom-button";
+import firestore from '@react-native-firebase/firestore';
+import { iUser } from "../../../types/userType";
+import { formatDate } from "../../constants/formatDate";
 
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -22,7 +25,7 @@ export const LoginScreen = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false)
-
+    const [checkUser, setCheckUSer] = useState<iUser>();
     useEffect(() => {
         if (notificationVisible) {
             setTimeout(() => {
@@ -43,7 +46,17 @@ export const LoginScreen = () => {
         try {
             const response = await auth().signInWithEmailAndPassword(email, password);
             if (response?.user) {
-                navigation.replace('MainTabs', { userId: response.user.uid });
+                const currentUser = await firestore().collection('users').doc(response.user.uid).get()
+                const check = currentUser.data()
+                if(check?.role === 'Owner')
+                {
+                    navigation.replace('MainTabs', { userId: response.user.uid });
+                }
+                else{
+                    setErrorMessage('You do not have permission!!');
+                    setNotificationVisible(true);
+                    auth().signOut()
+                }
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;

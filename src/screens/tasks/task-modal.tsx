@@ -253,6 +253,7 @@ export const TaskModal = ({ isModal, closeModal }: { isModal: boolean, closeModa
                     <Mapbox.MapView style={styles.map_box} >
                         <Mapbox.Camera
                             zoomLevel={12}
+                            // followUserLocation
                             centerCoordinate={selectedLocation ? selectedLocation.center : [0, 0]}
                         />
                         <LocationPuck puckBearingEnabled puckBearing='heading' />

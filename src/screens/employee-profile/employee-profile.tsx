@@ -13,6 +13,7 @@ import { iUser } from "../../../types/userType";
 import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
 import auth from '@react-native-firebase/auth';
+import { formatDate } from "../../constants/formatDate";
 
 type EmployeeFrofileProps = {
     route: { params: RootStackParamList['EmployeeProfile'] };
@@ -21,13 +22,6 @@ type EmployeeFrofileProps = {
 type EmployeeFrofileProp = StackNavigationProp<RootStackParamList>;
 
 
-const formatDate = (date: Date): string => {
-
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString();
-    return `${day}/${month}/${year}`;
-};
 
 export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
     const employeeID = route.params.employeeId

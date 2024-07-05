@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { RootStackParamList, RootTabParamList } from "../../navigations/navigation";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import Mapbox, { Image, Images, LocationPuck, ShapeSource, SymbolLayer } from '@rnmapbox/maps';
-import firestore from '@react-native-firebase/firestore';
 import { getDistance, getPreciseDistance } from 'geolib';
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
@@ -12,7 +11,9 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import { TaskInfo } from "./task-info";
-import { fetchUserLocations } from "./home-helper";
+import { fetchApplication, fetchUserLocations } from "./home-helper";
+import { TaskType } from "../../../types/taskType";
+import { formatDate } from "../../constants/formatDate";
 
 
 
@@ -26,14 +27,15 @@ export const HomeScreen = () => {
     const [query, setQuery] = useState<string>('');
     const [isModal, setIsModal] = useState<boolean>(false);
     const currentUser = auth().currentUser
-    
+    const [currentTask, setCurrentTask] = useState<TaskType>()
+    const [applicationList, setApplicationList] = useState<any>(null)
     
 
     useEffect(() => {
         if (!currentUser?.uid) return;
 
         const unsubscribe = fetchUserLocations(currentUser, setGeoJsonData, setTaskGeoJsonData);
-
+        
         return () => unsubscribe();
     }, [currentUser]);
 
@@ -47,8 +49,19 @@ export const HomeScreen = () => {
         }
     };
 
-    const handleTaskInfo = () => {
-        setIsModal(true)
+    const handleOpenTask = (event: any): void => {
+        const features = event.features;
+        if (features.length > 0) {
+            const item: TaskType = features[0].properties;
+            fetchApplication(item?.id, setApplicationList)
+            setCurrentTask(item)
+            setIsModal(true)
+        }
+        
+    }
+
+    const handleCloseModal = () => {
+        setIsModal(false)
     }
 
 
@@ -95,8 +108,7 @@ export const HomeScreen = () => {
                             </ShapeSource>
                         )}
                         {taskGeoJsonData && (
-                            <ShapeSource id="task_locations" shape={taskGeoJsonData} onPress={() => {handleTaskInfo()}}>
-
+                            <ShapeSource id="task_locations" shape={taskGeoJsonData} onPress={handleOpenTask}>
                                 <SymbolLayer
                                     id="task_locations"
                                     style={{ iconImage: 'taskImage', iconSize: 0.25, iconAnchor: 'bottom', iconAllowOverlap: true, }} // Adjust iconSize as needed
@@ -108,6 +120,7 @@ export const HomeScreen = () => {
                         )}
                     </Mapbox.MapView>
                 </View>
+                <TaskInfo isOpen={isModal} setClose={handleCloseModal} item={currentTask} applicationList={applicationList}/>
             </View>
         )
     }

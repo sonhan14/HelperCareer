@@ -1,16 +1,19 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { layout } from "../../constants/dimensions/dimension"
 import { images } from "../../images"
+import { formatDate } from "../../constants/formatDate"
+import { TaskType } from "../../../types/taskType"
 
-export const TaskItem = () => {
+
+export const TaskItem = ({item} : {item: TaskType}) => {
     return (
         <View style={styles.container}>
             <View style={styles.header_container}>
                 <Image source={images.avartar_pic} resizeMode='contain' style={styles.image_style} />
                 <View style={styles.task_info_container}>
-                    <Text style={styles.text_black_20}>Taking Care My Son</Text>
-                    <Text style={styles.text_black_15}>01/01/2024 - 01/02/2024</Text>
-                    <Text style={styles.text_red_15}>Status: Process</Text>
+                    <Text style={styles.text_black_20}>{item.task_name}</Text>
+                    <Text style={styles.text_black_15}>{formatDate(item.start_date)} - {formatDate(item.end_date)}</Text>
+                    <Text style={styles.text_red_15}>Status: {item.status}</Text>
                 </View>
             </View>
             <TouchableOpacity style={styles.view_button}>
@@ -29,11 +32,12 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 1,
-        shadowRadius: 10,
-        elevation: 10,
+        shadowRadius: 15,
+        elevation: 5,
         padding: 10,
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginBottom: 15
     },
     header_container: {
         height: '60%',

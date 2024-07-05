@@ -15,20 +15,13 @@ import storage from '@react-native-firebase/storage';
 import { iUser } from "../../../types/userType";
 import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
+import { formatDate } from "../../constants/formatDate";
 
 
 
 
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
-
-const formatDate = (date: Date): string => {
-
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString();
-    return `${day}/${month}/${year}`;
-};
 
 
 
@@ -71,6 +64,7 @@ export const ProfileScreen = () => {
                 introduction: doc?.introduction,
                 phone: doc?.phone,
                 rating: doc?.rating,
+                role: doc?.role
             };
             setUser(formattedUserData);
             setLoading(prev => ({

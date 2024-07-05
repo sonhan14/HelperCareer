@@ -9,16 +9,11 @@ import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firest
 import auth from '@react-native-firebase/auth';
 import { useEffect, useState } from "react";
 import storage from '@react-native-firebase/storage';
+import { formatDate } from "../../constants/formatDate";
 
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
-const formatDate = (date: Date): string => {
 
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString();
-    return `${day}/${month}/${year}`;
-};
 
 
 type messagesBox = {

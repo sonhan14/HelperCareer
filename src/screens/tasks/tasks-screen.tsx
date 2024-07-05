@@ -1,4 +1,4 @@
-import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { layout } from "../../constants/dimensions/dimension"
 import Icon from "react-native-vector-icons/AntDesign"
 import { color } from "../../constants/colors/color"
@@ -7,18 +7,22 @@ import React, { useEffect, useRef, useState } from "react"
 import { Circle, G, Svg } from "react-native-svg"
 import { TaskItem } from "./task-item"
 import { TaskModal } from "./task-modal"
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import { TaskType } from "../../../types/taskType"
 
 const AnimatedCicle = Animated.createAnimatedComponent(Circle)
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+
+
 
 export const TaskScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const onChangeSearch = (query: string) => setSearchQuery(query);
     const [isFocused, setIsFocused] = useState(false);
     const searchbarRef = useRef<React.ElementRef<typeof Searchbar>>(null);
-
-    const tasks = 200
-    const tasksDone = 200
+    const currentUser = auth().currentUser
+    
     const radius = 45;
     const circumference = radius * Math.PI * 2;
     const circleRef = useRef<React.ElementRef<typeof Circle>>(null)
@@ -26,7 +30,11 @@ export const TaskScreen = () => {
     const [isModal, setIsModal] = useState({
         showModal: false,
     });
-
+    const [tasksList, setTasksList] = useState<TaskType[]>([]);
+    const [taskPercent, setTaskPercent] = useState({
+        tasks: 1,
+        tasksDone: 1
+    })
 
     const progress = useRef(new Animated.Value(0)).current;
     const animation = (toValue: number) => {
@@ -38,6 +46,46 @@ export const TaskScreen = () => {
         }).start()
     }
 
+    const fetchTasks = () => {
+        const unsubscribeTasks = firestore()
+        .collection('tasks')
+        .where('user_id', '==', currentUser?.uid)
+        .onSnapshot(async (taskQuerySnapshot) => {
+            const tasksList: TaskType[] = [];
+
+            taskQuerySnapshot.forEach(doc => {
+                const data = doc.data();
+                
+                
+                if (data) {
+                    tasksList.push({
+                        id: doc.id,
+                        task_name: data.task_name,
+                        task_des: data.task_description,
+                        start_date: new Date(data.start_date.seconds * 1000 + data.start_date.nanoseconds / 1000000 ),
+                        end_date: new Date(data.end_date.seconds * 1000 + data.end_date.nanoseconds / 1000000),
+                        status: data.status
+                    });
+                }
+            });
+            setTasksList(tasksList);
+            setTaskPercent(prev => ({...prev, tasks: tasksList.length, tasksDone: tasksList.length}))
+        }, (error) => {
+            console.error('Error fetching task locations from Firestore: ', error);
+        });
+        return () => {
+            unsubscribeTasks();
+        };
+    }
+
+    useEffect(() => {
+        if (!currentUser?.uid) return;
+
+        const unsubscribe = fetchTasks();
+        
+        return () => unsubscribe();
+    }, [currentUser]);
+
 
     const onFocus = () => setIsFocused(true);
     const onBlur = () => {
@@ -46,11 +94,11 @@ export const TaskScreen = () => {
     };
 
     useEffect(() => {
-        animation(tasksDone)
+        animation(taskPercent.tasksDone)
 
 
         progress.addListener((v: any) => {
-            const maxPercent = 100 * v.value / tasks
+            const maxPercent = 100 * v.value / taskPercent.tasks
             const strokeDashoffset = circumference - (circumference * maxPercent) / 100
             if (circleRef.current) {
 
@@ -72,7 +120,7 @@ export const TaskScreen = () => {
         }
 
 
-    }, [tasksDone])
+    }, [taskPercent])
 
     const openModal = () => {
         setIsModal(prev => ({...prev, showModal: true}))
@@ -112,7 +160,7 @@ export const TaskScreen = () => {
                 <View style={styles.tasks_review_container}>
                     <View style={styles.info_container}>
                         <Text style={[styles.text_header, { color: 'white' }]}>Tasks Done</Text>
-                        <Text style={styles.text_white_16}>{tasksDone}/{tasks}</Text>
+                        <Text style={styles.text_white_16}>{taskPercent.tasksDone}/{taskPercent.tasks}</Text>
                         <TouchableOpacity style={styles.review_button}>
                             <Text style={styles.text_black_16}>Review</Text>
                         </TouchableOpacity>
@@ -157,7 +205,13 @@ export const TaskScreen = () => {
                     </View>
                 </View>
 
-                <TaskItem />
+                <FlatList 
+                style={{backgroundColor: color.light_background}}
+                data={tasksList}
+                renderItem={({ item }) => <TaskItem item={item} />}
+                keyExtractor={(item) => item.id}
+                showsVerticalScrollIndicator={false}
+                />
             </View>
             {isModal ? <TaskModal isModal={isModal.showModal} closeModal={() => closeModal()}/> : null}
         </View>
