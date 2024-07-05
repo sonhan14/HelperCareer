@@ -46,7 +46,7 @@ const truncateText = (text: string, limit: number) => {
 export const ChatScreen = () => {
     const navigation = useNavigation<ChatScreenNavigationProp>()
     const currentUser = auth().currentUser
-    const [boxData, setBOxData] = useState<messagesBox[]>([])
+    const [boxData, setBoxData] = useState<messagesBox[]>([])
 
     const AvatarFlatlist = () => {
         const renderItem = ({ item }: { item: messagesBox }) => (
@@ -99,56 +99,58 @@ export const ChatScreen = () => {
         );
     };
 
-    const handleChat = async () => {
-        const filteredChats: any[] = [];
+    const subscribeToChat = () => {
+        const unsubscribe = firestore()
+            .collection('chats')
+            .where('members', 'array-contains', currentUser?.uid)
+            .onSnapshot(async (querySnapshot) => {
+                const filteredChats: any[] = [];
+                const promises = querySnapshot.docs.map(async (documentSnapshot) => {
+                    const data = documentSnapshot.data();
+                    const members = data.members;
+                    const receive_id = members.filter((member: any) => member !== currentUser?.uid);
+                    const avatarRef = storage().ref(`users/${receive_id[0]}/avatar.jpg`);
+                    let avatarDownloadUrl;
+                    try {
+                        avatarDownloadUrl = await avatarRef.getDownloadURL();
+                    } catch (error) {
+                        avatarDownloadUrl = images.avartar_pic;
+                    }
 
-        try {
-            const chatSnapshots = await firestore()
-                .collection('chats')
-                .where('members', 'array-contains', currentUser?.uid)
-                .get();
+                    const userSnapshot = await firestore().collection('users').doc(receive_id[0]).get();
+                    const receive_info = userSnapshot.data();
 
-            const promises = chatSnapshots.docs.map(async (documentSnapshot) => {
-                const data = documentSnapshot.data();
-                const members = data.members;
-                const receive_id = members.filter((member: any) => member !== currentUser?.uid);
-                const avatarRef = storage().ref(`users/${receive_id[0]}/avatar.jpg`);
-                let avatarDownloadUrl;
-                try {
-                    avatarDownloadUrl = await avatarRef.getDownloadURL();
-
-                } catch (error) {
-                    avatarDownloadUrl = images.avartar_pic
-                }
-
-                const userSnapshot = await firestore().collection('users').doc(receive_id[0]).get();
-                const receive_info = userSnapshot.data();
-
-                filteredChats.push({
-                    id: documentSnapshot.id,
-                    name: receive_info?.last_name + ' ' + receive_info?.first_name,
-                    avatar: avatarDownloadUrl,
-                    received_id: receive_id[0],
-                    ...documentSnapshot.data()
+                    filteredChats.push({
+                        id: documentSnapshot.id,
+                        name: receive_info?.last_name + ' ' + receive_info?.first_name,
+                        avatar: avatarDownloadUrl,
+                        received_id: receive_id[0],
+                        lastMessage: data.lastMessage || '',
+                        lastMessageTimestamp: data.lastMessageTimestamp || firestore.Timestamp.now(),
+                    });
                 });
+
+                await Promise.all(promises);
+                setBoxData(filteredChats);
+            }, (error) => {
+                console.error('Error getting documents: ', error);
             });
 
-            await Promise.all(promises);
-
-            setBOxData(filteredChats);
-            console.log(filteredChats);
-        } catch (error) {
-            console.error('Error getting documents: ', error);
-        }
+        return unsubscribe;
     };
+
+    useEffect(() => {
+        if (currentUser) {
+            const unsubscribe = subscribeToChat();
+            return () => unsubscribe();
+        }
+    }, [currentUser]);
 
     const goToChat = (receiverId: string, chatBoxId: string) => {
         navigation.navigate('ChatBox', {receiverId: receiverId, chatId: chatBoxId})
     }
 
-    useEffect(() => {
-        handleChat()
-    }, [])
+
 
     return (
         <View style={styles.container}>
