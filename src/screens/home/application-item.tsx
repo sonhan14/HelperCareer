@@ -3,36 +3,20 @@ import { FlatList, GestureHandlerRootView, NativeViewGestureHandler, PanGestureH
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { images } from "../../images";
 import { layout } from "../../constants/dimensions/dimension";
-import firestore, { GeoPoint } from '@react-native-firebase/firestore';
-import { Applications } from "../../../types/applications.type";
+import { Applications, EmployeeListProps } from "../../../types/applications.type";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigations/navigation";
+import { useNavigation } from "@react-navigation/native";
 
-interface EmployeeListProps {
-    showEmployee: boolean;
-    employeeList: Applications[],
-    showDialog: () => void
-}
-export const EmployeeList = ({ showEmployee, employeeList, showDialog }: EmployeeListProps) => {
 
-    const hanleAccepted = (item: Applications) => {
-        showDialog()
-        // const { id, ...itemWithoutId } = item;
-        // firestore().collection('applications').doc(item.id).set({
-        //     ...itemWithoutId,
-        //     status: 'accepted'
-        // })
-    }
+type EmployeeNavigation = StackNavigationProp<RootStackParamList>
+export const EmployeeList = ({ showEmployee, employeeList, handleAction }: EmployeeListProps) => {
+    const navigation = useNavigation<EmployeeNavigation>()
 
-    const hanleRejected = (item: Applications) => {
-        const { id, ...itemWithoutId } = item;
-        firestore().collection('applications').doc(item.id).set({
-            ...itemWithoutId,
-            status: 'rejected'
-        })
-    }
 
     const renderItem = ({ item }: { item: Applications }) => {
         return (
-            <View style={styles.employee_container}>
+            <TouchableOpacity style={styles.employee_container} onPress={() => navigation.navigate('EmployeeProfile', {employeeId: item.user_id})}>
                 <View style={styles.image_container}>
                     <Image source={images.avartar_pic} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
                 </View>
@@ -40,22 +24,34 @@ export const EmployeeList = ({ showEmployee, employeeList, showDialog }: Employe
                     <Text style={styles.text_title}>Name: {item.last_name} {item.first_name}</Text>
                     <Text style={styles.text_Date}>Rating: {item.rating}</Text>
                 </View>
-                <View>
-                    <TouchableOpacity style={styles.button_apply} onPress={() => { hanleAccepted(item) }}>
-                        <Text style={styles.text_button}>Accept</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button_reject} onPress={() => { hanleRejected(item) }}>
-                        <Text style={styles.text_button}>Reject</Text>
-                    </TouchableOpacity>
-                </View>
+                {item.status === 'accepted' ?
+                    <View style={styles.status_container}>
+                        <Text style={styles.text_accept}>Accepted</Text>
+                    </View>
+                    :
+                    item.status === 'rejected' ?
+                    <View style={styles.status_container}>
+                        <Text style={styles.text_reject}>Rejected</Text>
+                    </View>
+                    :
+                    <View>
+                        <TouchableOpacity style={styles.button_apply} onPress={() => { handleAction(item, 'accept') }}>
+                            <Text style={styles.text_button}>Accept</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button_reject} onPress={() => { handleAction(item, 'reject') }}>
+                            <Text style={styles.text_button}>Reject</Text>
+                        </TouchableOpacity>
+                    </View>
+                }
 
-            </View>
+
+            </TouchableOpacity>
         )
     }
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
-            height: withTiming(showEmployee ? layout.height * 0.1 * 2 + 20 : 0, { duration: 300 }), // Adjust height as needed
+            height: withTiming(showEmployee ? layout.height * 0.1 * 2 + 20 : 0, { duration: 300 }),
         };
     });
 
@@ -118,7 +114,7 @@ const styles = StyleSheet.create({
     },
     button_reject: {
         height: '50%',
-        width: layout.height * 0.1 ,
+        width: layout.height * 0.1,
         backgroundColor: 'red',
         marginLeft: 10,
         borderRadius: 10,
@@ -130,5 +126,20 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 14,
         fontWeight: '700'
+    },
+    status_container:{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    text_accept: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: 'green'
+    },
+    text_reject: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: 'red'
     }
 })

@@ -129,7 +129,6 @@ export const fetchApplication = (taskId: any, setApplication: any) => {
                 })
                 
             });
-            console.log(application);
             
             setApplication(application)
         }, (error) => {
@@ -138,4 +137,20 @@ export const fetchApplication = (taskId: any, setApplication: any) => {
         return () => {
             unsubscribeApplication();
         }; 
+}
+
+export const hanleAccepted = (item: Applications) => {
+    const { id, ...itemWithoutId } = item;
+    firestore().collection('applications').doc(item.id).set({
+        ...itemWithoutId,
+        status: 'accepted'
+    })
+}
+
+export const hanleRejected = (item: Applications) => {
+    const { id, ...itemWithoutId } = item;
+    firestore().collection('applications').doc(item.id).set({
+        ...itemWithoutId,
+        status: 'rejected'
+    })
 }

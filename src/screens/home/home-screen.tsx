@@ -40,7 +40,7 @@ export const HomeScreen = () => {
     }, [currentUser]);
 
 
-    const handlePress = (event: any): void => {
+    const handleOpenEmployee = (event: any): void => {
         const features = event.features;
         if (features.length > 0) {
             const userId = features[0].properties.userId;
@@ -86,7 +86,7 @@ export const HomeScreen = () => {
                         />
                         <LocationPuck puckBearingEnabled puckBearing='heading' />
                         {geoJsonData && (
-                            <ShapeSource id="employee_locations" shape={geoJsonData} onPress={handlePress}>
+                            <ShapeSource id="employee_locations" shape={geoJsonData} onPress={handleOpenEmployee}>
 
                                 <SymbolLayer
                                     id="employee_locations"

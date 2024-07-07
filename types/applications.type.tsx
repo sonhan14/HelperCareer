@@ -8,3 +8,9 @@ export interface Applications {
     task_id: string,
     user_id: string
 }
+
+export interface EmployeeListProps {
+    showEmployee: boolean;
+    employeeList: Applications[],
+    handleAction: (item: Applications, actionType: 'accept' | 'reject') => void;
+}
