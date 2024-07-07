@@ -32,6 +32,8 @@ export const TaskScreen = () => {
     const [isModal, setIsModal] = useState<boolean>(false)
 
     const [tasksList, setTasksList] = useState<TaskType[]>([]);
+    const [taskDone, setTaskDone] = useState<TaskType[]>([]);
+    
     const [taskPercent, setTaskPercent] = useState({
         tasks: 1,
         tasksDone: 1
@@ -52,7 +54,8 @@ export const TaskScreen = () => {
     useEffect(() => {
         if (!currentUser?.uid) return;
 
-        const unsubscribe = fetchTasks(currentUser, setTasksList, setTaskPercent);
+        const unsubscribe = fetchTasks(currentUser, setTasksList, setTaskPercent, setTaskDone);
+        console.log(taskDone.length);
         
         return () => unsubscribe();
     }, [currentUser]);

@@ -4,7 +4,7 @@ import { Task, TaskType } from '../../../types/taskType';
 
 
 
-export const fetchTasks = (currentUser: any, setTasksList: any, setTaskPercent: any) => {
+export const fetchTasks = (currentUser: any, setTasksList: any, setTaskPercent: any, setTaskDone: any) => {
     const unsubscribeTasks = firestore()
         .collection('tasks')
         .where('user_id', '==', currentUser?.uid)
@@ -26,8 +26,9 @@ export const fetchTasks = (currentUser: any, setTasksList: any, setTaskPercent: 
                     });
                 }
             });
-            setTasksList(tasksList);
-            setTaskPercent((prev: any) => ({ ...prev, tasks: tasksList.length, tasksDone: tasksList.length }))
+            setTasksList(tasksList.filter((task: TaskType) => task.status === 'process'));
+            setTaskPercent((prev: any) => ({ ...prev, tasks: tasksList.length, tasksDone: tasksList.filter((task: TaskType) => task.status === 'finished').length }))
+            setTaskDone(tasksList.filter((task: TaskType) => task.status === 'finished'))
         }, (error) => {
             console.error('Error fetching task locations from Firestore: ', error);
         });

@@ -193,10 +193,8 @@ export const ProfileScreen = () => {
                 </ScrollView>
             </View>
 
-            <SweepButton onPress={() => { }} iconName="tasks" label="Manage Tasks" />
-
             <SweepButton onPress={() => { }} iconName="edit" label="Edit Profile" />
-
+            <SweepButton onPress={() => { }} iconName="tasks" label="About" />
 
             <View style={styles.logout_container}>
                 <TouchableOpacity style={styles.logout_button} onPress={() => { handleLogOut() }}>
