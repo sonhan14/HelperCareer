@@ -1,4 +1,4 @@
-import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RootStackParamList } from "../../navigations/navigation";
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useEffect, useLayoutEffect, useState } from "react";
@@ -188,12 +188,14 @@ export const ProfileScreen = () => {
             </View>
 
             <View style={styles.intro_container}>
-                <Text style={styles.text_15}>{user?.introduction}</Text>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <Text style={[styles.text_15, {textAlign: 'justify'}]}>{user?.introduction}</Text>
+                </ScrollView>
             </View>
 
-            <SweepButton onPress={()=>{}} iconName="tasks" label="Manage Tasks"/>
+            <SweepButton onPress={() => { }} iconName="tasks" label="Manage Tasks" />
 
-            <SweepButton onPress={()=>{}} iconName="edit" label="Edit Profile"/>
+            <SweepButton onPress={() => { }} iconName="edit" label="Edit Profile" />
 
 
             <View style={styles.logout_container}>

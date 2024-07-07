@@ -1,6 +1,6 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { RootStackParamList } from "../../navigations/navigation";
-import firestore from '@react-native-firebase/firestore';
+
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -8,12 +8,13 @@ import { layout } from "../../constants/dimensions/dimension";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { images } from "../../images";
 import { Appbar, SegmentedButtons } from "react-native-paper";
-import storage from '@react-native-firebase/storage';
+
 import { iUser } from "../../../types/userType";
 import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
 import auth from '@react-native-firebase/auth';
 import { formatDate } from "../../constants/formatDate";
+import { getDetail, getImgae, handleChat } from "./employee-helper";
 
 type EmployeeFrofileProps = {
     route: { params: RootStackParamList['EmployeeProfile'] };
@@ -41,100 +42,16 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
 
     const navigation = useNavigation<EmployeeFrofileProp>()
 
-    const getDetail = async () => {
-        const snapshot = await firestore().collection('users').doc(employeeID).get();
-        if (snapshot.exists) {
-            const doc = snapshot.data();
-            const formattedUserData: iUser = {
-                birthday: formatDate(doc?.birthday.toDate()),
-                first_name: doc?.first_name,
-                last_name: doc?.last_name,
-                gender: doc?.gender,
-                introduction: doc?.introduction,
-                phone: doc?.phone,
-                rating: doc?.rating,
-            };
-
-            setUser(formattedUserData);
-        } else {
-            console.log("No user found with the given ID");
-        }
-    }
-
-    const handleChat = () => {
-        const memberIds = [employeeID, currentUser?.uid];
-        const filteredChats: any[] = [];
-
-        firestore().collection('chats').where('members', 'array-contains', memberIds[0])
-            .get()
-            .then(querySnapshot => {
-                querySnapshot.forEach(documentSnapshot => {
-                    const data = documentSnapshot.data();
-                    if (data.members.includes(memberIds[1])) {
-                        filteredChats.push({
-                            id: documentSnapshot.id,
-                            ...data
-                        });
-                    }
-                });
-                console.log(filteredChats);
-                navigation.navigate('ChatBox', { receiverId: employeeID, chatId: filteredChats.length ? filteredChats[0].id : null });
-            })
-            .catch(error => {
-                console.error('Error getting documents: ', error);
-            });
-    };
-
 
     const handleBack = () => {
         navigation.goBack()
     }
 
-    const getImgae = async () => {
-        setLoading(prev => ({
-            ...prev, avatarLoading: true
-        }))
 
-        setLoading(prev => ({
-            ...prev, coverLoading: true
-        }))
-        const avatarRef = storage().ref(`users/${employeeID}/avatar.jpg`);
-        try {
-            const avatarDownloadUrl = await avatarRef.getDownloadURL();
-            setImage(prev => ({
-                ...prev, avatar: avatarDownloadUrl
-            }));
-
-        } catch (error) {
-            setImage(prev => ({
-                ...prev, avatar: images.avartar_pic
-            }));
-        }
-
-        const coverRef = storage().ref(`users/${employeeID}/cover.jpg`);
-        try {
-            const coverDownloadUrl = await coverRef.getDownloadURL();
-            setImage(prev => ({
-                ...prev, cover: coverDownloadUrl
-            }));
-
-
-        } catch (error) {
-            setImage(prev => ({
-                ...prev, cover: images.background_pic
-            }));
-        }
-        setLoading(prev => ({
-            ...prev, avatarLoading: false
-        }))
-        setLoading(prev => ({
-            ...prev, coverLoading: false
-        }))
-    }
 
     useEffect(() => {
-        getImgae()
-        getDetail()
+        getImgae(setLoading, setImage, employeeID)
+        getDetail(employeeID, setUser)
     }, [])
 
     return (
@@ -186,7 +103,7 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
             </View>
 
             <View style={{ width: layout.width - 20 }}>
-                <SweepButton onPress={() => { handleChat() }} iconName="wechat" label="Tap to Chat" />
+                <SweepButton onPress={() => { handleChat(employeeID, currentUser?.uid, navigation, user?.last_name + ' ' + user?.first_name) }} iconName="wechat" label="Tap to Chat" />
             </View>
 
         </View>

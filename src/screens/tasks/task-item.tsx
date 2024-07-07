@@ -3,9 +3,16 @@ import { layout } from "../../constants/dimensions/dimension"
 import { images } from "../../images"
 import { formatDate } from "../../constants/formatDate"
 import { TaskType } from "../../../types/taskType"
+import { StackNavigationProp } from "@react-navigation/stack"
+import { RootStackParamList } from "../../navigations/navigation"
+import { useNavigation } from "@react-navigation/native"
+
+type TaskItemNavigation = StackNavigationProp<RootStackParamList>
 
 
 export const TaskItem = ({item} : {item: TaskType}) => {
+    const navigation = useNavigation<TaskItemNavigation>()
+
     return (
         <View style={styles.container}>
             <View style={styles.header_container}>
@@ -16,7 +23,8 @@ export const TaskItem = ({item} : {item: TaskType}) => {
                     <Text style={styles.text_red_15}>Status: {item.status}</Text>
                 </View>
             </View>
-            <TouchableOpacity style={styles.view_button}>
+            <TouchableOpacity style={styles.view_button} onPress={() => { navigation.navigate('TaskDetail', {TaskId: item.id})
+            }}>
                 <Text style={styles.text_black_15}>View Detail</Text>
             </TouchableOpacity>
         </View>

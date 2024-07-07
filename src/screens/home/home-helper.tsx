@@ -129,7 +129,6 @@ export const fetchApplication = (taskId: any, setApplication: any) => {
                 })
                 
             });
-            
             setApplication(application)
         }, (error) => {
             console.error('Error fetching user locations from Firestore: ', error);

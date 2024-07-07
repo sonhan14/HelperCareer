@@ -23,9 +23,9 @@ export const ChatBox = ({route} : ChatBoxProps) => {
     const [messages, setMessages] = useState<IMessage[]>([])
     const currentUser = auth().currentUser
     
-    const [filteredChats, setFilteredChats] = useState<any[]>([]);
     const navigation = useNavigation<ChatBoxNavigationProp>()
     const receiverId = route.params.receiverId
+    const receiverName = route.params.receiverName
     const [chatBoxId, setChatBoxId] = useState<string>(route.params.chatId)
 
 
@@ -190,7 +190,7 @@ export const ChatBox = ({route} : ChatBoxProps) => {
                         <Image source={image.receiver_avatar === images.avartar_pic ? images.avartar_pic : {uri: image.receiver_avatar}} resizeMode='contain' style={{height: '100%', width: '100%'}}/>
                     </View>
                     <View style={styles.user_name_container}>
-                        <Text style={styles.user_name}>Khai</Text>
+                        <Text style={styles.user_name}>{receiverName}</Text>
                     </View>
                 </View>
                 <View style={styles.call_container}>

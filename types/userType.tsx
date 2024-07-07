@@ -6,5 +6,5 @@ export type iUser = {
     introduction: string;
     phone: string;
     rating: number;
-    role: string
+    role?: string
 };

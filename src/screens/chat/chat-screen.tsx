@@ -10,6 +10,7 @@ import auth from '@react-native-firebase/auth';
 import { useEffect, useState } from "react";
 import storage from '@react-native-firebase/storage';
 import { formatDate } from "../../constants/formatDate";
+import { truncateText } from "../../helpers/truncateText";
 
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -29,15 +30,6 @@ type messagesBox = {
 
 
 
-const truncateText = (text: string, limit: number) => {
-    if (text.length <= limit) {
-        return text;
-    }
-    return text.substring(0, limit) + '...';
-};
-
-
-
 export const ChatScreen = () => {
     const navigation = useNavigation<ChatScreenNavigationProp>()
     const currentUser = auth().currentUser
@@ -45,7 +37,7 @@ export const ChatScreen = () => {
 
     const AvatarFlatlist = () => {
         const renderItem = ({ item }: { item: messagesBox }) => (
-            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.received_id, item.id)}>
+            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.received_id, item.id, item.name)}>
                 <Image
                     source={images.avartar_pic}
                     style={{ width: 60, height: 60, borderRadius: 30 }}
@@ -67,7 +59,7 @@ export const ChatScreen = () => {
 
     const MessagesBoxList = () => {
         const renderItem = ({ item }: { item: messagesBox }) => (
-            <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.received_id, item.id)}>
+            <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.received_id, item.id, item.name)}>
                 <View style={styles.message_box_avatar}>
                     <Image
                         source={images.avartar_pic}
@@ -141,8 +133,8 @@ export const ChatScreen = () => {
         }
     }, [currentUser]);
 
-    const goToChat = (receiverId: string, chatBoxId: string) => {
-        navigation.navigate('ChatBox', {receiverId: receiverId, chatId: chatBoxId})
+    const goToChat = (receiverId: string, chatBoxId: string, receiverName: string) => {
+        navigation.navigate('ChatBox', {receiverId: receiverId, chatId: chatBoxId, receiverName: receiverName})
     }
 
 

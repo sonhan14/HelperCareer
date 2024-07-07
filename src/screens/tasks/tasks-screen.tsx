@@ -9,7 +9,8 @@ import { TaskItem } from "./task-item"
 import { TaskModal } from "./task-modal"
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { TaskType } from "../../../types/taskType"
+import { Task, TaskType } from "../../../types/taskType"
+import { fetchTasks } from "./task-helper"
 
 const AnimatedCicle = Animated.createAnimatedComponent(Circle)
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -27,9 +28,9 @@ export const TaskScreen = () => {
     const circumference = radius * Math.PI * 2;
     const circleRef = useRef<React.ElementRef<typeof Circle>>(null)
     const inputRef = useRef<React.ElementRef<typeof TextInput>>(null)
-    const [isModal, setIsModal] = useState({
-        showModal: false,
-    });
+
+    const [isModal, setIsModal] = useState<boolean>(false)
+
     const [tasksList, setTasksList] = useState<TaskType[]>([]);
     const [taskPercent, setTaskPercent] = useState({
         tasks: 1,
@@ -46,42 +47,12 @@ export const TaskScreen = () => {
         }).start()
     }
 
-    const fetchTasks = () => {
-        const unsubscribeTasks = firestore()
-        .collection('tasks')
-        .where('user_id', '==', currentUser?.uid)
-        .onSnapshot(async (taskQuerySnapshot) => {
-            const tasksList: TaskType[] = [];
 
-            taskQuerySnapshot.forEach(doc => {
-                const data = doc.data();
-                
-                
-                if (data) {
-                    tasksList.push({
-                        id: doc.id,
-                        task_name: data.task_name,
-                        task_des: data.task_description,
-                        start_date: new Date(data.start_date.seconds * 1000 + data.start_date.nanoseconds / 1000000 ),
-                        end_date: new Date(data.end_date.seconds * 1000 + data.end_date.nanoseconds / 1000000),
-                        status: data.status
-                    });
-                }
-            });
-            setTasksList(tasksList);
-            setTaskPercent(prev => ({...prev, tasks: tasksList.length, tasksDone: tasksList.length}))
-        }, (error) => {
-            console.error('Error fetching task locations from Firestore: ', error);
-        });
-        return () => {
-            unsubscribeTasks();
-        };
-    }
 
     useEffect(() => {
         if (!currentUser?.uid) return;
 
-        const unsubscribe = fetchTasks();
+        const unsubscribe = fetchTasks(currentUser, setTasksList, setTaskPercent);
         
         return () => unsubscribe();
     }, [currentUser]);
@@ -95,8 +66,6 @@ export const TaskScreen = () => {
 
     useEffect(() => {
         animation(taskPercent.tasksDone)
-
-
         progress.addListener((v: any) => {
             const maxPercent = 100 * v.value / taskPercent.tasks
             const strokeDashoffset = circumference - (circumference * maxPercent) / 100
@@ -123,11 +92,11 @@ export const TaskScreen = () => {
     }, [taskPercent])
 
     const openModal = () => {
-        setIsModal(prev => ({...prev, showModal: true}))
+        setIsModal(true)
     }
 
     const closeModal = () => {
-        setIsModal(prev => ({...prev, showModal: false}))
+        setIsModal(false)
     }
 
     return (
@@ -213,7 +182,7 @@ export const TaskScreen = () => {
                 showsVerticalScrollIndicator={false}
                 />
             </View>
-            {isModal ? <TaskModal isModal={isModal.showModal} closeModal={() => closeModal()}/> : null}
+            {isModal ? <TaskModal isModal={isModal} closeModal={() => closeModal()} item={null}/> : null}
         </View>
     )
 }
