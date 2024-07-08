@@ -196,9 +196,9 @@ export const ChatBox = ({route} : ChatBoxProps) => {
                 <View style={styles.call_container}>
                     <MaterialCommunityIcons name="phone-outline" size={32} color={'black'}/>
                 </View>
-                <View style={styles.call_container}>
+                <TouchableOpacity style={styles.call_container} onPress={() => {navigation.navigate('CallScreen')}}>
                     <MaterialCommunityIcons name="video-outline" size={32} color={'black'}/>
-                </View>
+                </TouchableOpacity>
             </View>
             <GiftedChat
                 

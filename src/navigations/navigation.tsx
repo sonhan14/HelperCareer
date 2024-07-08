@@ -6,7 +6,8 @@ export type RootStackParamList = {
     Register: undefined,
     ChatBox: {receiverId: string, chatId: string, receiverName: string},
     EmployeeProfile: {employeeId: string,},
-    TaskDetail: {TaskId: string}
+    TaskDetail: {TaskId: string},
+    CallScreen: undefined
 };
 
 export type RootTabParamList = {

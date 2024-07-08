@@ -8,6 +8,7 @@ import { ChatBox } from '../screens/chat/chat-box-screen';
 import { EmployeeProfile } from '../screens/employee-profile/employee-profile';
 import { TaskDetail } from '../screens/tasks/task-detail';
 import { TaskType } from '../../types/taskType';
+import { CallScreen } from '../screens/call/call-screen';
 
 
 
@@ -22,6 +23,7 @@ export function StackNavigator() {
             <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
             <Stack.Screen name="ChatBox" component={ChatBox} />
             <Stack.Screen name="EmployeeProfile" component={EmployeeProfile} />
+            <Stack.Screen name="CallScreen" component={CallScreen} />
             <Stack.Screen name="TaskDetail" component={TaskDetail} initialParams={{TaskId: '1'}}/>
         </Stack.Navigator>
     );
