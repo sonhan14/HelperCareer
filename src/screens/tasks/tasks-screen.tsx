@@ -23,7 +23,7 @@ export const TaskScreen = () => {
     const [isFocused, setIsFocused] = useState(false);
     const searchbarRef = useRef<React.ElementRef<typeof Searchbar>>(null);
     const currentUser = auth().currentUser
-    
+
     const radius = 45;
     const circumference = radius * Math.PI * 2;
     const circleRef = useRef<React.ElementRef<typeof Circle>>(null)
@@ -33,7 +33,7 @@ export const TaskScreen = () => {
 
     const [tasksList, setTasksList] = useState<TaskType[]>([]);
     const [taskDone, setTaskDone] = useState<TaskType[]>([]);
-    
+
     const [taskPercent, setTaskPercent] = useState({
         tasks: 1,
         tasksDone: 1
@@ -56,7 +56,7 @@ export const TaskScreen = () => {
 
         const unsubscribe = fetchTasks(currentUser, setTasksList, setTaskPercent, setTaskDone);
         console.log(taskDone.length);
-        
+
         return () => unsubscribe();
     }, [currentUser]);
 
@@ -176,16 +176,17 @@ export const TaskScreen = () => {
                         </Svg>
                     </View>
                 </View>
-
-                <FlatList 
-                style={{backgroundColor: color.light_background}}
-                data={tasksList}
-                renderItem={({ item }) => <TaskItem item={item} />}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
-                />
+                <View style={styles.list_container}>
+                    <FlatList
+                        // style={{ backgroundColor: color.light_background }}
+                        data={tasksList}
+                        renderItem={({ item }) => <TaskItem item={item} />}
+                        keyExtractor={(item) => item.id}
+                        showsVerticalScrollIndicator={false}
+                    />
+                </View>
             </View>
-            {isModal ? <TaskModal isModal={isModal} closeModal={() => closeModal()} item={null}/> : null}
+            {isModal ? <TaskModal isModal={isModal} closeModal={() => closeModal()} item={null} /> : null}
         </View>
     )
 }
@@ -281,5 +282,10 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         textAlign: 'center',
         position: 'absolute'
+    },
+    list_container: {
+        width: layout.width,
+        height: (layout.height * 0.15 + 15) * 3,
+        alignItems: 'center'
     }
 });

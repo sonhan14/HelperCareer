@@ -11,21 +11,10 @@ import { useEffect, useState } from "react";
 import storage from '@react-native-firebase/storage';
 import { formatDate } from "../../constants/formatDate";
 import { truncateText } from "../../helpers/truncateText";
+import { messagesBox } from "../../../types/messageBox";
+import { MessagesBoxList } from "./chat-box-list";
 
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
-
-
-
-
-type messagesBox = {
-    id: string,
-    received_id: string,
-    avatar: any,
-    name: string,
-    lastMessage: string,
-    lastMessageTimestamp: any,
-}
-
 
 
 
@@ -57,34 +46,7 @@ export const ChatScreen = () => {
         );
     };
 
-    const MessagesBoxList = () => {
-        const renderItem = ({ item }: { item: messagesBox }) => (
-            <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.received_id, item.id, item.name)}>
-                <View style={styles.message_box_avatar}>
-                    <Image
-                        source={images.avartar_pic}
-                        style={{ width: '80%', height: '80%', borderRadius: 50 }}
-                    />
-                </View>
-                <View style={styles.message_box_text}>
-                    <Text style={styles.text_name}>{item.name}</Text>
-                    <Text style={styles.text_message}>{truncateText(item.lastMessage, 20)}</Text>
-                </View>
-                <View style={styles.message_box_time}>
-                    <Text style={styles.text_time}>{formatDate(item.lastMessageTimestamp.toDate())}</Text>
-                </View>
-            </TouchableOpacity>
-        );
-
-        return (
-            <FlatList
-                data={boxData}
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                renderItem={(renderItem)}
-            />
-        );
-    };
+    
 
     const subscribeToChat = () => {
         const unsubscribe = firestore()
@@ -130,6 +92,7 @@ export const ChatScreen = () => {
         if (currentUser) {
             const unsubscribe = subscribeToChat();
             return () => unsubscribe();
+            
         }
     }, [currentUser]);
 
@@ -155,9 +118,7 @@ export const ChatScreen = () => {
             <View style={styles.avatar_list_container}>
                 <AvatarFlatlist />
             </View>
-
-            <MessagesBoxList />
-
+            <MessagesBoxList boxData={boxData} goToChat={goToChat}/>
         </View>
     )
 }
@@ -166,13 +127,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        padding: 10
+        paddingHorizontal: 10
     },
     header_container: {
         height: layout.height * 0.05,
-        width: layout.width - 20,
+        width: layout.width,
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: 'white',
     },
     button_back: {
         height: '100%',
@@ -198,41 +160,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
     },
-    message_box_container: {
-        height: layout.height * 0.1,
-        width: layout.width - 20,
-        marginVertical: 5,
-        flexDirection: 'row'
-    },
-    message_box_avatar: {
-        height: '100%',
-        width: '20%',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    message_box_text: {
-        height: '100%',
-        width: '65%',
-        paddingLeft: 5,
-        justifyContent: 'center'
-    },
-    text_name: {
-        color: 'black',
-        fontSize: 18,
-        fontWeight: '700'
-    },
-    text_message: {
-        color: 'black',
-        fontSize: 15,
-        fontWeight: '400'
-    },
-    message_box_time: {
-        width: '20%',
-        height: '100%',
-        justifyContent: 'center'
-    },
-    text_time: {
-        color: 'black',
-        fontWeight: '200'
-    }
 })
