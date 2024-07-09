@@ -24,7 +24,6 @@ export const RegisterScreen: React.FC = () => {
         password: '',
         rePassword: '',
     })
-
     const [isValid, setIsValid] = useState({
         passwordError: '',
         emailError: ''
@@ -126,10 +125,9 @@ export const RegisterScreen: React.FC = () => {
         try {
             let response = await auth().createUserWithEmailAndPassword(email, password);
             if (response) {
-                
-                
                 setIsModal(prev => ({...prev, showModal: true, userId: response.user.uid, email: account.email}))
             }
+            // setIsModal(prev => ({...prev, showModal: true, userId: '', email: account.email}))
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
             if (error.code === 'auth/email-already-in-use') {
@@ -148,11 +146,9 @@ export const RegisterScreen: React.FC = () => {
 
     return (
         <View style={{ flex: 1, position: 'relative' }}>
-
             <View style={styles.login_image_container}>
                 <Image source={images.register_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
             </View>
-
             <View style={styles.hello_container}>
                 <View style={styles.wellcome_container}>
                     <Text style={styles.text_title}>New Owner</Text>
@@ -258,15 +254,21 @@ export const RegisterScreen: React.FC = () => {
                     </View>
 
                 </Animated.View>
-
-                <CustomButton
+                <TouchableOpacity
+                            onPress={() => { __doSignUp() }}
+                            style={isRegister || isValid.emailError !== '' || isValid.passwordError !== ''? styles.signin_button_disable : styles.signin_button}
+                            disabled={isRegister}
+                        >
+                            <Text style={styles.text_button}>Contitnue</Text>
+                        </TouchableOpacity>
+                {/* <CustomButton
                     title="Sign Up"
                     onPress={__doSignUp}
                     style={styles.signin_button}
                     disabled={isRegister}
                     disabledStyle={styles.signin_button_disable}
                     loading={loading}
-                />
+                /> */}
             </View>
 
             <View style={styles.sign_up_container}>

@@ -5,3 +5,9 @@ export const formatDate = (date: Date): string => {
     const year = date.getFullYear().toString();
     return `${day}/${month}/${year}`;
 };
+
+export const convertStringToDate = (dateString: string): Date => {
+    const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
+    // month - 1 because months are zero-indexed (0-11) in JavaScript Date object
+    return new Date(year, month - 1, day);
+};

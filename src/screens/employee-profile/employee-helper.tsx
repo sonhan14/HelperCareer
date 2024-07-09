@@ -39,6 +39,7 @@ export const getDetail = async (employeeID: string, setUser: any, ) => {
     if (snapshot.exists) {
         const doc = snapshot.data();
         const formattedUserData: iUser = {
+            id: employeeID,
             birthday: formatDate(doc?.birthday.toDate()),
             first_name: doc?.first_name,
             last_name: doc?.last_name,
@@ -46,6 +47,7 @@ export const getDetail = async (employeeID: string, setUser: any, ) => {
             introduction: doc?.introduction,
             phone: doc?.phone,
             rating: doc?.rating,
+            email: doc?.email
         };
 
         setUser(formattedUserData);

@@ -63,7 +63,8 @@ export const LoginScreen = () => {
                         introduction: check?.introduction,
                         phone: check?.phone,
                         rating: check?.rating,
-                        role: check?.role
+                        role: check?.role,
+                        email: email
                     };
                     dispatch(setUserData(formattedUserData));
                     navigation.replace('MainTabs', { userId: response.user.uid });

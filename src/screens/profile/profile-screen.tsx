@@ -1,23 +1,21 @@
 import { ActivityIndicator, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RootStackParamList } from "../../navigations/navigation";
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+
 import { useEffect, useLayoutEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
 import { Net_dut } from "../../components/net-dut";
-import Icon from "react-native-vector-icons/FontAwesome";
 import auth from '@react-native-firebase/auth';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import ImagePicker from 'react-native-image-crop-picker';
 import storage from '@react-native-firebase/storage';
-import { iUser } from "../../../types/userType";
 import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
-import { formatDate } from "../../constants/formatDate";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUserData, selectUserData } from "../../redux/user/userSlice";
+import { EditProfile } from "./profile-edit";
 
 
 
@@ -31,7 +29,7 @@ export const ProfileScreen = () => {
     const userData = useSelector(selectUserData);
     const navigation = useNavigation<LoginScreenNavigationProp>();
     const dispatch = useDispatch();
-
+    const [isModal, setIsModal] = useState(false);
     const [image, setImage] = useState({
         avatar: images.avartar_pic,
         cover: images.background_pic,
@@ -42,42 +40,24 @@ export const ProfileScreen = () => {
         coverLoading: false
     });
 
+    const openEdit = () => {
+        if (userData) {
+            setIsModal(true)
+        }
+    }
+
+    const closeEdit = () => {
+            setIsModal(false)
+    }
 
     const handleLogOut = async () => {
-        dispatch(clearUserData());
+        // await dispatch(clearUserData());
         auth()
             .signOut()
             .then(() => {
                 navigation.replace('Login')
             });
     }
-
-    // const getData = async () => {
-    //     setLoading(prev => ({
-    //         ...prev, avatarLoading: true, coverLoading: true
-    //     }))
-    //     const snapshot = await firestore().collection('users').doc(userData?.id).get();
-    //     if (snapshot.exists && userData?.id) {
-    //         const doc = snapshot.data();
-    //         const formattedUserData: iUser = {
-    //             id: userData.id,
-    //             birthday: formatDate(doc?.birthday.toDate()),
-    //             first_name: doc?.first_name,
-    //             last_name: doc?.last_name,
-    //             gender: doc?.gender,
-    //             introduction: doc?.introduction,
-    //             phone: doc?.phone,
-    //             rating: doc?.rating,
-    //             role: doc?.role
-    //         };
-    //         setUser(formattedUserData);
-    //         setLoading(prev => ({
-    //             ...prev, avatarLoading: false, coverLoading: false
-    //         }))
-    //     } else {
-    //         console.log("No user found with the given ID");
-    //     }
-    // };
 
     const getImgae = async () => {
         setLoading(prev => ({
@@ -123,10 +103,8 @@ export const ProfileScreen = () => {
 
 
     useEffect(() => {
-        // getData();
         getImgae()
-
-    }, []);
+    }, [userData]);
 
     const pickImages = async (type: number) => {
         const currentImageState = { ...image };
@@ -197,7 +175,7 @@ export const ProfileScreen = () => {
                 </ScrollView>
             </View>
 
-            <SweepButton onPress={() => { }} iconName="edit" label="Edit Profile" />
+            <SweepButton onPress={() => openEdit()} iconName="edit" label="Edit Profile" />
             <SweepButton onPress={() => { }} iconName="tasks" label="About" />
 
             <View style={styles.logout_container}>
@@ -206,7 +184,7 @@ export const ProfileScreen = () => {
                 </TouchableOpacity>
             </View>
 
-
+            {isModal && userData ? <EditProfile isModal={isModal} userData={userData}  closeModal={closeEdit}/> : null}
             {/* <Net_dut/> */}
         </SafeAreaView>
     );

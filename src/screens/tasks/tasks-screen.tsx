@@ -57,7 +57,6 @@ export const TaskScreen = () => {
         if (!userData) return;
 
         const unsubscribe = fetchTasks(userData.id, setTasksList, setTaskPercent, setTaskDone);
-        console.log(taskDone.length);
 
         return () => unsubscribe();
     }, [userData]);

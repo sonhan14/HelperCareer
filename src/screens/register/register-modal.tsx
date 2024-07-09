@@ -2,10 +2,11 @@ import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, T
 import { images } from "../../images"
 import { layout } from "../../constants/dimensions/dimension"
 import { color } from "../../constants/colors/color"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Animated, { FadeIn } from "react-native-reanimated"
+import Animated, { FadeIn, LightSpeedInRight, LightSpeedOutRight } from "react-native-reanimated"
 import firestore from '@react-native-firebase/firestore';
+import { validateVietnamesePhoneNumber } from "./register-validation"
 
 
 
@@ -16,7 +17,6 @@ type accountInfo = {
     phone: string,
     intro: string,
     gender: string,
-
 }
 
 export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: boolean, userId: string, navigation: any, email: string }) => {
@@ -30,7 +30,7 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
         intro: '',
         gender: '',
     })
-
+    const [isValid, setIsValid] = useState('')
 
 
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -68,6 +68,18 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
             })
     }
 
+    useEffect(() => {
+        if (account.phone) {
+            if (!validateVietnamesePhoneNumber(account.phone)) {
+                setIsValid('Phone number must be VietNamese phone number')
+            } else {
+                setIsValid('')
+            }
+        } else {
+            setIsValid('')
+        }
+    }, [account.phone]);
+
     const isRegister = !account.last_name || !account.first_name || !account.birth_day || !account.intro || !account.phone;
 
     return (
@@ -83,33 +95,36 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
 
                     <View style={styles.hello_container}>
                         <View style={styles.wellcome_container}>
-                            <Text style={styles.text_title}>New Owner</Text>
+                            <Text style={styles.text_title}>You have successfully registered, now let me know some of your information</Text>
                         </View>
                     </View>
 
                     <View style={styles.sign_in_container}>
-                        <View style={styles.input_container}>
-                            <Text style={styles.text_input_blue}>Full Name: </Text>
-                            <View style={styles.name_container}>
-                                <TextInput
-                                    style={[styles.text_input, {width: '40%'}]}
-                                    placeholder="William"
-                                    placeholderTextColor={'#8897AD'}
-                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
-                                    value={account.first_name}
-                                    autoCapitalize='words'
-                                />
-                                <TextInput
-                                    style={[styles.text_input, {width: '40%'}]}
-                                    placeholder="Fang"
-                                    placeholderTextColor={'#8897AD'}
-                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
-                                    value={account.last_name}
-                                    autoCapitalize='words'
-                                />
-                            </View>
-
+                    <View style={[styles.name_input, {height: '13%'}]}>
+                        <View style={styles.first_name_container}>
+                            <Text style={styles.text_name}>First Name: </Text>
+                            <TextInput
+                                style={[styles.text_input]}
+                                placeholder="William"
+                                placeholderTextColor={'#8897AD'}
+                                onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
+                                value={account.first_name}
+                                autoCapitalize='words'
+                            />
                         </View>
+
+                        <View style={styles.first_name_container}>
+                            <Text style={styles.text_name}>Last Name: </Text>
+                            <TextInput
+                                style={[styles.text_input,]}
+                                placeholder="Fang"
+                                placeholderTextColor={'#8897AD'}
+                                onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
+                                value={account.last_name}
+                                autoCapitalize='words'
+                            />
+                        </View>
+                    </View>
 
                         <View style={styles.birthday_container}>
                             <Text style={styles.text_birthday}>Birthday: </Text>
@@ -159,6 +174,18 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                                 keyboardType='numeric'
                             />
                         </View>
+                        {isValid ? (
+                            <Animated.View
+                                entering={LightSpeedInRight.duration(500)}
+                                exiting={LightSpeedOutRight.duration(500)}
+                                >
+                                <Text style={styles.error_text}>{isValid}</Text>
+                            </Animated.View>
+
+                        ) : <Animated.View
+                            entering={LightSpeedInRight.duration(500)}
+                            exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                        }
 
                         <View style={[styles.input_container]}>
                             <Text style={styles.text_input_blue}>Introduce: </Text>
@@ -174,14 +201,12 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                         </View>
                         <TouchableOpacity
                             onPress={() => { handleAddInfo() }}
-                            style={isRegister ? styles.signin_button_disable : styles.signin_button}
+                            style={isRegister || isValid !== ''? styles.signin_button_disable : styles.signin_button}
                             disabled={isRegister}
                         >
                             <Text style={styles.text_button}>Contitnue</Text>
                         </TouchableOpacity>
                     </View>
-
-
                 </View>
             </ScrollView>
 
@@ -192,7 +217,6 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-
     },
     login_image_container: {
         width: layout.width,
@@ -201,6 +225,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10
+    },
+    error_text: {
+        color: 'red',
+        fontSize: 12,
     },
     hello_container: {
         height: layout.height * 0.1,
@@ -220,8 +248,9 @@ const styles = StyleSheet.create({
     },
     text_title: {
         color: color.link_text,
-        fontSize: 30,
-        fontWeight: '500'
+        fontSize: 16,
+        fontWeight: '700',
+        textAlign: 'center'
     },
     sign_in_container: {
         width: layout.width,
@@ -307,10 +336,20 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: color.link_text,
     },
-    name_container: {
+    name_input: {
+        height: '15%',
         width: '100%',
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
+        marginBottom: 10,
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    first_name_container: {
+        height: '100%',
+        width: '45%'
+    },
+    text_name: {
+        color: color.link_text,
+        fontSize: 15,
+        fontWeight: '500',
     }
 })

@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         position: 'absolute',
         right: 1,
-        backgroundColor: 'yellow'
+        backgroundColor: 'red'
     },
     delete_touch: {
         alignItems: 'center',
