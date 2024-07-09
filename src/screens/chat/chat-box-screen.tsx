@@ -11,6 +11,8 @@ import { layout } from "../../constants/dimensions/dimension";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigations/navigation";
 import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import { selectUserData } from "../../redux/user/userSlice";
 type ChatBoxNavigationProp = StackNavigationProp<RootStackParamList>;
 
 type ChatBoxProps = {
@@ -21,7 +23,7 @@ type ChatBoxProps = {
 
 export const ChatBox = ({route} : ChatBoxProps) => {
     const [messages, setMessages] = useState<IMessage[]>([])
-    const currentUser = auth().currentUser
+    const userData = useSelector(selectUserData);
     
     const navigation = useNavigation<ChatBoxNavigationProp>()
     const receiverId = route.params.receiverId
@@ -74,7 +76,7 @@ export const ChatBox = ({route} : ChatBoxProps) => {
                 lastMessageTimestamp: createdAt,
                 members: [
                     receiverId,
-                    currentUser?.uid
+                    userData?.id
                 ]
             })
             .then(newChatRef => {
@@ -112,11 +114,11 @@ export const ChatBox = ({route} : ChatBoxProps) => {
 
         
 
-    }, [chatBoxId, currentUser?.uid, receiverId])
+    }, [chatBoxId, userData, receiverId])
 
     const getImgae = async () => {
 
-        const sender_avatarRef = storage().ref(`users/${currentUser?.uid}/avatar.jpg`);
+        const sender_avatarRef = storage().ref(`users/${userData?.id}/avatar.jpg`);
         try {
             const sender_avatarUrl = await sender_avatarRef.getDownloadURL();
             setImage(prev => ({
@@ -206,7 +208,7 @@ export const ChatBox = ({route} : ChatBoxProps) => {
                 showAvatarForEveryMessage={true}
                 onSend={messages => onSend(messages)}
                 user={{
-                    _id: currentUser?.uid || '',
+                    _id: userData?.id || '',
                     avatar: image.sender_avatar,
                 }}
                 renderSend={renderSend}

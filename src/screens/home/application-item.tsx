@@ -16,7 +16,7 @@ export const EmployeeList = ({ showEmployee, employeeList, handleAction }: Emplo
 
     const renderItem = ({ item }: { item: Applications }) => {
         return (
-            <TouchableOpacity style={styles.employee_container} onPress={() => navigation.navigate('EmployeeProfile', {employeeId: item.user_id})}>
+            <TouchableOpacity style={styles.employee_container} onPress={() => navigation.navigate('EmployeeProfile', { employeeId: item.user_id })}>
                 <View style={styles.image_container}>
                     <Image source={images.avartar_pic} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
                 </View>
@@ -30,18 +30,18 @@ export const EmployeeList = ({ showEmployee, employeeList, handleAction }: Emplo
                     </View>
                     :
                     item.status === 'rejected' ?
-                    <View style={styles.status_container}>
-                        <Text style={styles.text_reject}>Rejected</Text>
-                    </View>
-                    :
-                    <View>
-                        <TouchableOpacity style={styles.button_apply} onPress={() => { handleAction(item, 'accept') }}>
-                            <Text style={styles.text_button}>Accept</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button_reject} onPress={() => { handleAction(item, 'reject') }}>
-                            <Text style={styles.text_button}>Reject</Text>
-                        </TouchableOpacity>
-                    </View>
+                        <View style={styles.status_container}>
+                            <Text style={styles.text_reject}>Rejected</Text>
+                        </View>
+                        :
+                        <View>
+                            <TouchableOpacity style={styles.button_apply} onPress={() => { handleAction(item, 'accept') }}>
+                                <Text style={styles.text_button}>Accept</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button_reject} onPress={() => { handleAction(item, 'reject') }}>
+                                <Text style={styles.text_button}>Reject</Text>
+                            </TouchableOpacity>
+                        </View>
                 }
 
 
@@ -57,12 +57,17 @@ export const EmployeeList = ({ showEmployee, employeeList, handleAction }: Emplo
 
     return (
         <Animated.View style={[styles.employeeListContainer, animatedStyle]}>
-            <FlatList
-                data={employeeList}
-                showsVerticalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                renderItem={(renderItem)}
-            />
+                <FlatList
+                    data={employeeList}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={(item) => item.id}
+                    renderItem={(renderItem)}
+                /> 
+                {/* :
+                <View style={{ height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+
+                    <Text style={{ color: 'red', fontSize: 20, fontWeight: '700' }}>There are no employee apply</Text>
+                </View> */}
         </Animated.View>
     );
 };
@@ -127,7 +132,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700'
     },
-    status_container:{
+    status_container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'

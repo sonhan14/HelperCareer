@@ -16,6 +16,8 @@ import { Applications } from "../../../types/applications.type"
 import { handleChat } from "../employee-profile/employee-helper"
 import auth from '@react-native-firebase/auth';
 import { TaskModal } from "./task-modal"
+import { selectUserData } from "../../redux/user/userSlice"
+import { useSelector } from "react-redux"
 
 type TaskDetailNavigatorProps = {
     route: { params: RootStackParamList['TaskDetail'] };
@@ -31,7 +33,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
     const handleBack = () => {
         navigation.goBack()
     }
-    const currentUser = auth().currentUser
+    const userData = useSelector(selectUserData);
     const [isModal, setIsModal] = useState<boolean>(false)
     const closeModal = () => {
         setIsModal(false)
@@ -54,7 +56,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
     const handleDialogYes = () => {
         if ( actionType) {
             if (actionType === 'finish') {
-                handleFinishTask(handleBack, taskDetail, currentUser?.uid)
+                handleFinishTask(handleBack, taskDetail, userData?.id)
             } else if (actionType === 'delete') {
                 handleDeleteTask(item, handleBack)
             }
@@ -75,7 +77,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
 
     const renderItem = ({ item }: { item: Applications }) => {
         return (
-            <TouchableOpacity style={styles.employee_container} onPress={() => { handleChat(item.user_id, currentUser?.uid, navigation, item.last_name + ' ' + item.first_name) }}>
+            <TouchableOpacity style={styles.employee_container} onPress={() => { handleChat(item.user_id, userData?.id, navigation, item.last_name + ' ' + item.first_name) }}>
                 <View style={styles.image_container}>
                     <Image source={images.avartar_pic} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
                 </View>

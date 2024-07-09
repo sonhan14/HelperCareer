@@ -13,6 +13,8 @@ import { formatDate } from "../../constants/formatDate";
 import { truncateText } from "../../helpers/truncateText";
 import { messagesBox } from "../../../types/messageBox";
 import { MessagesBoxList } from "./chat-box-list";
+import { selectUserData } from "../../redux/user/userSlice";
+import { useSelector } from "react-redux";
 
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -21,7 +23,7 @@ type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 export const ChatScreen = () => {
     const navigation = useNavigation<ChatScreenNavigationProp>()
-    const currentUser = auth().currentUser
+    const userData = useSelector(selectUserData);
     const [boxData, setBoxData] = useState<messagesBox[]>([])
 
     const AvatarFlatlist = () => {
@@ -51,13 +53,13 @@ export const ChatScreen = () => {
     const subscribeToChat = () => {
         const unsubscribe = firestore()
             .collection('chats')
-            .where('members', 'array-contains', currentUser?.uid)
+            .where('members', 'array-contains', userData?.id)
             .onSnapshot(async (querySnapshot) => {
                 const filteredChats: any[] = [];
                 const promises = querySnapshot.docs.map(async (documentSnapshot) => {
                     const data = documentSnapshot.data();
                     const members = data.members;
-                    const receive_id = members.filter((member: any) => member !== currentUser?.uid);
+                    const receive_id = members.filter((member: any) => member !== userData?.id);
                     const avatarRef = storage().ref(`users/${receive_id[0]}/avatar.jpg`);
                     let avatarDownloadUrl;
                     try {
@@ -89,12 +91,12 @@ export const ChatScreen = () => {
     };
 
     useEffect(() => {
-        if (currentUser) {
+        if (userData) {
             const unsubscribe = subscribeToChat();
             return () => unsubscribe();
             
         }
-    }, [currentUser]);
+    }, [userData]);
 
     const goToChat = (receiverId: string, chatBoxId: string, receiverName: string) => {
         navigation.navigate('ChatBox', {receiverId: receiverId, chatId: chatBoxId, receiverName: receiverName})

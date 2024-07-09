@@ -15,6 +15,8 @@ import { images } from "../../images";
 import { KeyboardAvoidingView } from "react-native";
 import { Task, TaskType } from "../../../types/taskType";
 import { AddNew } from "./task-helper";
+import { selectUserData } from "../../redux/user/userSlice";
+import { useSelector } from "react-redux";
 
 
 
@@ -28,7 +30,7 @@ interface Feature {
 
 
 export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, closeModal: () => void, item: TaskType | null }) => {
-    const currentUser = auth().currentUser
+    const userData = useSelector(selectUserData);
     const [loading, setLoading] = useState<boolean>(false)
     const [showDatePicker, setShowDatePicker] = useState({
         showStartDate: false,
@@ -55,7 +57,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
     const initialTaskData: Task = {
         task_name: '',
         task_description: '',
-        user_id: currentUser?.uid,
+        user_id: userData?.id,
         location: new GeoPoint(0, 0),
         status: 'process',
         start_date: new Date(),
@@ -66,7 +68,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
     const [taskItem, setTaskItem] = useState<Task>(item === null ? initialTaskData : {
         task_name: item.task_name,
         task_description: item.task_des,
-        user_id: currentUser?.uid,
+        user_id: userData?.id,
         location: new GeoPoint(item.latitude, item.longitude),
         status: item.status,
         start_date: new Date(item.start_date),
@@ -328,7 +330,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                     {item === null ?
                     <CustomButton
                     title="Add New Task"
-                    onPress={() => { AddNew(selectedLocation, taskItem, currentUser?.uid, handleBack, null, handleLoading) }}
+                    onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, null, handleLoading) }}
                     style={styles.add_button}
                     disabled={isAddNew}
                     disabledStyle={styles.add_button_disable}
@@ -337,7 +339,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                 :
                 <CustomButton
                         title="Edit This Task"
-                        onPress={() => { AddNew(selectedLocation, taskItem, currentUser?.uid, handleBack, item.id, handleLoading) }}
+                        onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, item.id, handleLoading) }}
                         style={styles.add_button}
                         disabled={isAddNew}
                         disabledStyle={styles.add_button_disable}

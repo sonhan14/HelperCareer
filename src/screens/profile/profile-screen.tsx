@@ -16,6 +16,8 @@ import { iUser } from "../../../types/userType";
 import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
 import { formatDate } from "../../constants/formatDate";
+import { useDispatch, useSelector } from "react-redux";
+import { clearUserData, selectUserData } from "../../redux/user/userSlice";
 
 
 
@@ -26,9 +28,10 @@ type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 
 export const ProfileScreen = () => {
-    const userID = auth().currentUser?.uid
-    const [user, setUser] = useState<iUser | null>(null);
+    const userData = useSelector(selectUserData);
     const navigation = useNavigation<LoginScreenNavigationProp>();
+    const dispatch = useDispatch();
+
     const [image, setImage] = useState({
         avatar: images.avartar_pic,
         cover: images.background_pic,
@@ -41,6 +44,7 @@ export const ProfileScreen = () => {
 
 
     const handleLogOut = async () => {
+        dispatch(clearUserData());
         auth()
             .signOut()
             .then(() => {
@@ -48,32 +52,32 @@ export const ProfileScreen = () => {
             });
     }
 
-    const getData = async () => {
-
-        setLoading(prev => ({
-            ...prev, avatarLoading: true, coverLoading: true
-        }))
-        const snapshot = await firestore().collection('users').doc(userID).get();
-        if (snapshot.exists) {
-            const doc = snapshot.data();
-            const formattedUserData: iUser = {
-                birthday: formatDate(doc?.birthday.toDate()),
-                first_name: doc?.first_name,
-                last_name: doc?.last_name,
-                gender: doc?.gender,
-                introduction: doc?.introduction,
-                phone: doc?.phone,
-                rating: doc?.rating,
-                role: doc?.role
-            };
-            setUser(formattedUserData);
-            setLoading(prev => ({
-                ...prev, avatarLoading: false, coverLoading: false
-            }))
-        } else {
-            console.log("No user found with the given ID");
-        }
-    };
+    // const getData = async () => {
+    //     setLoading(prev => ({
+    //         ...prev, avatarLoading: true, coverLoading: true
+    //     }))
+    //     const snapshot = await firestore().collection('users').doc(userData?.id).get();
+    //     if (snapshot.exists && userData?.id) {
+    //         const doc = snapshot.data();
+    //         const formattedUserData: iUser = {
+    //             id: userData.id,
+    //             birthday: formatDate(doc?.birthday.toDate()),
+    //             first_name: doc?.first_name,
+    //             last_name: doc?.last_name,
+    //             gender: doc?.gender,
+    //             introduction: doc?.introduction,
+    //             phone: doc?.phone,
+    //             rating: doc?.rating,
+    //             role: doc?.role
+    //         };
+    //         setUser(formattedUserData);
+    //         setLoading(prev => ({
+    //             ...prev, avatarLoading: false, coverLoading: false
+    //         }))
+    //     } else {
+    //         console.log("No user found with the given ID");
+    //     }
+    // };
 
     const getImgae = async () => {
         setLoading(prev => ({
@@ -83,7 +87,7 @@ export const ProfileScreen = () => {
         setLoading(prev => ({
             ...prev, coverLoading: true
         }))
-        const avatarRef = storage().ref(`users/${userID}/avatar.jpg`);
+        const avatarRef = storage().ref(`users/${userData?.id}/avatar.jpg`);
         try {
             const avatarDownloadUrl = await avatarRef.getDownloadURL();
             setImage(prev => ({
@@ -96,7 +100,7 @@ export const ProfileScreen = () => {
             }));
         }
 
-        const coverRef = storage().ref(`users/${userID}/cover.jpg`);
+        const coverRef = storage().ref(`users/${userData?.id}/cover.jpg`);
         try {
             const coverDownloadUrl = await coverRef.getDownloadURL();
             setImage(prev => ({
@@ -119,7 +123,7 @@ export const ProfileScreen = () => {
 
 
     useEffect(() => {
-        getData();
+        // getData();
         getImgae()
 
     }, []);
@@ -149,7 +153,7 @@ export const ProfileScreen = () => {
                 const uploadUri = Platform.OS === 'ios' ? imagePath.replace('file://', '') : imagePath;
                 const fileName = type === 0 ? 'avatar.jpg' : 'cover.jpg';
 
-                const storageRef = storage().ref(`users/${userID}/${fileName}`);
+                const storageRef = storage().ref(`users/${userData?.id}/${fileName}`);
                 await storageRef.putFile(uploadUri);
 
             }
@@ -165,7 +169,7 @@ export const ProfileScreen = () => {
                 image={image}
                 loading={loading}
                 pickImages={pickImages}
-                user={user}
+                user={userData}
                 isEditable={true}
             />
             <View style={styles.review_container}>
@@ -179,7 +183,7 @@ export const ProfileScreen = () => {
                 </View>
                 <View style={styles.task_container}>
                     <Text style={styles.task_number}>
-                        {user?.rating.toFixed(1)}
+                        {userData?.rating.toFixed(1)}
                     </Text>
                     <Text style={styles.task_title}>
                         Rating Review
@@ -189,7 +193,7 @@ export const ProfileScreen = () => {
 
             <View style={styles.intro_container}>
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <Text style={[styles.text_15, {textAlign: 'justify'}]}>{user?.introduction}</Text>
+                    <Text style={[styles.text_15, {textAlign: 'justify'}]}>{userData?.introduction}</Text>
                 </ScrollView>
             </View>
 

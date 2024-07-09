@@ -1,4 +1,5 @@
 export type iUser = {
+    id: string,
     birthday: string;
     first_name: string;
     last_name: string;

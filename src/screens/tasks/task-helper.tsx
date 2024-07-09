@@ -4,10 +4,10 @@ import { Task, TaskType } from '../../../types/taskType';
 
 
 
-export const fetchTasks = (currentUser: any, setTasksList: any, setTaskPercent: any, setTaskDone: any) => {
+export const fetchTasks = (userId: string, setTasksList: any, setTaskPercent: any, setTaskDone: any) => {
     const unsubscribeTasks = firestore()
         .collection('tasks')
-        .where('user_id', '==', currentUser?.uid)
+        .where('user_id', '==', userId)
         .onSnapshot(async (taskQuerySnapshot) => {
             const tasksList: TaskType[] = [];
 

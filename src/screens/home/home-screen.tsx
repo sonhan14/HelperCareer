@@ -14,6 +14,8 @@ import { TaskInfo } from "./task-info";
 import { fetchApplication, fetchUserLocations } from "./home-helper";
 import { TaskType } from "../../../types/taskType";
 import { formatDate } from "../../constants/formatDate";
+import { useSelector } from "react-redux";
+import { selectUserData } from "../../redux/user/userSlice";
 
 
 
@@ -26,18 +28,17 @@ export const HomeScreen = () => {
     const [taskGeoJsonData, setTaskGeoJsonData] = useState<any>(null);
     const [query, setQuery] = useState<string>('');
     const [isModal, setIsModal] = useState<boolean>(false);
-    const currentUser = auth().currentUser
     const [currentTask, setCurrentTask] = useState<TaskType>()
     const [applicationList, setApplicationList] = useState<any>(null)
-    
+    const userData = useSelector(selectUserData);
 
     useEffect(() => {
-        if (!currentUser?.uid) return;
+        if (!userData) return;
 
-        const unsubscribe = fetchUserLocations(currentUser, setGeoJsonData, setTaskGeoJsonData);
+        const unsubscribe = fetchUserLocations(userData.id, setGeoJsonData, setTaskGeoJsonData);
         
         return () => unsubscribe();
-    }, [currentUser]);
+    }, [userData]);
 
 
     const handleOpenEmployee = (event: any): void => {
@@ -65,7 +66,7 @@ export const HomeScreen = () => {
     }
 
 
-    if (!currentUser) {
+    if (!userData) {
         navigation.replace('Login')
     }
     else {

@@ -5,7 +5,7 @@ import { TaskType } from '../../../types/taskType';
 import { Applications } from '../../../types/applications.type';
 
 
-export const fetchUserLocations = (currentUser: any, setGeoJsonData: any, setTaskGeoJsonData: any) => {
+export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskGeoJsonData: any) => {
     const unsubscribeUsers = firestore()
         .collection('users')
         .where('role', '==', 'employee')
@@ -33,7 +33,7 @@ export const fetchUserLocations = (currentUser: any, setGeoJsonData: any, setTas
 
     const unsubscribeTasks = firestore()
         .collection('tasks')
-        .where('user_id', '==', currentUser?.uid)
+        .where('user_id', '==', userID)
         .onSnapshot(async (taskQuerySnapshot) => {
             const taskLocations: TaskType[] = [];
 

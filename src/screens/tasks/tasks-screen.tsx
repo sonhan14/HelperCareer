@@ -11,6 +11,8 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { Task, TaskType } from "../../../types/taskType"
 import { fetchTasks } from "./task-helper"
+import { useSelector } from "react-redux"
+import { selectUserData } from "../../redux/user/userSlice"
 
 const AnimatedCicle = Animated.createAnimatedComponent(Circle)
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -22,7 +24,7 @@ export const TaskScreen = () => {
     const onChangeSearch = (query: string) => setSearchQuery(query);
     const [isFocused, setIsFocused] = useState(false);
     const searchbarRef = useRef<React.ElementRef<typeof Searchbar>>(null);
-    const currentUser = auth().currentUser
+    const userData = useSelector(selectUserData);
 
     const radius = 45;
     const circumference = radius * Math.PI * 2;
@@ -52,13 +54,13 @@ export const TaskScreen = () => {
 
 
     useEffect(() => {
-        if (!currentUser?.uid) return;
+        if (!userData) return;
 
-        const unsubscribe = fetchTasks(currentUser, setTasksList, setTaskPercent, setTaskDone);
+        const unsubscribe = fetchTasks(userData.id, setTasksList, setTaskPercent, setTaskDone);
         console.log(taskDone.length);
 
         return () => unsubscribe();
-    }, [currentUser]);
+    }, [userData]);
 
 
     const onFocus = () => setIsFocused(true);

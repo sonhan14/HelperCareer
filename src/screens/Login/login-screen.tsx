@@ -12,6 +12,8 @@ import { CustomButton } from "../../components/custom-button";
 import firestore from '@react-native-firebase/firestore';
 import { iUser } from "../../../types/userType";
 import { formatDate } from "../../constants/formatDate";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../../redux/user/userSlice";
 
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -25,7 +27,8 @@ export const LoginScreen = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false)
-    const [checkUser, setCheckUSer] = useState<iUser>();
+    const dispatch = useDispatch();
+    
     useEffect(() => {
         if (notificationVisible) {
             setTimeout(() => {
@@ -48,8 +51,21 @@ export const LoginScreen = () => {
             if (response?.user) {
                 const currentUser = await firestore().collection('users').doc(response.user.uid).get()
                 const check = currentUser.data()
+                
                 if(check?.role === 'Owner')
                 {
+                    const formattedUserData: iUser = {
+                        id: response.user.uid,
+                        birthday: formatDate(check?.birthday.toDate()),
+                        first_name: check?.first_name,
+                        last_name: check?.last_name,
+                        gender: check?.gender,
+                        introduction: check?.introduction,
+                        phone: check?.phone,
+                        rating: check?.rating,
+                        role: check?.role
+                    };
+                    dispatch(setUserData(formattedUserData));
                     navigation.replace('MainTabs', { userId: response.user.uid });
                 }
                 else{

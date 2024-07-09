@@ -5,6 +5,8 @@ import { StatusBar } from 'react-native';
 import AppNavigator from './src/navigations/AppNavigator';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Provider } from 'react-redux';
+import { store } from './src/redux/store';
 
 
 
@@ -13,9 +15,11 @@ enableScreens();
 
 const App: React.FC = () => {
   return (
-<GestureHandlerRootView style={{ flex: 1 }}>
-    <AppNavigator />
-    </GestureHandlerRootView>
+    <Provider store={store}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <AppNavigator />
+      </GestureHandlerRootView>
+    </Provider>
   );
 };
 
