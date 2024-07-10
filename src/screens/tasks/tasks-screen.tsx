@@ -21,7 +21,6 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 export const TaskScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const onChangeSearch = (query: string) => setSearchQuery(query);
     const [isFocused, setIsFocused] = useState(false);
     const searchbarRef = useRef<React.ElementRef<typeof Searchbar>>(null);
     const userData = useSelector(selectUserData);
@@ -34,6 +33,7 @@ export const TaskScreen = () => {
     const [isModal, setIsModal] = useState<boolean>(false)
 
     const [tasksList, setTasksList] = useState<TaskType[]>([]);
+    const [tasksListFillter, setTasksListFillter] = useState<TaskType[]>([]);
     const [taskDone, setTaskDone] = useState<TaskType[]>([]);
 
     const [taskPercent, setTaskPercent] = useState({
@@ -103,6 +103,18 @@ export const TaskScreen = () => {
         setIsModal(false)
     }
 
+    useEffect(() => {
+        setTasksListFillter(tasksList);
+    }, [tasksList]);
+
+    const handleSearch = (text: string) => {
+        setSearchQuery(text);
+        const filteredList = tasksList.filter(task =>
+            `${task.task_name}`.toLowerCase().includes(text.toLowerCase())
+        );
+        setTasksListFillter(filteredList);
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.main_container}>
@@ -120,7 +132,7 @@ export const TaskScreen = () => {
                         }}
                         ref={searchbarRef}
                         iconColor={'black'}
-                        onChangeText={onChangeSearch}
+                        onChangeText={handleSearch}
                         value={searchQuery}
                         placeholder={isFocused ? '' : "Browse your name task..."}
                         style={styles.search_bar}
@@ -180,7 +192,7 @@ export const TaskScreen = () => {
                 <View style={styles.list_container}>
                     <FlatList
                         // style={{ backgroundColor: color.light_background }}
-                        data={tasksList}
+                        data={tasksListFillter}
                         renderItem={({ item }) => <TaskItem item={item} />}
                         keyExtractor={(item) => item.id}
                         showsVerticalScrollIndicator={false}

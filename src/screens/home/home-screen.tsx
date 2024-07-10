@@ -4,18 +4,21 @@ import { useEffect, useState } from "react";
 import { RootStackParamList, RootTabParamList } from "../../navigations/navigation";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import Mapbox, { Image, Images, LocationPuck, ShapeSource, SymbolLayer } from '@rnmapbox/maps';
-import { getDistance, getPreciseDistance } from 'geolib';
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
 import { StackNavigationProp } from "@react-navigation/stack";
-import axios from 'axios';
-import auth from '@react-native-firebase/auth';
+
 import { TaskInfo } from "./task-info";
-import { fetchApplication, fetchUserLocations } from "./home-helper";
+import { fetchApplication, fetchEmployee, fetchUserLocations } from "./home-helper";
 import { TaskType } from "../../../types/taskType";
-import { formatDate } from "../../constants/formatDate";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
+import { iUser } from "../../../types/userType";
+import Animated, { interpolate, interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { color } from "../../constants/colors/color";
+import { EmployeeListHome } from "./employee-list";
+import { useEmployee } from "../../context/EmployeeContext";
 
 
 
@@ -26,19 +29,29 @@ export const HomeScreen = () => {
     const navigation = useNavigation<HomeScreenRouteProp>()
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [taskGeoJsonData, setTaskGeoJsonData] = useState<any>(null);
-    const [query, setQuery] = useState<string>('');
+    const [employeeList, setEmployeeList] = useState<iUser[]>()
+
     const [isModal, setIsModal] = useState<boolean>(false);
     const [currentTask, setCurrentTask] = useState<TaskType>()
     const [applicationList, setApplicationList] = useState<any>(null)
     const userData = useSelector(selectUserData);
 
+    const { isEmployee, setIsEmployee } = useEmployee();
+
     useEffect(() => {
         if (!userData) return;
 
         const unsubscribe = fetchUserLocations(userData.id, setGeoJsonData, setTaskGeoJsonData);
-        
-        return () => unsubscribe();
+        const unsubscribeEmployee = fetchEmployee(setEmployeeList);
+        return () => {
+            unsubscribeEmployee();
+            unsubscribe();
+        }
     }, [userData]);
+
+    const animationHandle = () => {
+        setIsEmployee(isEmployee === 0 ? 1 : 0)
+    }
 
 
     const handleOpenEmployee = (event: any): void => {
@@ -58,7 +71,7 @@ export const HomeScreen = () => {
             setCurrentTask(item)
             setIsModal(true)
         }
-        
+
     }
 
     const handleCloseModal = () => {
@@ -73,12 +86,12 @@ export const HomeScreen = () => {
         return (
             <View style={styles.page}>
                 <View style={styles.container}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Search for an address"
-                        value={query}
-                        onChangeText={() => { }}
-                    />
+                    {employeeList ?
+                        <EmployeeListHome isEmployee={isEmployee} animationHandle={animationHandle} employeeList={employeeList} naigation={navigation}/>
+                        : 
+                        null
+                    }
+
 
                     <Mapbox.MapView style={styles.map} >
                         <Mapbox.Camera
@@ -121,7 +134,7 @@ export const HomeScreen = () => {
                         )}
                     </Mapbox.MapView>
                 </View>
-                <TaskInfo isOpen={isModal} setClose={handleCloseModal} item={currentTask} applicationList={applicationList}/>
+                <TaskInfo isOpen={isModal} setClose={handleCloseModal} item={currentTask} applicationList={applicationList} />
             </View>
         )
     }
@@ -139,25 +152,15 @@ const styles = StyleSheet.create({
         height: layout.height,
         width: layout.width,
         position: 'relative'
-
     },
     map: {
         flex: 1,
     },
-    input: {
-        height: 40,
-        width: layout.width,
-        borderColor: '#ddd',
-        borderWidth: 1,
-        paddingHorizontal: 8,
-        marginBottom: 16,
-        position: 'absolute',
-        zIndex: 1,
-        backgroundColor: 'white'
-    },
+
     item: {
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
+
 })

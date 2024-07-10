@@ -3,6 +3,8 @@ import firestore from '@react-native-firebase/firestore';
 import { Location } from '../../../types/homeTypes';
 import { TaskType } from '../../../types/taskType';
 import { Applications } from '../../../types/applications.type';
+import { iUser } from '../../../types/userType';
+import { formatDate } from '../../constants/formatDate';
 
 
 export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskGeoJsonData: any) => {
@@ -152,4 +154,35 @@ export const hanleRejected = (item: Applications) => {
         ...itemWithoutId,
         status: 'rejected'
     })
+}
+
+export const fetchEmployee = (setEmployeeList: any) => {
+    const unsubscribeEmployee = firestore().collection('users')
+                                .where('role', '==', 'employee')
+                                .onSnapshot(async (querySnapshot) => {
+                                    const employeeList: iUser[] = [];
+
+                                    querySnapshot.forEach(doc => {
+                                        const data = doc.data()
+                                        if (data) {
+                                            const formattedUserData: iUser = {
+                                                id: doc.id,
+                                                birthday: formatDate(data.birthday.toDate()),
+                                                first_name: data.first_name,
+                                                last_name: data.last_name,
+                                                gender: data.gender,
+                                                introduction: "Helo my name is " + data.first_name,
+                                                phone: data.phone,
+                                                rating: data.rating,
+                                                role: data.role,
+                                                email: data.email
+                                            };
+                                            employeeList.push(formattedUserData)
+                                        }
+                                    })
+                                    setEmployeeList(employeeList)
+                                })
+                                return () => {
+                                    unsubscribeEmployee();
+                                };
 }

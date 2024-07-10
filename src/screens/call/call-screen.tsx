@@ -1,5 +1,4 @@
 import { CallContent, StreamCall, StreamVideo, StreamVideoClient, User } from "@stream-io/video-react-native-sdk";
-import { View } from "react-native"
 
 export const CallScreen = () => {
 

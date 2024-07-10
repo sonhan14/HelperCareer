@@ -1,11 +1,10 @@
-import { ActivityIndicator, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RootStackParamList } from "../../navigations/navigation";
 
 import { useEffect, useLayoutEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
-import { Net_dut } from "../../components/net-dut";
 import auth from '@react-native-firebase/auth';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
@@ -14,7 +13,7 @@ import storage from '@react-native-firebase/storage';
 import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
 import { useDispatch, useSelector } from "react-redux";
-import { clearUserData, selectUserData } from "../../redux/user/userSlice";
+import {selectUserData } from "../../redux/user/userSlice";
 import { EditProfile } from "./profile-edit";
 
 
@@ -28,7 +27,6 @@ type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 export const ProfileScreen = () => {
     const userData = useSelector(selectUserData);
     const navigation = useNavigation<LoginScreenNavigationProp>();
-    const dispatch = useDispatch();
     const [isModal, setIsModal] = useState(false);
     const [image, setImage] = useState({
         avatar: images.avartar_pic,
