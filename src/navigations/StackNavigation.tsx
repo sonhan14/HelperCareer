@@ -16,8 +16,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export function StackNavigator() {
     const user = useSelector(selectUserData)
-    console.log(user);
-    
+
 
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>

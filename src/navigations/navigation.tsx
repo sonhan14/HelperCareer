@@ -2,12 +2,19 @@ import { TaskType } from "../../types/taskType";
 
 export type RootStackParamList = {
     Login: undefined;
-    MainTabs: { userId: string };
+    MainTabs: undefined;
     Register: undefined,
-    ChatBox: {receiverId: string, chatId: string, receiverName: string},
-    EmployeeProfile: {employeeId: string,},
-    TaskDetail: {TaskId: string},
-    CallScreen: undefined,
+    ChatBox: {
+        receiverId: string,
+        chatId: string,
+        receiverName: string
+    },
+    EmployeeProfile: { employeeId: string, },
+    TaskDetail: { TaskId: string },
+    CallScreen: {
+        receiverId: string,
+        receiverName: string
+    },
 };
 
 export type RootTabParamList = {

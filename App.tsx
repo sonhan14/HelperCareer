@@ -16,9 +16,9 @@ enableScreens();
 const App: React.FC = () => {
   return (
     <Provider store={store}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <AppNavigator />
-        </GestureHandlerRootView>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <AppNavigator />
+      </GestureHandlerRootView>
     </Provider>
   );
 };

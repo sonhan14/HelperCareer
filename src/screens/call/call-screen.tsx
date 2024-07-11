@@ -1,72 +1,60 @@
-import { CallContent, StreamCall, StreamVideo, StreamVideoClient, User } from "@stream-io/video-react-native-sdk";
-import base64url from "base64url";
-import CryptoJS from 'crypto-js';
+import { Call, CallContent, StreamCall, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { generateRandomId } from "../../helpers/randomId";
+import { RootStackParamList } from "../../navigations/navigation";
 
-interface JWTPayload {
-    user_id: string;
-    name: string;
-    exp: number;
-}
+type ChatBoxProps = {
+    route: { params: RootStackParamList['CallScreen'] };
+};
 
-export const CallScreen = () => {
+export const CallScreen = ({ route }: ChatBoxProps) => {
+    const receiverId = route.params.receiverId;
+    const receiverName = route.params.receiverName;
     const currentUser = useSelector(selectUserData);
-    const apiKey = '9puabwjb5p2p';
-    const userId = currentUser?.id;
-    const callId = 'default_3f595617-07a3-4f70-9f0f-7a898e85b455';
 
-    const [token, setToken] = useState<string>('');
-    const [client, setClient] = useState<StreamVideoClient | null>(null);
-    const [call, setCall] = useState<any>(null);
+    if (!currentUser) {
+        return null;
+    }
 
-    const createJWT = (payload: JWTPayload, secretKey: string): string => {
-        const header = {
-            alg: 'HS256',
-            typ: 'JWT'
-        };
+    const userId = currentUser.id;
+    const callId = generateRandomId();
+    const client = useStreamVideoClient();
+    const [call, setCall] = useState<Call | null>(null);
 
-        const encodedHeader = base64url.encode(JSON.stringify(header));
-        const encodedPayload = base64url.encode(JSON.stringify(payload));
-
-        const data = `${encodedHeader}.${encodedPayload}`;
-        const signature = base64url.encode(CryptoJS.HmacSHA256(data, secretKey).toString(CryptoJS.enc.Base64));
-
-        return `${data}.${signature}`;
-    };
 
     useEffect(() => {
-        if (userId) {
-            const payload: JWTPayload = {
-                user_id: userId,
-                name: currentUser.last_name + ' ' + currentUser.first_name,
-                exp: Math.floor(Date.now() / 1000) + (60 * 10)
-
-            };
-
-            const secretKey = 'xs93ftx87nujrm35z6eat7uzge5jky74hcby9umye2g4sdcdurkc25hmj8jf3gak';
-
+        const handleCall = async () => {
+            if (!client) return;
+            const newCall = client.call('default', callId);
             try {
-                const token = createJWT(payload, secretKey);
-                setToken(token);
-
-                const user: User = { id: userId, name: currentUser.last_name + ' ' + currentUser.first_name, };
-
-                const client = new StreamVideoClient({ apiKey, user, token });
-                const call = client.call('default', callId);
-                call.join({ create: true });
-
-                setClient(client);
-                setCall(call);
+                await newCall.getOrCreate({
+                    data: {
+                        members: [
+                            { user_id: receiverId },
+                            { user_id: userId }
+                        ]
+                    }
+                });
+                await newCall.join({ create: true });
+                setCall(newCall);
             } catch (error) {
-                console.error('Error creating JWT:', error);
+                console.error("Error creating or joining the call", error);
             }
-        }
-    }, [userId]);
+        };
 
-    if (!client || !call) {
+        handleCall();
+
+        return () => {
+            if (call) {
+                call.leave();
+            }
+        };
+    }, [client]);
+
+    if (!call) {
         return (
             <View style={styles.container}>
                 <Text style={styles.text}>Joining call...</Text>
@@ -75,11 +63,9 @@ export const CallScreen = () => {
     }
 
     return (
-        <StreamVideo client={client}>
-            <StreamCall call={call}>
-                <CallContent />
-            </StreamCall>
-        </StreamVideo>
+        <StreamCall call={call}>
+            <CallContent />
+        </StreamCall>
     );
 };
 

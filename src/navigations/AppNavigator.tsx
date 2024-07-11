@@ -11,6 +11,7 @@ import { iUser } from '../../types/userType';
 import { formatDate } from '../constants/formatDate';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../redux/user/userSlice';
+import VideoProvider from '../context/videoContext';
 
 // const MyTheme: Theme = {
 //     ...DefaultTheme,
@@ -81,9 +82,11 @@ export default function AppNavigator() {
     }
     return (
         <EmployeeProvider>
-        <NavigationContainer>
-            <StackNavigator />
-        </NavigationContainer>
+            <VideoProvider>
+                <NavigationContainer>
+                    <StackNavigator />
+                </NavigationContainer>
+            </VideoProvider>
         </EmployeeProvider>
     );
 }
