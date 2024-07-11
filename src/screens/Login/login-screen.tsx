@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Image, Text, TextInput, TouchableOpacity, View } from "react-native"
 import auth, { firebase, FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { images } from "../../images";
@@ -14,6 +14,7 @@ import { iUser } from "../../../types/userType";
 import { formatDate } from "../../constants/formatDate";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../../redux/user/userSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -28,7 +29,7 @@ export const LoginScreen = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false)
     const dispatch = useDispatch();
-    
+
     useEffect(() => {
         if (notificationVisible) {
             setTimeout(() => {
@@ -51,9 +52,7 @@ export const LoginScreen = () => {
             if (response?.user) {
                 const currentUser = await firestore().collection('users').doc(response.user.uid).get()
                 const check = currentUser.data()
-                
-                if(check?.role === 'Owner')
-                {
+                if (check?.role === 'Owner') {
                     const formattedUserData: iUser = {
                         id: response.user.uid,
                         birthday: formatDate(check?.birthday.toDate()),
@@ -67,9 +66,10 @@ export const LoginScreen = () => {
                         email: email
                     };
                     dispatch(setUserData(formattedUserData));
-                    navigation.replace('MainTabs', { userId: response.user.uid });
+                    await AsyncStorage.setItem('userEmail', email);
+                    await AsyncStorage.setItem('userPassword', password);
                 }
-                else{
+                else {
                     setErrorMessage('You do not have permission!!');
                     setNotificationVisible(true);
                     auth().signOut()
@@ -77,14 +77,14 @@ export const LoginScreen = () => {
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
-                switch (error.code) {
-                    case 'auth/invalid-credential':
-                        setErrorMessage('Incorrect email or password.');
-                        break;
-                    default:
-                        setErrorMessage('An unknown error occurred. Please try again.');
-                }
-            
+            switch (error.code) {
+                case 'auth/invalid-credential':
+                    setErrorMessage('Incorrect email or password.');
+                    break;
+                default:
+                    setErrorMessage('An unknown error occurred. Please try again.');
+            }
+
             setNotificationVisible(true);
             console.log(error.message);
         } finally {
@@ -99,7 +99,6 @@ export const LoginScreen = () => {
             <View style={login_styles.login_image_container}>
                 <Image source={images.wellcome_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
             </View>
-
             <View style={login_styles.hello_container}>
                 <View style={login_styles.wellcome_container}>
                     <Text style={login_styles.text_title}>Wellcome Back</Text>

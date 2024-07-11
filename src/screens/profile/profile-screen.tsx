@@ -13,8 +13,9 @@ import storage from '@react-native-firebase/storage';
 import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
 import { useDispatch, useSelector } from "react-redux";
-import {selectUserData } from "../../redux/user/userSlice";
+import { clearUserData, selectUserData } from "../../redux/user/userSlice";
 import { EditProfile } from "./profile-edit";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
@@ -32,7 +33,7 @@ export const ProfileScreen = () => {
         avatar: images.avartar_pic,
         cover: images.background_pic,
     })
-
+    const dispatch =useDispatch()
     const [loading, setLoading] = useState({
         avatarLoading: false,
         coverLoading: false
@@ -45,17 +46,22 @@ export const ProfileScreen = () => {
     }
 
     const closeEdit = () => {
-            setIsModal(false)
+        setIsModal(false)
     }
 
     const handleLogOut = async () => {
-        // await dispatch(clearUserData());
-        auth()
-            .signOut()
-            .then(() => {
-                navigation.replace('Login')
-            });
-    }
+        try {
+            await Promise.all([
+                AsyncStorage.removeItem('userEmail'),
+                AsyncStorage.removeItem('userPassword'),
+                dispatch(clearUserData()),
+                auth().signOut()
+            ]);
+            console.log('Logged out successfully!');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
 
     const getImgae = async () => {
         setLoading(prev => ({
@@ -169,7 +175,7 @@ export const ProfileScreen = () => {
 
             <View style={styles.intro_container}>
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <Text style={[styles.text_15, {textAlign: 'justify'}]}>{userData?.introduction}</Text>
+                    <Text style={[styles.text_15, { textAlign: 'justify' }]}>{userData?.introduction}</Text>
                 </ScrollView>
             </View>
 
@@ -182,7 +188,7 @@ export const ProfileScreen = () => {
                 </TouchableOpacity>
             </View>
 
-            {isModal && userData ? <EditProfile isModal={isModal} userData={userData}  closeModal={closeEdit}/> : null}
+            {isModal && userData ? <EditProfile isModal={isModal} userData={userData} closeModal={closeEdit} /> : null}
             {/* <Net_dut/> */}
         </SafeAreaView>
     );

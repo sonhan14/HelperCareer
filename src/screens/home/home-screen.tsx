@@ -7,14 +7,12 @@ import Mapbox, { Image, Images, LocationPuck, ShapeSource, SymbolLayer } from '@
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 import { TaskInfo } from "./task-info";
 import { fetchApplication, fetchEmployee, fetchUserLocations } from "./home-helper";
 import { TaskType } from "../../../types/taskType";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
 import { iUser } from "../../../types/userType";
-import Animated, { interpolate, interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { color } from "../../constants/colors/color";
 import { EmployeeListHome } from "./employee-list";
@@ -30,7 +28,6 @@ export const HomeScreen = () => {
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [taskGeoJsonData, setTaskGeoJsonData] = useState<any>(null);
     const [employeeList, setEmployeeList] = useState<iUser[]>()
-
     const [isModal, setIsModal] = useState<boolean>(false);
     const [currentTask, setCurrentTask] = useState<TaskType>()
     const [applicationList, setApplicationList] = useState<any>(null)
@@ -42,7 +39,8 @@ export const HomeScreen = () => {
         if (!userData) return;
 
         const unsubscribe = fetchUserLocations(userData.id, setGeoJsonData, setTaskGeoJsonData);
-        const unsubscribeEmployee = fetchEmployee(setEmployeeList);
+        const unsubscribeEmployee = fetchEmployee(setEmployeeList)
+        
         return () => {
             unsubscribeEmployee();
             unsubscribe();
@@ -77,12 +75,6 @@ export const HomeScreen = () => {
     const handleCloseModal = () => {
         setIsModal(false)
     }
-
-
-    if (!userData) {
-        navigation.replace('Login')
-    }
-    else {
         return (
             <View style={styles.page}>
                 <View style={styles.container}>
@@ -137,7 +129,7 @@ export const HomeScreen = () => {
                 <TaskInfo isOpen={isModal} setClose={handleCloseModal} item={currentTask} applicationList={applicationList} />
             </View>
         )
-    }
+
 
 }
 

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store'; // Đường dẫn tới file rootReducer của bạn
-import { iUser } from '../../../types/userType'; // Đường dẫn đến kiểu dữ liệu của bạn
+import { RootState } from '../store'; 
+import { iUser } from '../../../types/userType';
 
 interface UserState {
     userData: iUser | null;
@@ -27,5 +27,5 @@ export const { setUserData, clearUserData } = userSlice.actions;
 
 export default userSlice.reducer;
 
-// Selector để lấy userData từ store
+
 export const selectUserData = (state: RootState) => state.user.userData;
