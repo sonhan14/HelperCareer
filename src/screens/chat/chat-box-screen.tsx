@@ -1,6 +1,6 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Image, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import React, { useState, useCallback, useEffect, useLayoutEffect } from 'react'
-import { Bubble, GiftedChat, IMessage, Send } from 'react-native-gifted-chat'
+import { Bubble, Composer, GiftedChat, IMessage, InputToolbar, MessageImage, Send, SystemMessage } from 'react-native-gifted-chat'
 import { images } from "../../images";
 import auth from '@react-native-firebase/auth';
 import storage from '@react-native-firebase/storage';
@@ -16,6 +16,7 @@ import { selectUserData } from "../../redux/user/userSlice";
 import { Call, StreamVideoClient, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
 import { createUser } from "../../helpers/createUserStrem";
 import { generateRandomId } from "../../helpers/randomId";
+import ImagePicker from 'react-native-image-crop-picker';
 type ChatBoxNavigationProp = StackNavigationProp<RootStackParamList>;
 
 type ChatBoxProps = {
@@ -36,16 +37,19 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     const client = useStreamVideoClient();
 
 
-    const [image, setImage] = useState({
+    const [avatar, setAvatar] = useState({
         sender_avatar: images.avartar_pic,
         receiver_avatar: images.avartar_pic,
     })
 
+    const [image, setImage] = useState<string>('')
 
     useEffect(() => {
-        getImgae()
-        console.log(chatBoxId);
+        console.log(messages);
 
+    }, [messages])
+    useEffect(() => {
+        getImgae()
     }, [chatBoxId])
 
     useLayoutEffect(() => {
@@ -55,7 +59,8 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                     _id: doc.data()._id,
                     text: doc.data().text,
                     createdAt: doc.data().createdAt.toDate(),
-                    user: doc.data().user
+                    user: doc.data().user,
+                    image: doc.data().image
                 }))
             )
 
@@ -71,7 +76,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         const {
             text,
             createdAt,
-            user
+            user,
         } = messages[0]
 
         const _id = Date.now().toString();
@@ -92,7 +97,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         _id,
                         text,
                         createdAt,
-                        user
+                        user,
                     })
                 })
                 .catch(error => {
@@ -105,7 +110,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                 _id,
                 text,
                 createdAt,
-                user
+                user,
             })
                 .then(() => {
                     return firestore().collection('chats').doc(chatBoxId).update({
@@ -118,20 +123,18 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                 })
         }
 
-
-
-    }, [chatBoxId, userData, receiverId])
+    }, [chatBoxId, userData, receiverId, image])
 
     const getImgae = async () => {
 
         const sender_avatarRef = storage().ref(`users/${userData?.id}/avatar.jpg`);
         try {
             const sender_avatarUrl = await sender_avatarRef.getDownloadURL();
-            setImage(prev => ({
+            setAvatar(prev => ({
                 ...prev, sender_avatar: sender_avatarUrl
             }));
         } catch (error) {
-            setImage(prev => ({
+            setAvatar(prev => ({
                 ...prev, sender_avatar: images.avartar_pic
             }));
         }
@@ -139,12 +142,12 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         const receiver_avatarRef = storage().ref(`users/${receiverId}/avatar.jpg`);
         try {
             const receiver_avatarURL = await receiver_avatarRef.getDownloadURL();
-            setImage(prev => ({
+            setAvatar(prev => ({
                 ...prev, receiver_avatar: receiver_avatarURL
             }));
 
         } catch (error) {
-            setImage(prev => ({
+            setAvatar(prev => ({
                 ...prev, receiver_avatar: images.avartar_pic
             }));
 
@@ -155,12 +158,21 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         return (
             <Bubble
                 {...props}
-                wrapperStyle={{
+                wrapperStyle={
+                    {
+                        left: {
+                            backgroundColor: 'rgba(214, 239, 255, 1)'
+                        },
+                    }
+                }
+                containerStyle={{
                     left: {
-                        backgroundColor: 'rgba(214, 239, 255, 1)'
+                        marginBottom: 10
                     },
+                    right: {
+                        marginBottom: 10
+                    }
                 }}
-
                 textStyle={{
                     left: {
                         fontWeight: '500'
@@ -169,17 +181,78 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         fontWeight: '500'
                     }
                 }}
+
+                renderTime={(props) => {
+                    return (
+                        null
+                    )
+                }}
             />
         )
     }
 
     const renderSend = (props: any) => {
         return (
-            <Send  {...props}>
-                <View>
-                    <MaterialCommunityIcons name='send' size={32} color={color.blue_chat} style={{ marginBottom: 5 }} />
-                </View>
+            <Send {...props}>
+                <MaterialCommunityIcons name='send' size={30} color={color.blue_chat} style={{ marginBottom: 3 }} />
             </Send>
+        )
+    }
+
+    const renderInputToolbar = (props: any) => {
+        return (
+            <InputToolbar
+                {...props}
+                containerStyle={styles.inputToolbar}
+                renderComposer={renderComposer}
+                renderActions={renderActions}
+                renderSend={renderSend}
+            />
+        );
+    };
+
+    const renderComposer = (props: any) => {
+        return (
+            <Composer {...props}
+                placeholder="Aa"
+                textInputStyle={styles.composerContainer}
+            />
+        );
+    };
+
+    const renderSystemMessage = (props: any) => {
+        return (
+            <SystemMessage {...props}
+                containerStyle={{ padding: 10 }}
+            />
+        )
+    }
+
+    const renderActions = (props: any) => {
+        return (
+            <View style={styles.actionsContainer}>
+                <TouchableOpacity style={styles.actionButton} onPress={() => { pickImages() }}>
+                    <MaterialCommunityIcons name='message-image' size={30} style={{ marginBottom: 3 }} color={color.blue_chat} />
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+    const renderMessageImage = (props: any) => {
+        return (
+            <MessageImage {...props}
+                containerStyle={{
+                    backgroundColor: 'white',
+                    padding: 0,
+                }}
+                imageStyle={{
+                    resizeMode: 'cover',
+                    margin: 0,
+                    borderRadius: 0,
+                }}
+            >
+
+            </MessageImage>
         )
     }
 
@@ -215,6 +288,69 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
 
     }
 
+    const sendMessageWithImage = async (imageUrl: string) => {
+        const message: IMessage = {
+            _id: Date.now().toString(),
+            text: '',
+            createdAt: new Date(),
+            user: {
+                _id: userData?.id || '',
+                avatar: avatar.sender_avatar,
+            },
+            image: imageUrl,
+        };
+
+
+        if (chatBoxId === null) {
+            const newChatRef = await firestore().collection('chats').add({
+                lastMessage: receiverName + ' sent you a image',
+                lastMessageTimestamp: message.createdAt,
+                members: [receiverId, userData?.id],
+            });
+            setChatBoxId(newChatRef.id);
+            await firestore().collection('chats').doc(newChatRef.id).collection('messages').add(message);
+            setImage('')
+        } else {
+            await firestore().collection('chats').doc(chatBoxId).collection('messages').add(message);
+            await firestore().collection('chats').doc(chatBoxId).update({
+                lastMessage: receiverName + ' sent you a image',
+                lastMessageTimestamp: message.createdAt,
+            });
+            setImage('')
+        }
+    };
+
+    const pickImages = async () => {
+        const currentImageState = image;
+        try {
+            const pickedImage = await ImagePicker.openPicker({
+                // multiple: true,
+                mediaType: 'photo',
+            });
+            if (!pickedImage) {
+                return;
+            }
+            if (pickedImage) {
+                const imagePath = pickedImage.path;
+                const uploadUri = Platform.OS === 'ios' ? imagePath.replace('file://', '') : imagePath;
+                const storageRef = await storage().ref(`chatImages/${userData?.id}`);
+                await storageRef.putFile(uploadUri);
+
+                try {
+                    const imageUrl = await storageRef.getDownloadURL();
+                    setImage(imageUrl);
+                    sendMessageWithImage(imageUrl);
+
+                } catch (error) {
+                    console.error('Image upload error: ', error);
+                }
+
+            }
+        } catch (error) {
+            setImage(currentImageState);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header_bar}>
@@ -223,7 +359,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                 </TouchableOpacity>
                 <View style={styles.info_header}>
                     <View style={styles.avatar_container}>
-                        <Image source={image.receiver_avatar === images.avartar_pic ? images.avartar_pic : { uri: image.receiver_avatar }} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
+                        <Image source={avatar.receiver_avatar === images.avartar_pic ? images.avartar_pic : { uri: avatar.receiver_avatar }} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
                     </View>
                     <View style={styles.user_name_container}>
                         <Text style={styles.user_name}>{receiverName}</Text>
@@ -237,20 +373,20 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                 </TouchableOpacity>
             </View>
             <GiftedChat
-
                 messages={messages}
                 showAvatarForEveryMessage={true}
                 onSend={messages => onSend(messages)}
                 user={{
                     _id: userData?.id || '',
-                    avatar: image.sender_avatar,
+                    avatar: avatar.sender_avatar,
                 }}
-                renderSend={renderSend}
                 renderBubble={renderBubble}
+                renderInputToolbar={renderInputToolbar}
+                renderSystemMessage={renderSystemMessage}
+                renderMessageImage={renderMessageImage}
+
             />
         </View>
-
-
 
     )
 }
@@ -299,5 +435,34 @@ const styles = StyleSheet.create({
         width: '10%',
         marginLeft: 10,
         justifyContent: 'center'
-    }
+    },
+    inputToolbar: {
+        borderTopWidth: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 5,
+    },
+    composerContainer: {
+        borderWidth: 0.5,
+        borderColor: '#333',
+        color: 'black',
+        borderRadius: 25,
+        paddingHorizontal: 15,
+        marginRight: 10
+    },
+    actionsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    actionButton: {
+        paddingHorizontal: 5,
+    },
+    sendButton: {
+        paddingHorizontal: 5,
+    },
+    icon: {
+        width: 24,
+        height: 24,
+        tintColor: '#FF007F',
+    },
 })
