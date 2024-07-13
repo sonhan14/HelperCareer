@@ -13,7 +13,9 @@ import { RootStackParamList } from "../../navigations/navigation";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
-import { StreamVideoClient, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
+import { Call, StreamVideoClient, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
+import { createUser } from "../../helpers/createUserStrem";
+import { generateRandomId } from "../../helpers/randomId";
 type ChatBoxNavigationProp = StackNavigationProp<RootStackParamList>;
 
 type ChatBoxProps = {
@@ -30,20 +32,15 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     const receiverId = route.params.receiverId
     const receiverName = route.params.receiverName
     const [chatBoxId, setChatBoxId] = useState<string>(route.params.chatId)
-    const testClient = useStreamVideoClient()
+    const [call, setCall] = useState<Call | null>(null);
+    const client = useStreamVideoClient();
+
 
     const [image, setImage] = useState({
         sender_avatar: images.avartar_pic,
         receiver_avatar: images.avartar_pic,
     })
 
-    const joinCall = async () => {
-        if (testClient) {
-            console.log('heelo?');
-            const call = testClient.call('default', 'CryptoJS.lib.WordArray.random(16 / 2).toString(CryptoJS.enc.Hex)')
-            await call.getOrCreate()
-        }
-    }
 
     useEffect(() => {
         getImgae()
@@ -190,6 +187,34 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         navigation.goBack()
     }
 
+    const handleCall = async () => {
+        createUser(receiverId, receiverName)
+        const callId = generateRandomId();
+
+        if (!client || !userData) {
+            return null
+        }
+        else {
+            const newCall = client.call('default', callId);
+            try {
+                await newCall.getOrCreate({
+                    ring: true,
+                    data: {
+                        members: [
+                            { user_id: receiverId },
+                            { user_id: userData.id }
+                        ]
+                    }
+                });
+                setCall(newCall);
+            } catch (error) {
+                console.error("Error creating or joining the call", error);
+            }
+            navigation.navigate('CallScreen', { receiverId: receiverId, receiverName: receiverName, call: newCall })
+        }
+
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.header_bar}>
@@ -204,10 +229,10 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         <Text style={styles.user_name}>{receiverName}</Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.call_container} onPress={() => { joinCall() }}>
+                <TouchableOpacity style={styles.call_container} onPress={() => { }}>
                     <MaterialCommunityIcons name="phone-outline" size={32} color={'black'} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.call_container} onPress={() => { navigation.navigate('CallScreen', { receiverId: receiverId, receiverName: receiverName }) }}>
+                <TouchableOpacity style={styles.call_container} onPress={() => { handleCall() }}>
                     <MaterialCommunityIcons name="video-outline" size={32} color={'black'} />
                 </TouchableOpacity>
             </View>

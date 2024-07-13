@@ -12,6 +12,7 @@ import { formatDate } from '../constants/formatDate';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../redux/user/userSlice';
 import VideoProvider from '../context/videoContext';
+import CallProvider from '../context/CallContext';
 
 // const MyTheme: Theme = {
 //     ...DefaultTheme,
@@ -82,11 +83,13 @@ export default function AppNavigator() {
     }
     return (
         <EmployeeProvider>
-            <VideoProvider>
-                <NavigationContainer>
-                    <StackNavigator />
-                </NavigationContainer>
-            </VideoProvider>
+            <NavigationContainer>
+                {/* <VideoProvider>
+                    <CallProvider> */}
+                <StackNavigator />
+                {/* </CallProvider>
+                </VideoProvider> */}
+            </NavigationContainer>
         </EmployeeProvider>
     );
 }

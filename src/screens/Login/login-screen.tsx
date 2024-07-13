@@ -52,28 +52,28 @@ export const LoginScreen = () => {
             if (response?.user) {
                 const currentUser = await firestore().collection('users').doc(response.user.uid).get()
                 const check = currentUser.data()
-                if (check?.role === 'Owner') {
-                    const formattedUserData: iUser = {
-                        id: response.user.uid,
-                        birthday: formatDate(check?.birthday.toDate()),
-                        first_name: check?.first_name,
-                        last_name: check?.last_name,
-                        gender: check?.gender,
-                        introduction: check?.introduction,
-                        phone: check?.phone,
-                        rating: check?.rating,
-                        role: check?.role,
-                        email: email
-                    };
-                    dispatch(setUserData(formattedUserData));
-                    await AsyncStorage.setItem('userEmail', email);
-                    await AsyncStorage.setItem('userPassword', password);
-                }
-                else {
-                    setErrorMessage('You do not have permission!!');
-                    setNotificationVisible(true);
-                    auth().signOut()
-                }
+                // if (check?.role === 'Owner') {
+                const formattedUserData: iUser = {
+                    id: response.user.uid,
+                    birthday: formatDate(check?.birthday.toDate()),
+                    first_name: check?.first_name,
+                    last_name: check?.last_name,
+                    gender: check?.gender,
+                    introduction: check?.introduction,
+                    phone: check?.phone,
+                    rating: check?.rating,
+                    role: check?.role,
+                    email: email
+                };
+                dispatch(setUserData(formattedUserData));
+                await AsyncStorage.setItem('userEmail', email);
+                await AsyncStorage.setItem('userPassword', password);
+                // }
+                // else {
+                //     setErrorMessage('You do not have permission!!');
+                //     setNotificationVisible(true);
+                //     auth().signOut()
+                // }
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;

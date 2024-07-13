@@ -11,29 +11,35 @@ import { CallScreen } from '../screens/call/call-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
 import { selectUserData } from '../redux/user/userSlice';
+import VideoProvider from '../context/videoContext';
+import CallProvider from '../context/CallContext';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export function StackNavigator() {
     const user = useSelector(selectUserData)
 
-
+    if (user === null) {
+        return (
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Register" component={RegisterScreen} />
+            </Stack.Navigator>
+        )
+    }
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {user === null ? (
-                <>
-                    <Stack.Screen name="Login" component={LoginScreen} />
-                    <Stack.Screen name="Register" component={RegisterScreen} />
-                </>
-            ) : (
-                <>
-                    <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
-                    <Stack.Screen name="ChatBox" component={ChatBox} />
-                    <Stack.Screen name="EmployeeProfile" component={EmployeeProfile} />
-                    <Stack.Screen name="CallScreen" component={CallScreen} />
-                    <Stack.Screen name="TaskDetail" component={TaskDetail} initialParams={{ TaskId: '1' }} />
-                </>
-            )}
-        </Stack.Navigator>
+        <VideoProvider>
+            <CallProvider>
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    <>
+                        <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+                        <Stack.Screen name="ChatBox" component={ChatBox} />
+                        <Stack.Screen name="EmployeeProfile" component={EmployeeProfile} />
+                        <Stack.Screen name="CallScreen" component={CallScreen} />
+                        <Stack.Screen name="TaskDetail" component={TaskDetail} initialParams={{ TaskId: '1' }} />
+                    </>
+                </Stack.Navigator>
+            </CallProvider>
+        </VideoProvider>
     );
 }

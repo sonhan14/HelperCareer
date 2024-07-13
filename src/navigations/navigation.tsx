@@ -1,3 +1,4 @@
+import { Call } from "@stream-io/video-react-native-sdk";
 import { TaskType } from "../../types/taskType";
 
 export type RootStackParamList = {
@@ -7,13 +8,15 @@ export type RootStackParamList = {
     ChatBox: {
         receiverId: string,
         chatId: string,
-        receiverName: string
+        receiverName: string,
+
     },
     EmployeeProfile: { employeeId: string, },
     TaskDetail: { TaskId: string },
     CallScreen: {
         receiverId: string,
-        receiverName: string
+        receiverName: string,
+        call: Call
     },
 };
 

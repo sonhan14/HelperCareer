@@ -1,58 +1,50 @@
-import { Call, CallContent, StreamCall, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
+import { Call, CallContent, RingingCallContent, StreamCall, useCalls, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { generateRandomId } from "../../helpers/randomId";
 import { RootStackParamList } from "../../navigations/navigation";
+import { createUser } from "../../helpers/createUserStrem";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
+type ChatBoxNavigationProp = StackNavigationProp<RootStackParamList>;
 
 type ChatBoxProps = {
     route: { params: RootStackParamList['CallScreen'] };
 };
 
 export const CallScreen = ({ route }: ChatBoxProps) => {
-    const receiverId = route.params.receiverId;
-    const receiverName = route.params.receiverName;
     const currentUser = useSelector(selectUserData);
-
+    const navigation = useNavigation<ChatBoxNavigationProp>()
     if (!currentUser) {
         return null;
     }
+    const calls = useCalls();
+    const call = calls[0]
 
-    const userId = currentUser.id;
-    const callId = generateRandomId();
-    const client = useStreamVideoClient();
-    const [call, setCall] = useState<Call | null>(null);
-
+    // const [call, setCall] = useState<Call>(route.params.call)
 
     useEffect(() => {
-        const handleCall = async () => {
-            if (!client) return;
-            const newCall = client.call('default', callId);
-            try {
-                await newCall.getOrCreate({
-                    data: {
-                        members: [
-                            { user_id: receiverId },
-                            { user_id: userId }
-                        ]
-                    }
-                });
-                await newCall.join({ create: true });
-                setCall(newCall);
-            } catch (error) {
-                console.error("Error creating or joining the call", error);
-            }
-        };
+        // const handleCall = async () => {
+        //     try {
+        //         await call.get()
+        //         await call.join({ create: true });
+        //     } catch (error) {
+        //         console.error("Error creating or joining the call", error);
+        //     }
+        // };
+        // handleCall();
 
-        handleCall();
-
-        return () => {
-            if (call) {
-                call.leave();
-            }
-        };
-    }, [client]);
+        // return () => {
+        //     if (call) {
+        //         call.leave();
+        //     }
+        // };
+        if (!call) {
+            navigation.goBack()
+        }
+    }, [call]);
 
     if (!call) {
         return (
@@ -64,7 +56,8 @@ export const CallScreen = ({ route }: ChatBoxProps) => {
 
     return (
         <StreamCall call={call}>
-            <CallContent />
+            {/* <CallContent onHangupCallHandler={() => { navigation.goBack() }} /> */}
+            <RingingCallContent />
         </StreamCall>
     );
 };
