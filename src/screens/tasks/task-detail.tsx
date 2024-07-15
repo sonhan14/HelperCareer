@@ -54,7 +54,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
     };
 
     const handleDialogYes = () => {
-        if ( actionType) {
+        if (actionType) {
             if (actionType === 'finish') {
                 handleFinishTask(handleBack, taskDetail, userData?.id)
             } else if (actionType === 'delete') {
@@ -107,7 +107,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
                         <Text style={styles.text_title}>Task Name: {taskDetail?.task_name}</Text>
                         {
                             taskDetail?.start_date && taskDetail.end_date ?
-                                <Text style={styles.text_Date}>Duration: {formatDate(new Date(taskDetail.start_date))} - {formatDate(new Date(taskDetail.end_date))}</Text>
+                                <Text style={styles.text_Date}>Duration: {taskDetail.start_date} - {taskDetail.end_date}</Text>
                                 :
                                 null
                         }
@@ -135,10 +135,10 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
                 </View>
 
                 <View style={styles.bottom_handle}>
-                    <TouchableOpacity style={styles.delete_button} onPress={() => {handleAction('delete')}}>
+                    <TouchableOpacity style={styles.delete_button} onPress={() => { handleAction('delete') }}>
                         <Text style={styles.text_delete}>Delete Task</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.done_button} onPress={() => {handleAction('finish')}}>
+                    <TouchableOpacity style={styles.done_button} onPress={() => { handleAction('finish') }}>
                         <Text style={styles.text_finish}>Finish Task</Text>
                     </TouchableOpacity>
                 </View>

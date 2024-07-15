@@ -10,7 +10,7 @@ import { useNavigation } from "@react-navigation/native"
 type TaskItemNavigation = StackNavigationProp<RootStackParamList>
 
 
-export const TaskItem = ({item} : {item: TaskType}) => {
+export const TaskItem = ({ item }: { item: TaskType }) => {
     const navigation = useNavigation<TaskItemNavigation>()
 
     return (
@@ -19,11 +19,12 @@ export const TaskItem = ({item} : {item: TaskType}) => {
                 <Image source={images.avartar_pic} resizeMode='contain' style={styles.image_style} />
                 <View style={styles.task_info_container}>
                     <Text style={styles.text_black_20}>{item.task_name}</Text>
-                    <Text style={styles.text_black_15}>{formatDate(item.start_date)} - {formatDate(item.end_date)}</Text>
+                    <Text style={styles.text_black_15}>{item.start_date} - {item.end_date}</Text>
                     <Text style={styles.text_red_15}>Status: {item.status}</Text>
                 </View>
             </View>
-            <TouchableOpacity style={styles.view_button} onPress={() => { navigation.navigate('TaskDetail', {TaskId: item.id})
+            <TouchableOpacity style={styles.view_button} onPress={() => {
+                navigation.navigate('TaskDetail', { TaskId: item.id })
             }}>
                 <Text style={styles.text_black_15}>View Detail</Text>
             </TouchableOpacity>
@@ -60,12 +61,12 @@ const styles = StyleSheet.create({
         height: '40%',
         marginLeft: 10,
     },
-    text_black_20:{
+    text_black_20: {
         color: 'black',
         fontSize: 20,
         fontWeight: '700'
     },
-    text_black_15:{
+    text_black_15: {
         color: 'black',
         fontSize: 14,
         fontWeight: '400'

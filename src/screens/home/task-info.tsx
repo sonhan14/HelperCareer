@@ -150,7 +150,7 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
                                     <Text style={styles.text_title}>Task Name: {item?.task_name}</Text>
                                     {
                                         item?.start_date && item.end_date ?
-                                            <Text style={styles.text_Date}>Duration: {formatDate(new Date(item.start_date))} - {formatDate(new Date(item.end_date))}</Text>
+                                            <Text style={styles.text_Date}>Duration: {item.start_date} - {item.end_date}</Text>
                                             :
                                             null
                                     }

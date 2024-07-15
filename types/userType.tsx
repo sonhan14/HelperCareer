@@ -8,5 +8,6 @@ export type iUser = {
     phone: string;
     rating: number;
     role?: string,
-    email: string
+    email: string,
+    fcmToken: string,
 };

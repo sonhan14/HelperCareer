@@ -61,7 +61,8 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                 phone: account.phone,
                 rating: 5.0,
                 email: email,
-                role: 'Owner'
+                role: 'Owner',
+                fcmToken: 'abc'
             })
             .then(() => {
                 navigation.replace('MainTabs', { userId: userId })
@@ -100,36 +101,36 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                     </View>
 
                     <View style={styles.sign_in_container}>
-                    <View style={[styles.name_input, {height: '13%'}]}>
-                        <View style={styles.first_name_container}>
-                            <Text style={styles.text_name}>First Name: </Text>
-                            <TextInput
-                                style={[styles.text_input]}
-                                placeholder="William"
-                                placeholderTextColor={'#8897AD'}
-                                onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
-                                value={account.first_name}
-                                autoCapitalize='words'
-                            />
-                        </View>
+                        <View style={[styles.name_input, { height: '13%' }]}>
+                            <View style={styles.first_name_container}>
+                                <Text style={styles.text_name}>First Name: </Text>
+                                <TextInput
+                                    style={[styles.text_input]}
+                                    placeholder="William"
+                                    placeholderTextColor={'#8897AD'}
+                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
+                                    value={account.first_name}
+                                    autoCapitalize='words'
+                                />
+                            </View>
 
-                        <View style={styles.first_name_container}>
-                            <Text style={styles.text_name}>Last Name: </Text>
-                            <TextInput
-                                style={[styles.text_input,]}
-                                placeholder="Fang"
-                                placeholderTextColor={'#8897AD'}
-                                onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
-                                value={account.last_name}
-                                autoCapitalize='words'
-                            />
+                            <View style={styles.first_name_container}>
+                                <Text style={styles.text_name}>Last Name: </Text>
+                                <TextInput
+                                    style={[styles.text_input,]}
+                                    placeholder="Fang"
+                                    placeholderTextColor={'#8897AD'}
+                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
+                                    value={account.last_name}
+                                    autoCapitalize='words'
+                                />
+                            </View>
                         </View>
-                    </View>
 
                         <View style={styles.birthday_container}>
                             <Text style={styles.text_birthday}>Birthday: </Text>
                             <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowDatePicker(true) }}>
-                                <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.birth_day.toLocaleDateString()}</Text>
+                                <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.birth_day.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>
                             </TouchableOpacity>
 
                             <Text style={[styles.text_birthday]}>Gender: </Text>
@@ -178,7 +179,7 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                             <Animated.View
                                 entering={LightSpeedInRight.duration(500)}
                                 exiting={LightSpeedOutRight.duration(500)}
-                                >
+                            >
                                 <Text style={styles.error_text}>{isValid}</Text>
                             </Animated.View>
 
@@ -201,7 +202,7 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                         </View>
                         <TouchableOpacity
                             onPress={() => { handleAddInfo() }}
-                            style={isRegister || isValid !== ''? styles.signin_button_disable : styles.signin_button}
+                            style={isRegister || isValid !== '' ? styles.signin_button_disable : styles.signin_button}
                             disabled={isRegister}
                         >
                             <Text style={styles.text_button}>Contitnue</Text>

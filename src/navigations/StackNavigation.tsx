@@ -18,6 +18,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export function StackNavigator() {
     const user = useSelector(selectUserData)
+    console.log(user);
 
     if (user === null) {
         return (

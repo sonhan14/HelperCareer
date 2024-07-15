@@ -28,6 +28,7 @@ export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskG
             });
 
             const geoJson = convertToGeoJson(locations);
+
             setGeoJsonData(geoJson);
         }, (error) => {
             console.error('Error fetching user locations from Firestore: ', error);
@@ -49,8 +50,8 @@ export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskG
                         id: doc.id,
                         task_name: data.task_name,
                         task_des: data.task_description,
-                        start_date: new Date(data.start_date.seconds * 1000 + data.start_date.nanoseconds / 1000000),
-                        end_date: new Date(data.end_date.seconds * 1000 + data.end_date.nanoseconds / 1000000),
+                        start_date: formatDate(data.start_date),
+                        end_date: formatDate(data.end_date),
                         status: data.status
                     });
                 }
@@ -129,15 +130,15 @@ export const fetchApplication = (taskId: any, setApplication: any) => {
                     task_id: data.task_id,
                     user_id: data.user_id
                 })
-                
+
             });
             setApplication(application)
         }, (error) => {
             console.error('Error fetching user locations from Firestore: ', error);
         });
-        return () => {
-            unsubscribeApplication();
-        }; 
+    return () => {
+        unsubscribeApplication();
+    };
 }
 
 export const hanleAccepted = (item: Applications) => {
@@ -158,31 +159,32 @@ export const hanleRejected = (item: Applications) => {
 
 export const fetchEmployee = (setEmployeeList: any) => {
     const unsubscribeEmployee = firestore().collection('users')
-                                .where('role', '==', 'employee')
-                                .onSnapshot(async (querySnapshot) => {
-                                    const employeeList: iUser[] = [];
+        .where('role', '==', 'employee')
+        .onSnapshot(async (querySnapshot) => {
+            const employeeList: iUser[] = [];
 
-                                    querySnapshot.forEach(doc => {
-                                        const data = doc.data()
-                                        if (data) {
-                                            const formattedUserData: iUser = {
-                                                id: doc.id,
-                                                birthday: formatDate(data.birthday.toDate()),
-                                                first_name: data.first_name,
-                                                last_name: data.last_name,
-                                                gender: data.gender,
-                                                introduction: "Helo my name is " + data.first_name,
-                                                phone: data.phone,
-                                                rating: data.rating,
-                                                role: data.role,
-                                                email: data.email
-                                            };
-                                            employeeList.push(formattedUserData)
-                                        }
-                                    })
-                                    setEmployeeList(employeeList)
-                                })
-                                return () => {
-                                    unsubscribeEmployee();
-                                };
+            querySnapshot.forEach(doc => {
+                const data = doc.data()
+                if (data) {
+                    const formattedUserData: iUser = {
+                        id: doc.id,
+                        birthday: formatDate(data.birthday),
+                        first_name: data.first_name,
+                        last_name: data.last_name,
+                        gender: data.gender,
+                        introduction: "Helo my name is " + data.first_name,
+                        phone: data.phone,
+                        rating: data.rating,
+                        role: data.role,
+                        email: data.email,
+                        fcmToken: data.fcmToken
+                    };
+                    employeeList.push(formattedUserData)
+                }
+            })
+            setEmployeeList(employeeList)
+        })
+    return () => {
+        unsubscribeEmployee();
+    };
 }

@@ -27,27 +27,28 @@ export const handleChat = (employeeID: string, userId: any, navigation: Employee
                     });
                 }
             });
-            navigation.navigate('ChatBox', { receiverId: employeeID, chatId: filteredChats.length ? filteredChats[0].id : null, receiverName: receiverName});
+            navigation.navigate('ChatBox', { receiverId: employeeID, chatId: filteredChats.length ? filteredChats[0].id : null, receiverName: receiverName });
         })
         .catch(error => {
             console.error('Error getting documents: ', error);
         });
 };
 
-export const getDetail = async (employeeID: string, setUser: any, ) => {
+export const getDetail = async (employeeID: string, setUser: any,) => {
     const snapshot = await firestore().collection('users').doc(employeeID).get();
     if (snapshot.exists) {
         const doc = snapshot.data();
         const formattedUserData: iUser = {
             id: employeeID,
-            birthday: formatDate(doc?.birthday.toDate()),
+            birthday: formatDate(doc?.birthday),
             first_name: doc?.first_name,
             last_name: doc?.last_name,
             gender: doc?.gender,
             introduction: doc?.introduction,
             phone: doc?.phone,
             rating: doc?.rating,
-            email: doc?.email
+            email: doc?.email,
+            fcmToken: doc?.fcmToken
         };
 
         setUser(formattedUserData);
@@ -57,7 +58,7 @@ export const getDetail = async (employeeID: string, setUser: any, ) => {
 }
 
 export const getImgae = async (setLoading: any, setImage: any, employeeID: string) => {
-    setLoading((prev :any) => ({
+    setLoading((prev: any) => ({
         ...prev, avatarLoading: true
     }))
 

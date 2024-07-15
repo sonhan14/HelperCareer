@@ -68,6 +68,36 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         return unsubscribe
     }, [])
 
+    // const sendNotification = async (receiverId: string, messageText: string) => {
+    //     // Lấy FCM token của người nhận từ Firestore
+    //     const receiverDoc = await firestore().collection('users').doc(receiverId).get();
+    //     const data = receiverDoc.data()
+    //     const fcmToken = data?.fcmToken;
+
+    //     // Gửi thông báo đến FCM token của người nhận
+    //     if (fcmToken) {
+    //         const response = await fetch('https://fcm.googleapis.com/fcm/send', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'key=YOUR_SERVER_KEY', // Thay YOUR_SERVER_KEY bằng Server key của bạn
+    //             },
+    //             body: JSON.stringify({
+    //                 to: fcmToken,
+    //                 notification: {
+    //                     title: 'New Message',
+    //                     body: messageText,
+    //                 },
+    //             }),
+    //         });
+
+    //         const responseData = await response.json();
+    //         console.log('Notification response:', responseData);
+    //     } else {
+    //         console.log('No FCM token for receiver.');
+    //     }
+    // };
+
     const onSend = useCallback((messages: IMessage[] = []) => {
         setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, messages)
@@ -100,6 +130,9 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         user,
                     })
                 })
+                // .then(() => {
+                //     sendNotification(receiverId, text);
+                // })
                 .catch(error => {
                     console.error('Error sending message: ', error);
                 })
@@ -118,6 +151,9 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         lastMessageTimestamp: createdAt
                     });
                 })
+                // .then(() => {
+                //     sendNotification(receiverId, text);
+                // })
                 .catch(error => {
                     console.error('Error sending message: ', error);
                 })

@@ -1,6 +1,6 @@
 // src/navigation/AppNavigator.tsx
 import * as React from 'react';
-import { NavigationContainer, DefaultTheme, Theme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, Theme, useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { StackNavigator } from './StackNavigation';
 import { EmployeeProvider } from '../context/EmployeeContext';
@@ -13,24 +13,40 @@ import { useDispatch } from 'react-redux';
 import { setUserData } from '../redux/user/userSlice';
 import VideoProvider from '../context/videoContext';
 import CallProvider from '../context/CallContext';
-
-// const MyTheme: Theme = {
-//     ...DefaultTheme,
-//     colors: {
-//         ...DefaultTheme.colors,
-//         background: 'rgba(32, 21, 32, 1)',
-//         text: 'white',
-//     },
-// };
-
-
+import messaging from '@react-native-firebase/messaging';
+import { RootStackParamList } from './navigation';
 
 
 export default function AppNavigator() {
     const [loading, setLoading] = React.useState(false)
     const dispatch = useDispatch();
+    async function requestUserPermission() {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+            console.log('Authorization status:', authStatus);
+        }
+    }
+
+    const getToken = async () => {
+        const token = await messaging().getToken()
+        await AsyncStorage.setItem("FCMToken", token)
+    }
+
+
 
     React.useEffect(() => {
+        requestUserPermission()
+        getToken()
+    })
+
+
+    React.useEffect(() => {
+
+
         const checkuser = async () => {
             try {
                 setLoading(true)
@@ -42,24 +58,25 @@ export default function AppNavigator() {
                         if (response?.user) {
                             const currentUser = await firestore().collection('users').doc(response.user.uid).get()
                             const check = currentUser.data()
-                            if (check?.role === 'Owner') {
-                                const formattedUserData: iUser = {
-                                    id: response.user.uid,
-                                    birthday: formatDate(check?.birthday.toDate()),
-                                    first_name: check?.first_name,
-                                    last_name: check?.last_name,
-                                    gender: check?.gender,
-                                    introduction: check?.introduction,
-                                    phone: check?.phone,
-                                    rating: check?.rating,
-                                    role: check?.role,
-                                    email: userEmail
-                                };
-                                dispatch(setUserData(formattedUserData));
-                            }
-                            else {
-                                auth().signOut()
-                            }
+                            // if (check?.role === 'Owner') {
+                            const formattedUserData: iUser = {
+                                id: response.user.uid,
+                                birthday: formatDate(check?.birthday),
+                                first_name: check?.first_name,
+                                last_name: check?.last_name,
+                                gender: check?.gender,
+                                introduction: check?.introduction,
+                                phone: check?.phone,
+                                rating: check?.rating,
+                                role: check?.role,
+                                email: userEmail,
+                                fcmToken: check?.fcmToken
+                            };
+                            await dispatch(setUserData(formattedUserData));
+                            // }
+                            // else {
+                            //     auth().signOut()
+                            // }
                         }
 
                     } catch (error) {
@@ -72,6 +89,7 @@ export default function AppNavigator() {
             }
         }
         checkuser()
+
     }, [])
 
     if (loading) {
@@ -84,11 +102,11 @@ export default function AppNavigator() {
     return (
         <EmployeeProvider>
             <NavigationContainer>
-                {/* <VideoProvider>
-                    <CallProvider> */}
-                <StackNavigator />
-                {/* </CallProvider>
-                </VideoProvider> */}
+                <VideoProvider>
+                    <CallProvider>
+                        <StackNavigator />
+                    </CallProvider>
+                </VideoProvider>
             </NavigationContainer>
         </EmployeeProvider>
     );

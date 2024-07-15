@@ -67,7 +67,7 @@ export const EditProfile = ({ isModal, userData, closeModal }: editModal) => {
             const formattedUserData: iUser = {
                 ...userData,
                 ...account,
-                birthday: formatDate(account.birthday),
+                birthday: account.birthday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
             };
             dispatch(setUserData(formattedUserData));
             closeModal()
@@ -108,7 +108,7 @@ export const EditProfile = ({ isModal, userData, closeModal }: editModal) => {
                 </View>
 
                 <View style={styles.sign_in_container}>
-                    <View style={[styles.name_input, {height: '13%'}]}>
+                    <View style={[styles.name_input, { height: '13%' }]}>
                         <View style={styles.first_name_container}>
                             <Text style={styles.text_name}>First Name: </Text>
                             <TextInput
@@ -137,7 +137,7 @@ export const EditProfile = ({ isModal, userData, closeModal }: editModal) => {
                     <View style={styles.birthday_container}>
                         <Text style={styles.text_birthday}>Birthday: </Text>
                         <TouchableOpacity style={[styles.input_birthday, { width: '30%' }]} onPress={() => { setShowDatePicker(true) }}>
-                            <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{formatDate(account.birthday)}</Text>
+                            <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.birthday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>
                         </TouchableOpacity>
 
                         <Text style={[styles.text_birthday]}>Gender: </Text>

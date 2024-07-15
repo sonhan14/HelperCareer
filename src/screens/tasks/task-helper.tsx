@@ -1,6 +1,7 @@
 
 import firestore, { GeoPoint } from '@react-native-firebase/firestore';
 import { Task, TaskType } from '../../../types/taskType';
+import { formatDate } from '../../constants/formatDate';
 
 
 
@@ -18,8 +19,8 @@ export const fetchTasks = (userId: string, setTasksList: any, setTaskPercent: an
                         id: doc.id,
                         task_name: data.task_name,
                         task_des: data.task_description,
-                        start_date: new Date(data.start_date.seconds * 1000 + data.start_date.nanoseconds / 1000000),
-                        end_date: new Date(data.end_date.seconds * 1000 + data.end_date.nanoseconds / 1000000),
+                        start_date: formatDate(data.start_date),
+                        end_date: formatDate(data.end_date),
                         status: data.status,
                         longitude: data.location._longitude,
                         latitude: data.location._latitude
@@ -48,8 +49,8 @@ export const fetchTaskDetail = (taskId: any, setTaskDetail: any,) => {
                     id: taskQuerySnapshot.id,
                     task_name: data.task_name,
                     task_des: data.task_description,
-                    start_date: new Date(data.start_date.seconds * 1000 + data.start_date.nanoseconds / 1000000),
-                    end_date: new Date(data.end_date.seconds * 1000 + data.end_date.nanoseconds / 1000000),
+                    start_date: formatDate(data.start_date),
+                    end_date: formatDate(data.end_date),
                     status: data.status,
                     longitude: data.location._longitude,
                     latitude: data.location._latitude

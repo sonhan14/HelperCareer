@@ -17,6 +17,7 @@ import { Task, TaskType } from "../../../types/taskType";
 import { AddNew } from "./task-helper";
 import { selectUserData } from "../../redux/user/userSlice";
 import { useSelector } from "react-redux";
+import { convertStringToDate } from "../../constants/formatDate";
 
 
 
@@ -71,8 +72,8 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
         user_id: userData?.id,
         location: new GeoPoint(item.latitude, item.longitude),
         status: item.status,
-        start_date: new Date(item.start_date),
-        end_date: new Date(item.end_date),
+        start_date: convertStringToDate(item.start_date),
+        end_date: convertStringToDate(item.end_date),
     })
     const [query, setQuery] = useState<string>('');
     const [results, setResults] = useState<Feature[]>([]);
@@ -119,7 +120,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                     limit: 1
                 },
             });
-            
+
             setSelectedLocation({
                 id: response.data.features[0].id,
                 full_address: response.data.features[0].properties.full_address,
@@ -136,9 +137,6 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
         setSelectedLocation(location);
         setResults([]);
         setQuery(location.full_address);
-        console.log(location.center);
-
-
         searchStyle.value = withTiming({
             height: 40,
             width: (layout.width - 20) * 0.8,
@@ -235,7 +233,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                         <TextInput
                             mode="outlined"
                             label="Start Date"
-                            value={taskItem.start_date.toLocaleDateString()}
+                            value={taskItem.start_date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                             style={styles.input_container}
                             editable={false}
 
@@ -246,7 +244,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                         <TextInput
                             mode="outlined"
                             label="End Date"
-                            value={taskItem.end_date.toLocaleDateString()}
+                            value={taskItem.end_date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                             style={styles.input_container}
                             editable={false}
                         />
@@ -310,9 +308,9 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                         <DateTimePicker
                             testID="dateTimePicker"
                             value={taskItem.start_date}
-                            mode="date" 
+                            mode="date"
                             is24Hour={true}
-                            display="default" 
+                            display="default"
                             onChange={onChangeDate}
                         />
                     )}
@@ -328,23 +326,23 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                         />
                     )}
                     {item === null ?
-                    <CustomButton
-                    title="Add New Task"
-                    onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, null, handleLoading) }}
-                    style={styles.add_button}
-                    disabled={isAddNew}
-                    disabledStyle={styles.add_button_disable}
-                    loading={loading}
-                />
-                :
-                <CustomButton
-                        title="Edit This Task"
-                        onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, item.id, handleLoading) }}
-                        style={styles.add_button}
-                        disabled={isAddNew}
-                        disabledStyle={styles.add_button_disable}
-                        loading={loading}
-                    />
+                        <CustomButton
+                            title="Add New Task"
+                            onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, null, handleLoading) }}
+                            style={styles.add_button}
+                            disabled={isAddNew}
+                            disabledStyle={styles.add_button_disable}
+                            loading={loading}
+                        />
+                        :
+                        <CustomButton
+                            title="Edit This Task"
+                            onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, item.id, handleLoading) }}
+                            style={styles.add_button}
+                            disabled={isAddNew}
+                            disabledStyle={styles.add_button_disable}
+                            loading={loading}
+                        />
                     }
                 </View>
             </KeyboardAvoidingView>

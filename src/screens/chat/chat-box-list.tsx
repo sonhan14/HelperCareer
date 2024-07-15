@@ -42,9 +42,9 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
     });
 
     const handleDeleteChat = () => {
-        height.value = withTiming(0, {duration: 500})
-        marginVertical.value = withTiming(0, {duration: 500})
-        
+        height.value = withTiming(0, { duration: 500 })
+        marginVertical.value = withTiming(0, { duration: 500 })
+
     }
 
     const gestureHandle = Gesture.Pan()
@@ -54,10 +54,10 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
                 console.log('dragx', dragX.value);
                 console.log(e.translationX);
             }
-            else{
+            else {
                 dragX.value = e.translationX;
             }
-            
+
         })
         .onEnd((e) => {
             if (threshold >= e.translationX && isSwiped.value === false) {
@@ -68,17 +68,17 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
                 dragX.value = withTiming(0);
                 isSwiped.value = false
             }
-            else{
+            else {
                 dragX.value = withTiming(0);
                 isSwiped.value = false
             }
-            
+
         })
 
     return (
         <Animated.View >
             <Animated.View style={[styles.delete_swipe, animatedIconStyle]}>
-                <TouchableOpacity style={styles.delete_touch} onPress={() => {handleDeleteChat()}}>
+                <TouchableOpacity style={styles.delete_touch} onPress={() => { handleDeleteChat() }}>
                     <Icon name="trash" size={30} color="white" />
                 </TouchableOpacity>
 
@@ -97,7 +97,7 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
                             <Text style={styles.text_message}>{truncateText(item.lastMessage, 20)}</Text>
                         </View>
                         <View style={styles.message_box_time}>
-                            <Text style={styles.text_time}>{formatDate(item.lastMessageTimestamp.toDate())}</Text>
+                            <Text style={styles.text_time}>{formatDate(item.lastMessageTimestamp)}</Text>
                         </View>
                     </TouchableOpacity>
                 </Animated.View>
