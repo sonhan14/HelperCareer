@@ -18,7 +18,7 @@ export const EmployeeList = ({ showEmployee, employeeList, handleAction }: Emplo
         return (
             <TouchableOpacity style={styles.employee_container} onPress={() => navigation.navigate('EmployeeProfile', { employeeId: item.user_id })}>
                 <View style={styles.image_container}>
-                    <Image source={images.avartar_pic} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
+                    <Image source={{ uri: item.avatar }} style={{ height: '100%', width: '100%', borderRadius: 100 }} />
                 </View>
                 <View style={styles.name_container}>
                     <Text style={styles.text_title}>Name: {item.last_name} {item.first_name}</Text>
@@ -57,13 +57,13 @@ export const EmployeeList = ({ showEmployee, employeeList, handleAction }: Emplo
 
     return (
         <Animated.View style={[styles.employeeListContainer, animatedStyle]}>
-                <FlatList
-                    data={employeeList}
-                    showsVerticalScrollIndicator={false}
-                    keyExtractor={(item) => item.id}
-                    renderItem={(renderItem)}
-                /> 
-                {/* :
+            <FlatList
+                data={employeeList}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={(item) => item.id}
+                renderItem={(renderItem)}
+            />
+            {/* :
                 <View style={{ height: '100%', justifyContent: 'center', alignItems: 'center' }}>
 
                     <Text style={{ color: 'red', fontSize: 20, fontWeight: '700' }}>There are no employee apply</Text>
@@ -90,9 +90,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     image_container: {
-        height: '100%',
+        height: layout.height * 0.1,
         width: layout.height * 0.1,
-        marginRight: 5
+        marginRight: 5,
+        padding: 10
     },
     name_container: {
         height: '100%',

@@ -111,35 +111,55 @@ export const convertToTaskGeoJson = (locations: TaskType[]): GeoJSON.FeatureColl
     };
 };
 
-export const fetchApplication = (taskId: any, setApplication: any) => {
+export const fetchApplication = (taskId: string, setApplication: React.Dispatch<React.SetStateAction<Applications[] | undefined>>) => {
     const unsubscribeApplication = firestore()
         .collection('applications')
         .where('task_id', '==', taskId)
         .onSnapshot(async (querySnapshot) => {
             const application: Applications[] = [];
+            const applicationPromises: Promise<void>[] = [];
 
-            querySnapshot.forEach(doc => {
+            querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                application.push({
-                    id: doc.id,
-                    application_date: new Date(data.application_date.seconds * 1000 + data.application_date.nanoseconds / 1000000),
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    rating: data.rating,
-                    status: data.status,
-                    task_id: data.task_id,
-                    user_id: data.user_id
-                })
+                const applicationPromise = new Promise<void>((resolve, reject) => {
+                    firestore()
+                        .collection('users')
+                        .doc(data.user_id)
+                        .onSnapshot((userSnapshot) => {
+                            const userData = userSnapshot.data();
+                            if (userData) {
+                                application.push({
+                                    id: doc.id,
+                                    application_date: new Date(data.application_date.seconds * 1000 + data.application_date.nanoseconds / 1000000),
+                                    first_name: userData.first_name,
+                                    last_name: userData.last_name,
+                                    rating: data.rating,
+                                    status: data.status,
+                                    task_id: data.task_id,
+                                    user_id: data.user_id,
+                                    avatar: userData.avatar,
+                                    fcmToken: userData.fcmToken
+                                });
+                            }
+                            resolve();
+                        }, reject);
+                });
 
+                applicationPromises.push(applicationPromise);
             });
-            setApplication(application)
+
+            await Promise.all(applicationPromises);
+
+            setApplication(application);
         }, (error) => {
             console.error('Error fetching user locations from Firestore: ', error);
         });
+
     return () => {
         unsubscribeApplication();
     };
-}
+};
+
 
 export const hanleAccepted = (item: Applications) => {
     const { id, ...itemWithoutId } = item;
@@ -162,7 +182,6 @@ export const fetchEmployee = (setEmployeeList: any) => {
         .where('role', '==', 'employee')
         .onSnapshot(async (querySnapshot) => {
             const employeeList: iUser[] = [];
-
             querySnapshot.forEach(doc => {
                 const data = doc.data()
                 if (data) {
@@ -177,7 +196,9 @@ export const fetchEmployee = (setEmployeeList: any) => {
                         rating: data.rating,
                         role: data.role,
                         email: data.email,
-                        fcmToken: data.fcmToken
+                        fcmToken: data.fcmToken,
+                        avatar: data.avatar,
+                        cover: data.cover
                     };
                     employeeList.push(formattedUserData)
                 }

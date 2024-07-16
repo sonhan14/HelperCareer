@@ -11,61 +11,53 @@ interface ProfileImageSectionProps {
         avatar: string;
         cover: string;
     };
-    loading: {
-        avatarLoading: boolean;
-        coverLoading: boolean;
-    };
     pickImages?: (type: number) => void;
     user: iUser | null;
     isEditable: boolean;
 }
 
-const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({ image, loading, pickImages, user, isEditable }) => {
+const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({ image, pickImages, user, isEditable }) => {
     return (
         <>
-            {!loading.coverLoading ?
-                <TouchableOpacity 
-                    style={styles.title_container} 
-                    onPress={() => isEditable && pickImages && pickImages(1)}
-                    disabled={!isEditable}
-                >
-                    <Image 
-                        source={image.cover === images.background_pic ? images.background_pic : { uri: image.cover }}
-                        resizeMode='cover'
-                        style={{ width: '100%', height: '100%' }} 
-                    />
-                    {isEditable && (
-                        <TouchableOpacity style={styles.cover_image} onPress={() => pickImages && pickImages(1)}>
-                            <Icon name="camera" size={15} color={'black'} />
-                            <Text style={[styles.text_15, { marginLeft: 5 }]}>Change cover image</Text>
-                        </TouchableOpacity>
-                    )}
-                </TouchableOpacity>
-                :
-                <ActivityIndicator size="large" color="#0000ff" style={styles.title_container}/>
-            }
+
+            <TouchableOpacity
+                style={styles.title_container}
+                onPress={() => isEditable && pickImages && pickImages(1)}
+                disabled={!isEditable}
+            >
+                <Image
+                    source={image.cover === images.background_pic ? images.background_pic : { uri: image.cover }}
+                    resizeMode='cover'
+                    style={{ width: '100%', height: '100%' }}
+                />
+                {isEditable && (
+                    <TouchableOpacity style={styles.cover_image} onPress={() => pickImages && pickImages(1)}>
+                        <Icon name="camera" size={15} color={'black'} />
+                        <Text style={[styles.text_15, { marginLeft: 5 }]}>Change cover image</Text>
+                    </TouchableOpacity>
+                )}
+            </TouchableOpacity>
+
 
             <View style={styles.avatar_info_container}>
-                {!loading.avatarLoading ?
-                    <TouchableOpacity 
-                        style={styles.avatar_container} 
-                        onPress={() => isEditable && pickImages && pickImages(0)}
-                        disabled={!isEditable}
-                    >
-                        {isEditable && (
-                            <View style={styles.camera_avatar_container}>
-                                <Icon name="camera" size={15} color={'white'} />
-                            </View>
-                        )}
-                        <Image 
-                            source={image.avatar === images.avartar_pic ? images.avartar_pic : { uri: image.avatar }}
-                            resizeMode='cover'
-                            style={{ height: '100%', width: '100%', borderRadius: 100 }} 
-                        />
-                    </TouchableOpacity>
-                    :
-                    <ActivityIndicator size="large" color="#0000ff" />
-                }
+
+                <TouchableOpacity
+                    style={styles.avatar_container}
+                    onPress={() => isEditable && pickImages && pickImages(0)}
+                    disabled={!isEditable}
+                >
+                    {isEditable && (
+                        <View style={styles.camera_avatar_container}>
+                            <Icon name="camera" size={15} color={'white'} />
+                        </View>
+                    )}
+                    <Image
+                        source={image.avatar === images.avartar_pic ? images.avartar_pic : { uri: image.avatar }}
+                        resizeMode='cover'
+                        style={{ height: '100%', width: '100%', borderRadius: 100 }}
+                    />
+                </TouchableOpacity>
+
 
                 <View style={styles.name_info_container}>
                     <Text style={styles.text_20}>

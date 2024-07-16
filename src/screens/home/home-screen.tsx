@@ -2,7 +2,7 @@ import { FlatList, Modal, PermissionsAndroid, Platform, StyleSheet, Text, TextIn
 
 import { useEffect, useState } from "react";
 import { RootStackParamList, RootTabParamList } from "../../navigations/navigation";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { RouteProp, useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
 import Mapbox, { Image, Images, LocationPuck, ShapeSource, SymbolLayer } from '@rnmapbox/maps';
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
@@ -17,6 +17,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { color } from "../../constants/colors/color";
 import { EmployeeListHome } from "./employee-list";
 import { useEmployee } from "../../context/EmployeeContext";
+import { Applications } from "../../../types/applications.type";
 
 
 
@@ -32,10 +33,15 @@ export const HomeScreen = () => {
     const [employeeList, setEmployeeList] = useState<iUser[]>()
     const [isModal, setIsModal] = useState<boolean>(false);
     const [currentTask, setCurrentTask] = useState<TaskType>()
-    const [applicationList, setApplicationList] = useState<any>(null)
+    const [applicationList, setApplicationList] = useState<Applications[]>()
     const userData = useSelector(selectUserData);
-    const payload = { userId: 'your_user_id', role: 'admin' };
-    const options = { expiresIn: '1h' };
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        if (!isFocused) {
+            setIsModal(false)
+        }
+    }, [isFocused]);
 
     const { isEmployee, setIsEmployee } = useEmployee();
 
@@ -47,12 +53,13 @@ export const HomeScreen = () => {
 
         return () => {
             unsubscribeEmployee();
-            unsubscribe();
+            unsubscribe()
         }
     }, [userData]);
 
     const animationHandle = () => {
         setIsEmployee(isEmployee === 0 ? 1 : 0)
+        setIsModal(false)
     }
 
 

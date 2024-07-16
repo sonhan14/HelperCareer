@@ -17,7 +17,7 @@ interface imodal {
     isOpen: boolean,
     setClose: () => void,
     item?: TaskType,
-    applicationList: Applications[]
+    applicationList: Applications[] | undefined
 }
 
 

@@ -1,26 +1,65 @@
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+
+import storage from '@react-native-firebase/storage';
+import { useSelector } from 'react-redux';
+import { selectUserData } from '../../redux/user/userSlice';
+import { images } from '../../images';
 import { iUser } from '../../../types/userType';
-import { formatDate } from '../../constants/formatDate';
 
-export const getData = async (userData: iUser) => {
 
-    const snapshot = await firestore().collection('users').doc(userData?.id).get();
-    if (snapshot.exists && userData?.id) {
-        const doc = snapshot.data();
-        const formattedUserData: iUser = {
-            id: userData.id,
-            birthday: formatDate(doc?.birthday),
-            first_name: doc?.first_name,
-            last_name: doc?.last_name,
-            gender: doc?.gender,
-            introduction: doc?.introduction,
-            phone: doc?.phone,
-            rating: doc?.rating,
-            role: doc?.role,
-            email: doc?.email,
-            fcmToken: doc?.fcmToken
-        };
-    } else {
-        console.log("No user found with the given ID");
+
+interface ImageProps {
+    setLoading: React.Dispatch<React.SetStateAction<{
+        avatarLoading: boolean;
+        coverLoading: boolean;
+    }>>,
+    setImage: React.Dispatch<React.SetStateAction<{
+        avatar: any;
+        cover: any;
+    }>>,
+    userData: iUser
+}
+
+export const getImgae = async ({ setLoading, setImage, userData }: ImageProps) => {
+
+    setLoading((prev: any) => ({
+        ...prev, avatarLoading: true
+    }))
+
+    setLoading((prev: any) => ({
+        ...prev, coverLoading: true
+    }))
+    const avatarRef = storage().ref(`users/${userData?.id}/avatar.jpg`);
+    try {
+        const avatarDownloadUrl = await avatarRef.getDownloadURL();
+        setImage(prev => ({
+            ...prev, avatar: avatarDownloadUrl
+        }));
+
+    } catch (error) {
+        setImage(prev => ({
+            ...prev, avatar: images.avartar_pic
+        }));
     }
-};
+
+    const coverRef = storage().ref(`users/${userData?.id}/cover.jpg`);
+    try {
+        const coverDownloadUrl = await coverRef.getDownloadURL();
+        setImage(prev => ({
+            ...prev, cover: coverDownloadUrl
+        }));
+
+
+    } catch (error) {
+        setImage(prev => ({
+            ...prev, cover: images.background_pic
+        }));
+    }
+    setLoading(prev => ({
+        ...prev, coverLoading: false
+    }))
+    setLoading(prev => ({
+        ...prev, avatarLoading: false
+    }))
+}
+

@@ -1,4 +1,4 @@
-import { Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Animated, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { layout } from "../../constants/dimensions/dimension"
 import Icon from "react-native-vector-icons/AntDesign"
 import { color } from "../../constants/colors/color"
@@ -13,6 +13,7 @@ import { Task, TaskType } from "../../../types/taskType"
 import { fetchTasks } from "./task-helper"
 import { useSelector } from "react-redux"
 import { selectUserData } from "../../redux/user/userSlice"
+import { images } from "../../images"
 
 const AnimatedCicle = Animated.createAnimatedComponent(Circle)
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -190,13 +191,17 @@ export const TaskScreen = () => {
                     </View>
                 </View>
                 <View style={styles.list_container}>
-                    <FlatList
-                        // style={{ backgroundColor: color.light_background }}
-                        data={tasksListFillter}
-                        renderItem={({ item }) => <TaskItem item={item} />}
-                        keyExtractor={(item) => item.id}
-                        showsVerticalScrollIndicator={false}
-                    />
+                    {tasksListFillter.length === 0 ?
+                        <Image source={images.task_empty} resizeMode='contain' style={styles.task_empty} />
+                        :
+                        <FlatList
+                            data={tasksListFillter}
+                            renderItem={({ item }) => <TaskItem item={item} />}
+                            keyExtractor={(item) => item.id}
+                            showsVerticalScrollIndicator={false}
+                        />
+                    }
+
                 </View>
             </View>
             {isModal ? <TaskModal isModal={isModal} closeModal={() => closeModal()} item={null} /> : null}
@@ -299,6 +304,11 @@ const styles = StyleSheet.create({
     list_container: {
         width: layout.width,
         height: (layout.height * 0.15 + 15) * 3,
-        alignItems: 'center'
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    task_empty: {
+        height: layout.height * 0.3,
+        width: layout.width
     }
 });

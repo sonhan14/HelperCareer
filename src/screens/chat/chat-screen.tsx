@@ -30,7 +30,7 @@ export const ChatScreen = () => {
         const renderItem = ({ item }: { item: messagesBox }) => (
             <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.received_id, item.id, item.name, item.fcmToken)}>
                 <Image
-                    source={images.avartar_pic}
+                    source={{ uri: item.avatar }}
                     style={{ width: 60, height: 60, borderRadius: 30 }}
                 />
                 <Text style={{ marginTop: 5, color: 'black' }}>{truncateText(item.name, 6)}</Text>
@@ -56,30 +56,26 @@ export const ChatScreen = () => {
             .where('members', 'array-contains', userData?.id)
             .onSnapshot(async (querySnapshot) => {
                 const filteredChats: any[] = [];
+
                 const promises = querySnapshot.docs.map(async (documentSnapshot) => {
                     const data = documentSnapshot.data();
                     const members = data.members;
                     const receive_id = members.filter((member: any) => member !== userData?.id);
-                    const avatarRef = storage().ref(`users/${receive_id[0]}/avatar.jpg`);
-                    let avatarDownloadUrl;
-                    try {
-                        avatarDownloadUrl = await avatarRef.getDownloadURL();
-                    } catch (error) {
-                        avatarDownloadUrl = images.avartar_pic;
-                    }
 
-                    const userSnapshot = await firestore().collection('users').doc(receive_id[0]).get();
-                    const receive_info = userSnapshot.data();
-
-                    filteredChats.push({
-                        id: documentSnapshot.id,
-                        name: receive_info?.last_name + ' ' + receive_info?.first_name,
-                        avatar: avatarDownloadUrl,
-                        received_id: receive_id[0],
-                        lastMessage: data.lastMessage || '',
-                        lastMessageTimestamp: data.lastMessageTimestamp || firestore.Timestamp.now(),
-                        fcmToken: receive_info?.fcmToken
-                    });
+                    firestore().collection('users').doc(receive_id[0]).onSnapshot(async (userSnapshot) => {
+                        const userData = userSnapshot.data()
+                        if (userData) {
+                            filteredChats.push({
+                                id: documentSnapshot.id,
+                                name: userData.last_name + ' ' + userData.first_name,
+                                avatar: userData.avatar,
+                                received_id: receive_id[0],
+                                lastMessage: data.lastMessage || '',
+                                lastMessageTimestamp: data.lastMessageTimestamp || firestore.Timestamp.now(),
+                                fcmToken: userData.fcmToken
+                            });
+                        }
+                    })
                 });
 
                 await Promise.all(promises);

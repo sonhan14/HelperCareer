@@ -88,7 +88,7 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
                     <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.received_id, item.id, item.name, item.fcmToken)} activeOpacity={1}>
                         <View style={styles.message_box_avatar}>
                             <Image
-                                source={images.avartar_pic}
+                                source={{ uri: item.avatar }}
                                 style={{ width: '80%', height: '80%', borderRadius: 50 }}
                             />
                         </View>

@@ -67,7 +67,9 @@ export const LoginScreen = () => {
                     rating: check?.rating,
                     role: check?.role,
                     email: email,
-                    fcmToken: check?.fcmToken
+                    fcmToken: check?.fcmToken,
+                    avatar: check?.avatar,
+                    cover: check?.cover
                 };
                 dispatch(setUserData(formattedUserData));
                 await AsyncStorage.setItem('userEmail', email);

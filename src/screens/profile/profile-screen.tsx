@@ -1,6 +1,6 @@
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RootStackParamList } from "../../navigations/navigation";
-
+import firestore from '@react-native-firebase/firestore';
 import { useEffect, useLayoutEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { layout } from "../../constants/dimensions/dimension";
@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearUserData, selectUserData } from "../../redux/user/userSlice";
 import { EditProfile } from "./profile-edit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getImgae } from "./profile-helper";
 
 
 
@@ -33,11 +34,11 @@ export const ProfileScreen = () => {
         avatar: images.avartar_pic,
         cover: images.background_pic,
     })
-    const dispatch =useDispatch()
-    const [loading, setLoading] = useState({
-        avatarLoading: false,
-        coverLoading: false
-    });
+    const dispatch = useDispatch()
+    // const [loading, setLoading] = useState({
+    //     avatarLoading: false,
+    //     coverLoading: false
+    // });
 
     const openEdit = () => {
         if (userData) {
@@ -63,51 +64,12 @@ export const ProfileScreen = () => {
         }
     };
 
-    const getImgae = async () => {
-        setLoading(prev => ({
-            ...prev, avatarLoading: true
-        }))
-
-        setLoading(prev => ({
-            ...prev, coverLoading: true
-        }))
-        const avatarRef = storage().ref(`users/${userData?.id}/avatar.jpg`);
-        try {
-            const avatarDownloadUrl = await avatarRef.getDownloadURL();
-            setImage(prev => ({
-                ...prev, avatar: avatarDownloadUrl
-            }));
-
-        } catch (error) {
-            setImage(prev => ({
-                ...prev, avatar: images.avartar_pic
-            }));
-        }
-
-        const coverRef = storage().ref(`users/${userData?.id}/cover.jpg`);
-        try {
-            const coverDownloadUrl = await coverRef.getDownloadURL();
-            setImage(prev => ({
-                ...prev, cover: coverDownloadUrl
-            }));
-
-
-        } catch (error) {
-            setImage(prev => ({
-                ...prev, cover: images.background_pic
-            }));
-        }
-        setLoading(prev => ({
-            ...prev, coverLoading: false
-        }))
-        setLoading(prev => ({
-            ...prev, avatarLoading: false
-        }))
-    }
-
-
     useEffect(() => {
-        getImgae()
+        if (userData) {
+            setImage((prev) => ({
+                ...prev, avatar: userData.avatar, cover: userData.cover
+            }))
+        }
     }, [userData]);
 
     const pickImages = async (type: number) => {
@@ -137,6 +99,26 @@ export const ProfileScreen = () => {
 
                 const storageRef = storage().ref(`users/${userData?.id}/${fileName}`);
                 await storageRef.putFile(uploadUri);
+                try {
+                    const imageUrl = await storageRef.getDownloadURL();
+                    type === 0 ?
+                        await firestore()
+                            .collection('users')
+                            .doc(userData?.id)
+                            .update({
+                                avatar: imageUrl,
+                            })
+                        :
+                        await firestore()
+                            .collection('users')
+                            .doc(userData?.id)
+                            .update({
+                                cover: imageUrl,
+                            })
+
+                } catch (error) {
+                    console.error('Image upload error: ', error);
+                }
 
             }
         } catch (error) {
@@ -149,7 +131,6 @@ export const ProfileScreen = () => {
         <SafeAreaView style={styles.container}>
             <ProfileImageSection
                 image={image}
-                loading={loading}
                 pickImages={pickImages}
                 user={userData}
                 isEditable={true}

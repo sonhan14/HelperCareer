@@ -70,7 +70,9 @@ export default function AppNavigator() {
                                 rating: check?.rating,
                                 role: check?.role,
                                 email: userEmail,
-                                fcmToken: check?.fcmToken
+                                fcmToken: check?.fcmToken,
+                                avatar: check?.avatar,
+                                cover: check?.cover
                             };
                             await dispatch(setUserData(formattedUserData));
                             // }

@@ -11,7 +11,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 type EmployeeFrofileProp = StackNavigationProp<RootStackParamList>;
 
 
-export const handleChat = (employeeID: string, userId: any, navigation: EmployeeFrofileProp, receiverName: string) => {
+export const handleChat = (employeeID: string, userId: any, navigation: EmployeeFrofileProp, receiverName: string, fcmToken: string) => {
     const memberIds = [employeeID, userId];
     const filteredChats: any[] = [];
 
@@ -27,7 +27,7 @@ export const handleChat = (employeeID: string, userId: any, navigation: Employee
                     });
                 }
             });
-            navigation.navigate('ChatBox', { receiverId: employeeID, chatId: filteredChats.length ? filteredChats[0].id : null, receiverName: receiverName });
+            navigation.navigate('ChatBox', { receiverId: employeeID, chatId: filteredChats.length ? filteredChats[0].id : null, receiverName: receiverName, fcmToken: fcmToken });
         })
         .catch(error => {
             console.error('Error getting documents: ', error);
@@ -48,7 +48,9 @@ export const getDetail = async (employeeID: string, setUser: any,) => {
             phone: doc?.phone,
             rating: doc?.rating,
             email: doc?.email,
-            fcmToken: doc?.fcmToken
+            fcmToken: doc?.fcmToken,
+            avatar: doc?.avatar,
+            cover: doc?.cover,
         };
 
         setUser(formattedUserData);

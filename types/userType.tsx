@@ -10,4 +10,7 @@ export type iUser = {
     role?: string,
     email: string,
     fcmToken: string,
+    avatar: string | undefined,
+    cover: string | undefined
+
 };

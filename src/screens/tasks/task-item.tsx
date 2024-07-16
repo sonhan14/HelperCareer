@@ -16,7 +16,7 @@ export const TaskItem = ({ item }: { item: TaskType }) => {
     return (
         <View style={styles.container}>
             <View style={styles.header_container}>
-                <Image source={images.avartar_pic} resizeMode='contain' style={styles.image_style} />
+                <Image source={images.task_image} resizeMode='contain' style={styles.image_style} />
                 <View style={styles.task_info_container}>
                     <Text style={styles.text_black_20}>{item.task_name}</Text>
                     <Text style={styles.text_black_15}>{item.start_date} - {item.end_date}</Text>

@@ -20,10 +20,13 @@ interface EmployeeListHomeProps {
 }
 
 const EmployeeItem = ({ item, naigation }: { item: iUser, naigation: HomeScreenRouteProp }) => {
+    if (!item) {
+        return
+    }
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.header_container} onPress={() => naigation.navigate('EmployeeProfile', { employeeId: item.id })}>
-                <Image source={images.avartar_pic} resizeMode='contain' style={styles.image_style} />
+                <Image source={item.avatar === undefined ? images.avartar_pic : { uri: item.avatar }} resizeMode='contain' style={styles.image_style} />
                 <View style={styles.task_info_container}>
                     <Text style={styles.text_black_20}>{item.last_name} {item.first_name}</Text>
                     <Text style={styles.text_black_15}>{item.birthday}</Text>
@@ -221,8 +224,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     image_style: {
-        height: '100%',
-        width: layout.height * 0.15 * 0.6
+        height: layout.height * 0.15 * 0.6,
+        width: layout.height * 0.15 * 0.6,
+        borderRadius: 100
     },
     task_info_container: {
         height: '100%',
@@ -237,12 +241,12 @@ const styles = StyleSheet.create({
     text_black_15: {
         color: 'black',
         fontSize: 14,
-        fontWeight: '400'
+        fontWeight: '500'
     },
     text_red_15: {
         color: 'red',
         fontSize: 14,
-        fontWeight: '400'
+        fontWeight: '500'
     },
     view_button: {
         height: '30%',

@@ -199,6 +199,8 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
             ReverseGeocoding()
         }
     }, [item])
+
+
     return (
         <Modal
             animationType={'slide'}

@@ -28,7 +28,7 @@ type TaskDetailNavigation = StackNavigationProp<RootStackParamList, 'TaskDetail'
 export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
     const item = route.params.TaskId;
     const [taskDetail, setTaskDetail] = useState<TaskType | null>(null);
-    const [applicationList, setApplicationList] = useState<any>(null)
+    const [applicationList, setApplicationList] = useState<Applications[]>()
     const navigation = useNavigation<TaskDetailNavigation>();
     const handleBack = () => {
         navigation.goBack()
@@ -75,11 +75,12 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
         }
     }, [item])
 
+
     const renderItem = ({ item }: { item: Applications }) => {
         return (
-            <TouchableOpacity style={styles.employee_container} onPress={() => { handleChat(item.user_id, userData?.id, navigation, item.last_name + ' ' + item.first_name) }}>
+            <TouchableOpacity style={styles.employee_container} onPress={() => { handleChat(item.user_id, userData?.id, navigation, item.last_name + ' ' + item.first_name, item.fcmToken) }}>
                 <View style={styles.image_container}>
-                    <Image source={images.avartar_pic} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
+                    <Image source={{ uri: item.avatar }} resizeMode='contain' style={{ height: '100%', width: '100%', borderRadius: 100 }} />
                 </View>
                 <View style={styles.name_container}>
                     <Text style={styles.text_title}>Name: {item.last_name} {item.first_name}</Text>
@@ -124,13 +125,18 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
 
                 <Text style={[styles.text_title, { marginLeft: 10 }]}>Active Employees</Text>
                 <View style={styles.application_container}>
-                    {applicationList &&
+                    {applicationList && applicationList.filter(app => app.status === 'accepted').length !== 0 ?
                         <FlatList
-                            data={applicationList.filter((app: Applications) => app.status === 'accepted')}
+                            data={applicationList.filter(app => app.status === 'accepted')}
                             showsVerticalScrollIndicator={false}
                             keyExtractor={(item) => item.id}
                             renderItem={(renderItem)}
-                        />}
+                        />
+                        :
+                        <View>
+                            <Image source={images.list_empty} />
+                        </View>
+                    }
 
                 </View>
 
@@ -191,9 +197,10 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     image_container: {
-        height: '100%',
+        height: layout.height * 0.1,
         width: layout.height * 0.1,
         marginRight: 5,
+        padding: 5
     },
     name_container: {
         height: '100%',
