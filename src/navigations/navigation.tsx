@@ -9,6 +9,7 @@ export type RootStackParamList = {
         receiverId: string,
         chatId: string,
         receiverName: string,
+        fcmToken: string
 
     },
     EmployeeProfile: { employeeId: string, },

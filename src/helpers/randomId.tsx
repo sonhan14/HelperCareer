@@ -1,6 +1,7 @@
 import CryptoJS from 'crypto-js';
 import { JWTPayload } from '../../types/JwtPayload';
 import base64url from "base64url";
+import axios from 'axios';
 
 export function generateRandomId() {
     // Tạo một chuỗi ngẫu nhiên
@@ -26,3 +27,7 @@ export const createJWT = (payload: JWTPayload, secretKey: string): string => {
 
     return `${data}.${signature}`;
 };
+
+
+
+

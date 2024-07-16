@@ -102,11 +102,7 @@ export default function AppNavigator() {
     return (
         <EmployeeProvider>
             <NavigationContainer>
-                <VideoProvider>
-                    <CallProvider>
-                        <StackNavigator />
-                    </CallProvider>
-                </VideoProvider>
+                <StackNavigator />
             </NavigationContainer>
         </EmployeeProvider>
     );

@@ -5,4 +5,5 @@ export type messagesBox = {
     name: string,
     lastMessage: string,
     lastMessageTimestamp: any,
+    fcmToken: string
 }

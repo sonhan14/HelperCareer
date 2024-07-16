@@ -20,6 +20,8 @@ import { useEmployee } from "../../context/EmployeeContext";
 
 
 
+
+
 type HomeScreenRouteProp = StackNavigationProp<RootStackParamList>;
 Mapbox.setAccessToken('sk.eyJ1Ijoic29uaGFuMTQiLCJhIjoiY2x4dHI1N2Y1MDh3cDJxc2NteTBibjJkaSJ9.prG3DQ46R1SMRD80ztH3Mg');
 
@@ -32,6 +34,8 @@ export const HomeScreen = () => {
     const [currentTask, setCurrentTask] = useState<TaskType>()
     const [applicationList, setApplicationList] = useState<any>(null)
     const userData = useSelector(selectUserData);
+    const payload = { userId: 'your_user_id', role: 'admin' };
+    const options = { expiresIn: '1h' };
 
     const { isEmployee, setIsEmployee } = useEmployee();
 
@@ -40,7 +44,7 @@ export const HomeScreen = () => {
 
         const unsubscribe = fetchUserLocations(userData.id, setGeoJsonData, setTaskGeoJsonData);
         const unsubscribeEmployee = fetchEmployee(setEmployeeList)
-        
+
         return () => {
             unsubscribeEmployee();
             unsubscribe();
@@ -75,60 +79,60 @@ export const HomeScreen = () => {
     const handleCloseModal = () => {
         setIsModal(false)
     }
-        return (
-            <View style={styles.page}>
-                <View style={styles.container}>
-                    {employeeList ?
-                        <EmployeeListHome isEmployee={isEmployee} animationHandle={animationHandle} employeeList={employeeList} naigation={navigation}/>
-                        : 
-                        null
-                    }
+    return (
+        <View style={styles.page}>
+            <View style={styles.container}>
+                {employeeList ?
+                    <EmployeeListHome isEmployee={isEmployee} animationHandle={animationHandle} employeeList={employeeList} naigation={navigation} />
+                    :
+                    null
+                }
 
 
-                    <Mapbox.MapView style={styles.map} >
-                        <Mapbox.Camera
-                            followZoomLevel={11}
-                            followUserLocation
-                        />
-                        <LocationPuck puckBearingEnabled puckBearing='heading' />
-                        {geoJsonData && (
-                            <ShapeSource id="employee_locations" shape={geoJsonData} onPress={handleOpenEmployee}>
+                <Mapbox.MapView style={styles.map} >
+                    <Mapbox.Camera
+                        followZoomLevel={11}
+                        followUserLocation
+                    />
+                    <LocationPuck puckBearingEnabled puckBearing='heading' />
+                    {geoJsonData && (
+                        <ShapeSource id="employee_locations" shape={geoJsonData} onPress={handleOpenEmployee}>
 
-                                <SymbolLayer
-                                    id="employee_locations"
-                                    style={{
-                                        iconImage: 'avatar',
-                                        iconSize: 0.6,
-                                        iconAnchor: 'bottom-left',
-                                        iconAllowOverlap: true,
-                                        // textField: ['get', 'title'],
-                                        // textSize: 12,
-                                        // textAnchor: 'top',
-                                        // textOffset: [0, -1.5],
-                                        // textColor: 'red'
-                                    }} // Adjust iconSize as needed
-                                />
-                                <Mapbox.Images images={{ avatar: images.avartar_pic }}>
+                            <SymbolLayer
+                                id="employee_locations"
+                                style={{
+                                    iconImage: 'avatar',
+                                    iconSize: 0.6,
+                                    iconAnchor: 'bottom-left',
+                                    iconAllowOverlap: true,
+                                    // textField: ['get', 'title'],
+                                    // textSize: 12,
+                                    // textAnchor: 'top',
+                                    // textOffset: [0, -1.5],
+                                    // textColor: 'red'
+                                }} // Adjust iconSize as needed
+                            />
+                            <Mapbox.Images images={{ avatar: images.avartar_pic }}>
 
-                                </Mapbox.Images>
-                            </ShapeSource>
-                        )}
-                        {taskGeoJsonData && (
-                            <ShapeSource id="task_locations" shape={taskGeoJsonData} onPress={handleOpenTask}>
-                                <SymbolLayer
-                                    id="task_locations"
-                                    style={{ iconImage: 'taskImage', iconSize: 0.25, iconAnchor: 'bottom', iconAllowOverlap: true, }} // Adjust iconSize as needed
-                                />
-                                <Mapbox.Images images={{ taskImage: images.task_image }}>
+                            </Mapbox.Images>
+                        </ShapeSource>
+                    )}
+                    {taskGeoJsonData && (
+                        <ShapeSource id="task_locations" shape={taskGeoJsonData} onPress={handleOpenTask}>
+                            <SymbolLayer
+                                id="task_locations"
+                                style={{ iconImage: 'taskImage', iconSize: 0.25, iconAnchor: 'bottom', iconAllowOverlap: true, }} // Adjust iconSize as needed
+                            />
+                            <Mapbox.Images images={{ taskImage: images.task_image }}>
 
-                                </Mapbox.Images>
-                            </ShapeSource>
-                        )}
-                    </Mapbox.MapView>
-                </View>
-                <TaskInfo isOpen={isModal} setClose={handleCloseModal} item={currentTask} applicationList={applicationList} />
+                            </Mapbox.Images>
+                        </ShapeSource>
+                    )}
+                </Mapbox.MapView>
             </View>
-        )
+            <TaskInfo isOpen={isModal} setClose={handleCloseModal} item={currentTask} applicationList={applicationList} />
+        </View>
+    )
 
 
 }

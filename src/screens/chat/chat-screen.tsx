@@ -28,7 +28,7 @@ export const ChatScreen = () => {
 
     const AvatarFlatlist = () => {
         const renderItem = ({ item }: { item: messagesBox }) => (
-            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.received_id, item.id, item.name)}>
+            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.received_id, item.id, item.name, item.fcmToken)}>
                 <Image
                     source={images.avartar_pic}
                     style={{ width: 60, height: 60, borderRadius: 30 }}
@@ -36,7 +36,7 @@ export const ChatScreen = () => {
                 <Text style={{ marginTop: 5, color: 'black' }}>{truncateText(item.name, 6)}</Text>
             </TouchableOpacity>
         );
-    
+
         return (
             <FlatList
                 data={boxData}
@@ -48,7 +48,7 @@ export const ChatScreen = () => {
         );
     };
 
-    
+
 
     const subscribeToChat = () => {
         const unsubscribe = firestore()
@@ -78,6 +78,7 @@ export const ChatScreen = () => {
                         received_id: receive_id[0],
                         lastMessage: data.lastMessage || '',
                         lastMessageTimestamp: data.lastMessageTimestamp || firestore.Timestamp.now(),
+                        fcmToken: receive_info?.fcmToken
                     });
                 });
 
@@ -94,12 +95,12 @@ export const ChatScreen = () => {
         if (userData) {
             const unsubscribe = subscribeToChat();
             return () => unsubscribe();
-            
+
         }
     }, [userData]);
 
-    const goToChat = (receiverId: string, chatBoxId: string, receiverName: string) => {
-        navigation.navigate('ChatBox', {receiverId: receiverId, chatId: chatBoxId, receiverName: receiverName})
+    const goToChat = (receiverId: string, chatBoxId: string, receiverName: string, fcmToken: string) => {
+        navigation.navigate('ChatBox', { receiverId: receiverId, chatId: chatBoxId, receiverName: receiverName, fcmToken: fcmToken })
     }
 
 
@@ -120,7 +121,7 @@ export const ChatScreen = () => {
             <View style={styles.avatar_list_container}>
                 <AvatarFlatlist />
             </View>
-            <MessagesBoxList boxData={boxData} goToChat={goToChat}/>
+            <MessagesBoxList boxData={boxData} goToChat={goToChat} />
         </View>
     )
 }

@@ -9,7 +9,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { color } from "../../constants/colors/color";
 
-const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiverId: string, chatBoxId: string, receiverName: string) => void }) => {
+const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiverId: string, chatBoxId: string, receiverName: string, fcmToken: string) => void }) => {
 
     const dragX = useSharedValue(0);
     const height = useSharedValue(layout.height * 0.1);
@@ -85,7 +85,7 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
             </Animated.View>
             <GestureDetector gesture={gestureHandle}>
                 <Animated.View style={[styles.messageBox, animatedStyle]}>
-                    <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.received_id, item.id, item.name)} activeOpacity={1}>
+                    <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.received_id, item.id, item.name, item.fcmToken)} activeOpacity={1}>
                         <View style={styles.message_box_avatar}>
                             <Image
                                 source={images.avartar_pic}
@@ -106,7 +106,7 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
     )
 };
 
-export const MessagesBoxList = ({ boxData, goToChat }: { boxData: messagesBox[], goToChat: (receiverId: string, chatBoxId: string, receiverName: string) => void }) => {
+export const MessagesBoxList = ({ boxData, goToChat }: { boxData: messagesBox[], goToChat: (receiverId: string, chatBoxId: string, receiverName: string, fcmToken: string) => void }) => {
 
     return (
         <FlatList

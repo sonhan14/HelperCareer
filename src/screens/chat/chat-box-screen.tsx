@@ -32,6 +32,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     const navigation = useNavigation<ChatBoxNavigationProp>()
     const receiverId = route.params.receiverId
     const receiverName = route.params.receiverName
+    const fcmToken = route.params.fcmToken
     const [chatBoxId, setChatBoxId] = useState<string>(route.params.chatId)
     const [call, setCall] = useState<Call | null>(null);
     const client = useStreamVideoClient();
@@ -45,9 +46,10 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     const [image, setImage] = useState<string>('')
 
     useEffect(() => {
-        console.log(messages);
+        console.log(fcmToken);
 
-    }, [messages])
+
+    }, [])
     useEffect(() => {
         getImgae()
     }, [chatBoxId])

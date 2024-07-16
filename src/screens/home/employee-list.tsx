@@ -22,7 +22,7 @@ interface EmployeeListHomeProps {
 const EmployeeItem = ({ item, naigation }: { item: iUser, naigation: HomeScreenRouteProp }) => {
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.header_container} onPress={() => naigation.navigate('EmployeeProfile', {employeeId: item.id})}>
+            <TouchableOpacity style={styles.header_container} onPress={() => naigation.navigate('EmployeeProfile', { employeeId: item.id })}>
                 <Image source={images.avartar_pic} resizeMode='contain' style={styles.image_style} />
                 <View style={styles.task_info_container}>
                     <Text style={styles.text_black_20}>{item.last_name} {item.first_name}</Text>
@@ -62,7 +62,7 @@ export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, na
         const borderRadius = interpolate(
             height.value,
             [40, layout.height * 0.6, layout.height],
-            [100, 40, 0]
+            [20, 10, 0]
         );
 
         const width = interpolate(
@@ -80,7 +80,7 @@ export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, na
         return {
             height: height.value,
             width,
-            // borderRadius,
+            borderRadius,
             backgroundColor: bgColor,
         };
     });
@@ -117,7 +117,7 @@ export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, na
         );
         const translateX = interpolate(
             height.value,
-            [40,  layout.height],
+            [40, layout.height],
             [-layout.width, 0]
         );
 
@@ -163,10 +163,10 @@ export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, na
                 />
             </Animated.View>
             <Animated.View style={[styles.employee_list, employeeAnimation]}>
-                <Text style={[styles.text_black_15, {marginBottom: 10}]}>Number of employees: {filteredEmployeeList.length}</Text>
+                <Text style={[styles.text_black_15, { marginBottom: 10 }]}>Number of employees: {filteredEmployeeList.length}</Text>
                 <FlatList
                     data={filteredEmployeeList}
-                    renderItem={({ item }) => <EmployeeItem item={item} naigation={naigation}/>}
+                    renderItem={({ item }) => <EmployeeItem item={item} naigation={naigation} />}
                     keyExtractor={(item) => item.id}
                     showsVerticalScrollIndicator={false}
                 />
