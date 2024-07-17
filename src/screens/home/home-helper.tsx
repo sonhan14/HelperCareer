@@ -1,7 +1,7 @@
 // File: helpers.ts
 import firestore from '@react-native-firebase/firestore';
 import { Location } from '../../../types/homeTypes';
-import { TaskType } from '../../../types/taskType';
+import { Task } from '../../../types/taskType';
 import { Applications } from '../../../types/applications.type';
 import { iUser } from '../../../types/userType';
 import { formatDate } from '../../constants/formatDate';
@@ -38,24 +38,24 @@ export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskG
         .collection('tasks')
         .where('user_id', '==', userID)
         .onSnapshot(async (taskQuerySnapshot) => {
-            const taskLocations: TaskType[] = [];
+            const taskLocations: Task[] = [];
 
             taskQuerySnapshot.forEach(doc => {
                 const data = doc.data();
 
                 if (data.location && data.location.latitude !== undefined && data.location.longitude !== undefined) {
                     taskLocations.push({
-                        latitude: data.location.latitude,
-                        longitude: data.location.longitude,
+                        location: data.location,
                         id: doc.id,
                         task_name: data.task_name,
-                        task_des: data.task_description,
+                        task_description: data.task_description,
                         start_date: formatDate(data.start_date),
                         end_date: formatDate(data.end_date),
                         status: data.status
                     });
                 }
             });
+            // console.log('taskLocations', taskLocations);
 
             const taskGeoJson = convertToTaskGeoJson(taskLocations);
             setTaskGeoJsonData(taskGeoJson);
@@ -88,17 +88,17 @@ export const convertToGeoJson = (locations: Location[]): GeoJSON.FeatureCollecti
     };
 };
 
-export const convertToTaskGeoJson = (locations: TaskType[]): GeoJSON.FeatureCollection<GeoJSON.Point> => {
+export const convertToTaskGeoJson = (locations: Task[]): GeoJSON.FeatureCollection<GeoJSON.Point> => {
     const features: GeoJSON.Feature<GeoJSON.Point>[] = locations.map(location => ({
         type: 'Feature',
         geometry: {
             type: 'Point',
-            coordinates: [location.longitude, location.latitude] as [number, number]
+            coordinates: [location.location.longitude, location.location.latitude] as [number, number]
         },
         properties: {
             task_name: location.task_name,
             id: location.id, // Add user ID
-            task_des: location.task_des,
+            task_description: location.task_description,
             start_date: location.start_date,
             end_date: location.end_date,
             status: location.status,
@@ -112,6 +112,7 @@ export const convertToTaskGeoJson = (locations: TaskType[]): GeoJSON.FeatureColl
 };
 
 export const fetchApplication = (taskId: string, setApplication: React.Dispatch<React.SetStateAction<Applications[] | undefined>>) => {
+
     const unsubscribeApplication = firestore()
         .collection('applications')
         .where('task_id', '==', taskId)

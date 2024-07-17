@@ -13,11 +13,11 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-na
 import { Marker } from "react-native-maps";
 import { images } from "../../images";
 import { KeyboardAvoidingView } from "react-native";
-import { Task, TaskType } from "../../../types/taskType";
+import { Task } from "../../../types/taskType";
 import { AddNew } from "./task-helper";
 import { selectUserData } from "../../redux/user/userSlice";
 import { useSelector } from "react-redux";
-import { convertStringToDate } from "../../constants/formatDate";
+import { convertStringToDate, parseDate } from "../../constants/formatDate";
 
 
 
@@ -30,7 +30,7 @@ interface Feature {
 
 
 
-export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, closeModal: () => void, item: TaskType | null }) => {
+export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, closeModal: () => void, item: Task | null }) => {
     const userData = useSelector(selectUserData);
     const [loading, setLoading] = useState<boolean>(false)
     const [showDatePicker, setShowDatePicker] = useState({
@@ -56,25 +56,23 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
     });
 
     const initialTaskData: Task = {
+        id: '',
         task_name: '',
         task_description: '',
         user_id: userData?.id,
         location: new GeoPoint(0, 0),
         status: 'process',
-        start_date: new Date(),
-        end_date: new Date(),
-
+        start_date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        end_date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
     };
 
-    const [taskItem, setTaskItem] = useState<Task>(item === null ? initialTaskData : {
-        task_name: item.task_name,
-        task_description: item.task_des,
-        user_id: userData?.id,
-        location: new GeoPoint(item.latitude, item.longitude),
-        status: item.status,
-        start_date: convertStringToDate(item.start_date),
-        end_date: convertStringToDate(item.end_date),
-    })
+
+
+    const [taskItem, setTaskItem] = useState<Task>(item ?? initialTaskData)
+    useEffect(() => {
+        console.log(taskItem);
+
+    }, [taskItem])
     const [query, setQuery] = useState<string>('');
     const [results, setResults] = useState<Feature[]>([]);
     const [selectedLocation, setSelectedLocation] = useState<Feature>();
@@ -110,8 +108,8 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
         try {
             const response = await axios.get('https://api.mapbox.com/search/geocode/v6/reverse', {
                 params: {
-                    longitude: item?.longitude,
-                    latitude: item?.latitude,
+                    longitude: item?.location.longitude,
+                    latitude: item?.location.latitude,
                     access_token: 'sk.eyJ1Ijoic29uaGFuMTQiLCJhIjoiY2x4dHI1N2Y1MDh3cDJxc2NteTBibjJkaSJ9.prG3DQ46R1SMRD80ztH3Mg',
                     proximity: '105.7827,21.0285', // Center point in Hanoi
                     bbox: '102.14441,8.17966,109.46464,23.393395', // Bounding box around Vietnam
@@ -165,7 +163,7 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
             });
             return;
         }
-        const currentDate = selectedDate || taskItem.start_date;
+        const currentDate = selectedDate || parseDate(taskItem.start_date);
         setShowDatePicker({
             showStartDate: false,
             showEndDate: false
@@ -174,13 +172,13 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
         if (showDatePicker.showStartDate) {
             setTaskItem(prevState => ({
                 ...prevState,
-                start_date: currentDate,
-                end_date: currentDate > taskItem.end_date ? currentDate : taskItem.end_date
+                start_date: currentDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                end_date: currentDate > parseDate(taskItem.end_date) ? currentDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : taskItem.end_date
             }));
         } else if (showDatePicker.showEndDate) {
             setTaskItem(prevState => ({
                 ...prevState,
-                end_date: currentDate > taskItem.start_date ? currentDate : taskItem.start_date
+                end_date: currentDate > parseDate(taskItem.start_date) ? currentDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : taskItem.start_date
             }));
         }
     };
@@ -206,149 +204,148 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
             animationType={'slide'}
             visible={isModal}
         >
+
             <Appbar.Header style={styles.header_container}>
                 <Appbar.BackAction onPress={() => { handleBack() }} />
                 <Appbar.Content title={'Add new task'} titleStyle={{ color: 'black', fontWeight: '700' }} />
             </Appbar.Header>
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-                <View style={styles.main_container}>
+
+            <View style={styles.main_container}>
+                <TextInput
+                    mode="outlined"
+                    label="Task Name"
+                    value={taskItem.task_name}
+                    onChangeText={(text) => { setTaskItem(prev => ({ ...prev, task_name: text })) }}
+                    style={styles.input_container}
+                />
+                <TextInput
+                    mode="outlined"
+                    label="Task Description"
+                    value={taskItem.task_description}
+                    onChangeText={(text) => { setTaskItem(prev => ({ ...prev, task_description: text })) }}
+                    style={[styles.input_container, { height: layout.height * 0.15 }]}
+                    numberOfLines={4}
+                    multiline={true}
+                    scrollEnabled={true}
+                    textAlign="center"
+                />
+
+                <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showStartDate: true }))}>
                     <TextInput
                         mode="outlined"
-                        label="Task Name"
-                        value={taskItem.task_name}
-                        onChangeText={(text) => { setTaskItem(prev => ({ ...prev, task_name: text })) }}
+                        label="Start Date"
+                        value={taskItem.start_date}
                         style={styles.input_container}
+                        editable={false}
+
                     />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showEndDate: true }))}>
                     <TextInput
                         mode="outlined"
-                        label="Task Description"
-                        value={taskItem.task_description}
-                        onChangeText={(text) => { setTaskItem(prev => ({ ...prev, task_description: text })) }}
-                        style={[styles.input_container, { height: layout.height * 0.15 }]}
-                        numberOfLines={4}
-                        multiline={true}
-                        scrollEnabled={true}
-                        textAlign="center"
+                        label="End Date"
+                        value={taskItem.end_date}
+                        style={styles.input_container}
+                        editable={false}
                     />
+                </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showStartDate: true }))}>
+                <View style={styles.map}>
+                    <Animated.View style={[styles.search_container, animatedStyle]}>
                         <TextInput
                             mode="outlined"
-                            label="Start Date"
-                            value={taskItem.start_date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                            style={styles.input_container}
-                            editable={false}
-
+                            style={styles.input_search}
+                            placeholder="Search for an address"
+                            value={query}
+                            onChangeText={searchAddress}
+                            onPress={() => {
+                                searchAnimation()
+                                searchAddress(query)
+                            }}
                         />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showEndDate: true }))}>
-                        <TextInput
-                            mode="outlined"
-                            label="End Date"
-                            value={taskItem.end_date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                            style={styles.input_container}
-                            editable={false}
-                        />
-                    </TouchableOpacity>
-
-                    <View style={styles.map}>
-                        <Animated.View style={[styles.search_container, animatedStyle]}>
-                            <TextInput
-                                mode="outlined"
-                                style={styles.input_search}
-                                placeholder="Search for an address"
-                                value={query}
-                                onChangeText={searchAddress}
-                                onPress={() => {
-                                    searchAnimation()
-                                    searchAddress(query)
-                                }}
-                            />
-                            <FlatList
-                                data={results}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity style={styles.item} onPress={() => selectLocation(item)}>
-                                        <Text>{item.full_address}</Text>
-                                    </TouchableOpacity>
-                                )}
-                                showsVerticalScrollIndicator={false}
-                            />
-                        </Animated.View>
-                        <Mapbox.MapView style={styles.map_box} >
-                            <Mapbox.Camera
-                                zoomLevel={12}
-                                // followUserLocation
-                                centerCoordinate={selectedLocation ? selectedLocation.center : [0, 0]}
-                            />
-                            <LocationPuck puckBearingEnabled puckBearing='heading' />
-                            {selectedLocation && (
-                                <Mapbox.ShapeSource id="selectedLocation" shape={{
-                                    type: 'Feature',
-                                    geometry: {
-                                        type: 'Point',
-                                        coordinates: selectedLocation.center
-                                    },
-                                    properties: {}
-                                }}>
-                                    <Mapbox.SymbolLayer
-                                        id="selectedLocationSymbol"
-                                        style={{ iconImage: 'avatar', iconSize: 0.25, iconAnchor: 'bottom', iconAllowOverlap: true, }}
-                                    />
-                                    <Mapbox.Images images={{ avatar: images.task_image }}>
-
-                                    </Mapbox.Images>
-                                </Mapbox.ShapeSource>
+                        <FlatList
+                            data={results}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity style={styles.item} onPress={() => selectLocation(item)}>
+                                    <Text>{item.full_address}</Text>
+                                </TouchableOpacity>
                             )}
-                        </Mapbox.MapView>
-                    </View>
-
-
-
-                    {showDatePicker.showStartDate && (
-                        <DateTimePicker
-                            testID="dateTimePicker"
-                            value={taskItem.start_date}
-                            mode="date"
-                            is24Hour={true}
-                            display="default"
-                            onChange={onChangeDate}
+                            showsVerticalScrollIndicator={false}
                         />
-                    )}
+                    </Animated.View>
+                    <Mapbox.MapView style={styles.map_box} >
+                        <Mapbox.Camera
+                            zoomLevel={12}
+                            // followUserLocation
+                            centerCoordinate={selectedLocation ? selectedLocation.center : [0, 0]}
+                        />
+                        <LocationPuck puckBearingEnabled puckBearing='heading' />
+                        {selectedLocation && (
+                            <Mapbox.ShapeSource id="selectedLocation" shape={{
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: selectedLocation.center
+                                },
+                                properties: {}
+                            }}>
+                                <Mapbox.SymbolLayer
+                                    id="selectedLocationSymbol"
+                                    style={{ iconImage: 'avatar', iconSize: 0.25, iconAnchor: 'bottom', iconAllowOverlap: true, }}
+                                />
+                                <Mapbox.Images images={{ avatar: images.task_image }}>
 
-                    {showDatePicker.showEndDate && (
-                        <DateTimePicker
-                            testID="dateTimePickerEnd"
-                            value={taskItem.end_date}
-                            mode="date"
-                            is24Hour={true}
-                            display="default"
-                            onChange={onChangeDate}
-                        />
-                    )}
-                    {item === null ?
-                        <CustomButton
-                            title="Add New Task"
-                            onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, null, handleLoading) }}
-                            style={styles.add_button}
-                            disabled={isAddNew}
-                            disabledStyle={styles.add_button_disable}
-                            loading={loading}
-                        />
-                        :
-                        <CustomButton
-                            title="Edit This Task"
-                            onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, item.id, handleLoading) }}
-                            style={styles.add_button}
-                            disabled={isAddNew}
-                            disabledStyle={styles.add_button_disable}
-                            loading={loading}
-                        />
-                    }
+                                </Mapbox.Images>
+                            </Mapbox.ShapeSource>
+                        )}
+                    </Mapbox.MapView>
                 </View>
-            </KeyboardAvoidingView>
 
+
+
+                {showDatePicker.showStartDate && (
+                    <DateTimePicker
+                        testID="dateTimePicker"
+                        value={parseDate(taskItem.start_date)}
+                        mode="date"
+                        is24Hour={true}
+                        display="default"
+                        onChange={onChangeDate}
+                    />
+                )}
+
+                {showDatePicker.showEndDate && (
+                    <DateTimePicker
+                        testID="dateTimePickerEnd"
+                        value={parseDate(taskItem.end_date)}
+                        mode="date"
+                        is24Hour={true}
+                        display="default"
+                        onChange={onChangeDate}
+                    />
+                )}
+                {item === null ?
+                    <CustomButton
+                        title="Add New Task"
+                        onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, null, handleLoading) }}
+                        style={styles.add_button}
+                        disabled={isAddNew}
+                        disabledStyle={styles.add_button_disable}
+                        loading={loading}
+                    />
+                    :
+                    <CustomButton
+                        title="Edit This Task"
+                        onPress={() => { AddNew(selectedLocation, taskItem, userData?.id, handleBack, item.id, handleLoading) }}
+                        style={styles.add_button}
+                        disabled={isAddNew}
+                        disabledStyle={styles.add_button_disable}
+                        loading={loading}
+                    />
+                }
+            </View>
         </Modal>
 
     )

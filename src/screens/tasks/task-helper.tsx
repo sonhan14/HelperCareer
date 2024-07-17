@@ -1,7 +1,7 @@
 
 import firestore, { GeoPoint } from '@react-native-firebase/firestore';
-import { Task, TaskType } from '../../../types/taskType';
-import { formatDate } from '../../constants/formatDate';
+import { Task } from '../../../types/taskType';
+import { formatDate, parseDate } from '../../constants/formatDate';
 
 
 
@@ -10,7 +10,7 @@ export const fetchTasks = (userId: string, setTasksList: any, setTaskPercent: an
         .collection('tasks')
         .where('user_id', '==', userId)
         .onSnapshot(async (taskQuerySnapshot) => {
-            const tasksList: TaskType[] = [];
+            const tasksList: Task[] = [];
 
             taskQuerySnapshot.forEach(doc => {
                 const data = doc.data();
@@ -18,18 +18,17 @@ export const fetchTasks = (userId: string, setTasksList: any, setTaskPercent: an
                     tasksList.push({
                         id: doc.id,
                         task_name: data.task_name,
-                        task_des: data.task_description,
+                        task_description: data.task_description,
                         start_date: formatDate(data.start_date),
                         end_date: formatDate(data.end_date),
                         status: data.status,
-                        longitude: data.location._longitude,
-                        latitude: data.location._latitude
+                        location: data.location
                     });
                 }
             });
-            setTasksList(tasksList.filter((task: TaskType) => task.status === 'process'));
-            setTaskPercent((prev: any) => ({ ...prev, tasks: tasksList.length, tasksDone: tasksList.filter((task: TaskType) => task.status === 'finished').length }))
-            setTaskDone(tasksList.filter((task: TaskType) => task.status === 'finished'))
+            setTasksList(tasksList.filter((task: Task) => task.status === 'process'));
+            setTaskPercent((prev: any) => ({ ...prev, tasks: tasksList.length, tasksDone: tasksList.filter((task: Task) => task.status === 'finished').length }))
+            setTaskDone(tasksList.filter((task: Task) => task.status === 'finished'))
         }, (error) => {
             console.error('Error fetching task locations from Firestore: ', error);
         });
@@ -45,15 +44,14 @@ export const fetchTaskDetail = (taskId: any, setTaskDetail: any,) => {
         .onSnapshot(async (taskQuerySnapshot) => {
             const data = taskQuerySnapshot.data()
             if (data) {
-                const taskDetail: TaskType = {
+                const taskDetail: Task = {
                     id: taskQuerySnapshot.id,
                     task_name: data.task_name,
-                    task_des: data.task_description,
+                    task_description: data.task_description,
                     start_date: formatDate(data.start_date),
                     end_date: formatDate(data.end_date),
                     status: data.status,
-                    longitude: data.location._longitude,
-                    latitude: data.location._latitude
+                    location: data.location
                 }
                 setTaskDetail(taskDetail)
             }
@@ -69,7 +67,6 @@ export const fetchTaskDetail = (taskId: any, setTaskDetail: any,) => {
 export const AddNew = (selectedLocation: any, taskItem: Task, user_id: any, handleBack: () => void, taskId: string | null, handleLoading: () => void) => {
     handleLoading()
     if (selectedLocation && taskId === null) {
-
         firestore()
             .collection('tasks')
             .add({
@@ -78,8 +75,8 @@ export const AddNew = (selectedLocation: any, taskItem: Task, user_id: any, hand
                 user_id: user_id,
                 location: new GeoPoint(selectedLocation.center[1], selectedLocation.center[0]),
                 status: 'process',
-                start_date: taskItem.start_date,
-                end_date: taskItem.end_date
+                start_date: parseDate(taskItem.start_date),
+                end_date: parseDate(taskItem.end_date)
             })
             .then(() => {
                 handleBack()
@@ -89,14 +86,14 @@ export const AddNew = (selectedLocation: any, taskItem: Task, user_id: any, hand
         firestore()
             .collection('tasks')
             .doc(taskId)
-            .set({
+            .update({
                 task_name: taskItem.task_name,
                 task_description: taskItem.task_description,
                 user_id: user_id,
                 location: new GeoPoint(selectedLocation.center[1], selectedLocation.center[0]),
                 status: 'process',
-                start_date: taskItem.start_date,
-                end_date: taskItem.end_date
+                start_date: parseDate(taskItem.start_date),
+                end_date: parseDate(taskItem.end_date)
             })
             .then(() => {
                 handleLoading()
@@ -117,20 +114,14 @@ export const handleDeleteTask = async (taskId: string, handleBack: () => void) =
     }
 }
 
-export const handleFinishTask = async (handleBack: () => void, TaskDetail: TaskType | null, user_id: any) => {
-    if (TaskDetail) {
+export const handleFinishTask = async (handleBack: () => void, taskId: string) => {
+    if (taskId) {
         try {
             await firestore()
                 .collection('tasks')
-                .doc(TaskDetail.id)
-                .set({
-                    task_name: TaskDetail.task_name,
-                    task_description: TaskDetail.task_des,
-                    user_id: user_id,
-                    location: new GeoPoint(TaskDetail.latitude, TaskDetail.longitude),
+                .doc(taskId)
+                .update({
                     status: 'finished',
-                    start_date: TaskDetail.start_date,
-                    end_date: TaskDetail.end_date
                 })
             handleBack()
         } catch (error) {

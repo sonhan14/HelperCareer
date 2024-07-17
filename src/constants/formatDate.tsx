@@ -22,3 +22,8 @@ export const convertStringToDate = (dateString: string): Date => {
     // month - 1 because months are zero-indexed (0-11) in JavaScript Date object
     return new Date(year, month - 1, day);
 };
+
+export function parseDate(dateString: string) {
+    const [day, month, year] = dateString.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+}

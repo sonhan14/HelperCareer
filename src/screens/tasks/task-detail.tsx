@@ -5,7 +5,7 @@ import { formatDate } from "../../constants/formatDate"
 import { RootStackParamList } from "../../navigations/navigation"
 import { layout } from "../../constants/dimensions/dimension"
 import { useEffect, useState } from "react"
-import { TaskType } from "../../../types/taskType"
+import { Task } from "../../../types/taskType"
 import { fetchTaskDetail, handleDeleteTask, handleFinishTask } from "./task-helper"
 import { color } from "../../constants/colors/color"
 import { fetchApplication } from "../home/home-helper"
@@ -27,7 +27,7 @@ type TaskDetailNavigation = StackNavigationProp<RootStackParamList, 'TaskDetail'
 
 export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
     const item = route.params.TaskId;
-    const [taskDetail, setTaskDetail] = useState<TaskType | null>(null);
+    const [taskDetail, setTaskDetail] = useState<Task | null>(null);
     const [applicationList, setApplicationList] = useState<Applications[]>()
     const navigation = useNavigation<TaskDetailNavigation>();
     const handleBack = () => {
@@ -56,7 +56,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
     const handleDialogYes = () => {
         if (actionType) {
             if (actionType === 'finish') {
-                handleFinishTask(handleBack, taskDetail, userData?.id)
+                handleFinishTask(handleBack, item)
             } else if (actionType === 'delete') {
                 handleDeleteTask(item, handleBack)
             }
@@ -118,7 +118,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
                 <View style={styles.des_container}>
                     <View style={styles.des_box}>
                         <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-                            <Text style={styles.text_15}>{taskDetail?.task_des}</Text>
+                            <Text style={styles.text_15}>{taskDetail?.task_description}</Text>
                         </ScrollView>
                     </View>
                 </View>

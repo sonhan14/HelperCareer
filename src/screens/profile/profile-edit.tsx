@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Image, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { layout } from "../../constants/dimensions/dimension"
 import Animated, { FadeIn, LightSpeedInRight, LightSpeedOutRight } from "react-native-reanimated"
 import { color } from "../../constants/colors/color"
@@ -96,128 +96,135 @@ export const EditProfile = ({ isModal, userData, closeModal }: editModal) => {
             animationType={'slide'}
             visible={isModal}
         >
-            <View style={styles.container}>
-                <View style={styles.login_image_container}>
-                    <Image source={images.register_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
-                </View>
-
-                <View style={styles.hello_container}>
-                    <View style={styles.wellcome_container}>
-                        <Text style={styles.text_title}>Let change some infomation</Text>
-                    </View>
-                </View>
-
-                <View style={styles.sign_in_container}>
-                    <View style={[styles.name_input, { height: '13%' }]}>
-                        <View style={styles.first_name_container}>
-                            <Text style={styles.text_name}>First Name: </Text>
-                            <TextInput
-                                style={[styles.text_input]}
-                                placeholder="William"
-                                placeholderTextColor={'#8897AD'}
-                                onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
-                                value={account.first_name}
-                                autoCapitalize='words'
-                            />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+            >
+                <ScrollView >
+                    <View style={styles.container}>
+                        <View style={styles.login_image_container}>
+                            <Image source={images.register_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
                         </View>
 
-                        <View style={styles.first_name_container}>
-                            <Text style={styles.text_name}>Last Name: </Text>
-                            <TextInput
-                                style={[styles.text_input,]}
-                                placeholder="Fang"
-                                placeholderTextColor={'#8897AD'}
-                                onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
-                                value={account.last_name}
-                                autoCapitalize='words'
-                            />
+                        <View style={styles.hello_container}>
+                            <View style={styles.wellcome_container}>
+                                <Text style={styles.text_title}>Let change some infomation</Text>
+                            </View>
                         </View>
-                    </View>
 
-                    <View style={styles.birthday_container}>
-                        <Text style={styles.text_birthday}>Birthday: </Text>
-                        <TouchableOpacity style={[styles.input_birthday, { width: '30%' }]} onPress={() => { setShowDatePicker(true) }}>
-                            <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.birthday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>
-                        </TouchableOpacity>
+                        <View style={styles.sign_in_container}>
+                            <View style={[styles.name_input, { height: '13%' }]}>
+                                <View style={styles.first_name_container}>
+                                    <Text style={styles.text_name}>First Name: </Text>
+                                    <TextInput
+                                        style={[styles.text_input]}
+                                        placeholder="William"
+                                        placeholderTextColor={'#8897AD'}
+                                        onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
+                                        value={account.first_name}
+                                        autoCapitalize='words'
+                                    />
+                                </View>
 
-                        <Text style={[styles.text_birthday]}>Gender: </Text>
-                        <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowGenderOptions(true) }}>
-                            <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.gender || 'Select Gender'}</Text>
-                        </TouchableOpacity>
-                    </View>
+                                <View style={styles.first_name_container}>
+                                    <Text style={styles.text_name}>Last Name: </Text>
+                                    <TextInput
+                                        style={[styles.text_input,]}
+                                        placeholder="Fang"
+                                        placeholderTextColor={'#8897AD'}
+                                        onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
+                                        value={account.last_name}
+                                        autoCapitalize='words'
+                                    />
+                                </View>
+                            </View>
 
-                    {showGenderOptions && (
-                        <Animated.View style={styles.genderOptions} entering={FadeIn.duration(500)}>
-                            <TouchableOpacity style={styles.genderOption} onPress={() => selectGender('Male')}>
-                                <Text style={styles.genderOptionText}>Male</Text>
+                            <View style={styles.birthday_container}>
+                                <Text style={styles.text_birthday}>Birthday: </Text>
+                                <TouchableOpacity style={[styles.input_birthday, { width: '30%' }]} onPress={() => { setShowDatePicker(true) }}>
+                                    <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.birthday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>
+                                </TouchableOpacity>
+
+                                <Text style={[styles.text_birthday]}>Gender: </Text>
+                                <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowGenderOptions(true) }}>
+                                    <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.gender || 'Select Gender'}</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {showGenderOptions && (
+                                <Animated.View style={styles.genderOptions} entering={FadeIn.duration(500)}>
+                                    <TouchableOpacity style={styles.genderOption} onPress={() => selectGender('Male')}>
+                                        <Text style={styles.genderOptionText}>Male</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.genderOption} onPress={() => selectGender('Female')}>
+                                        <Text style={styles.genderOptionText}>Female</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.genderOption} onPress={() => selectGender('Other')}>
+                                        <Text style={styles.genderOptionText}>Other</Text>
+                                    </TouchableOpacity>
+                                </Animated.View>
+                            )}
+
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    testID="dateTimePicker"
+                                    value={new Date(account.birthday)}
+                                    mode="date" // Set mode: 'date', 'time', or 'datetime'
+                                    is24Hour={true}
+                                    display="default" // Set display: 'default', 'spinner', 'calendar' (only for iOS)
+                                    onChange={onChangeDate}
+                                />
+                            )}
+
+                            <View style={[styles.input_container]}>
+                                <Text style={styles.text_input_blue}>Phone: </Text>
+                                <TextInput
+                                    style={[styles.text_input]}
+                                    placeholder="0123456789"
+                                    placeholderTextColor={'#8897AD'}
+                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, phone: text })) }}
+                                    value={account.phone}
+                                    keyboardType='numeric'
+                                />
+                            </View>
+                            {isValid ? (
+                                <Animated.View
+                                    entering={LightSpeedInRight.duration(500)}
+                                    exiting={LightSpeedOutRight.duration(500)}
+                                >
+                                    <Text style={styles.error_text}>{isValid}</Text>
+                                </Animated.View>
+
+                            ) : <Animated.View
+                                entering={LightSpeedInRight.duration(500)}
+                                exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                            }
+
+                            <View style={[styles.input_container]}>
+                                <Text style={styles.text_input_blue}>Introduce: </Text>
+                                <TextInput
+                                    style={[styles.text_input, { height: 100 }]}
+                                    placeholder="Hi, I'm William"
+                                    placeholderTextColor={'#8897AD'}
+                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, intro: text })) }}
+                                    value={account.introduction}
+                                    numberOfLines={4}
+                                    multiline={true}
+                                />
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => { handleEditInfo() }}
+                                style={isRegister || isValid !== '' ? styles.signin_button_disable : styles.signin_button}
+                                disabled={isRegister}
+                            >
+                                <Text style={styles.text_button}>Edit Profile</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.genderOption} onPress={() => selectGender('Female')}>
-                                <Text style={styles.genderOptionText}>Female</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.genderOption} onPress={() => selectGender('Other')}>
-                                <Text style={styles.genderOptionText}>Other</Text>
-                            </TouchableOpacity>
-                        </Animated.View>
-                    )}
+                        </View>
 
-                    {showDatePicker && (
-                        <DateTimePicker
-                            testID="dateTimePicker"
-                            value={new Date(account.birthday)}
-                            mode="date" // Set mode: 'date', 'time', or 'datetime'
-                            is24Hour={true}
-                            display="default" // Set display: 'default', 'spinner', 'calendar' (only for iOS)
-                            onChange={onChangeDate}
-                        />
-                    )}
 
-                    <View style={[styles.input_container]}>
-                        <Text style={styles.text_input_blue}>Phone: </Text>
-                        <TextInput
-                            style={[styles.text_input]}
-                            placeholder="0123456789"
-                            placeholderTextColor={'#8897AD'}
-                            onChangeText={(text) => { setAccount(prev => ({ ...prev, phone: text })) }}
-                            value={account.phone}
-                            keyboardType='numeric'
-                        />
                     </View>
-                    {isValid ? (
-                        <Animated.View
-                            entering={LightSpeedInRight.duration(500)}
-                            exiting={LightSpeedOutRight.duration(500)}
-                        >
-                            <Text style={styles.error_text}>{isValid}</Text>
-                        </Animated.View>
-
-                    ) : <Animated.View
-                        entering={LightSpeedInRight.duration(500)}
-                        exiting={LightSpeedOutRight.duration(500)}></Animated.View>
-                    }
-
-                    <View style={[styles.input_container]}>
-                        <Text style={styles.text_input_blue}>Introduce: </Text>
-                        <TextInput
-                            style={[styles.text_input, { height: 100 }]}
-                            placeholder="Hi, I'm William"
-                            placeholderTextColor={'#8897AD'}
-                            onChangeText={(text) => { setAccount(prev => ({ ...prev, intro: text })) }}
-                            value={account.introduction}
-                            numberOfLines={4}
-                            multiline={true}
-                        />
-                    </View>
-                    <TouchableOpacity
-                        onPress={() => { handleEditInfo() }}
-                        style={isRegister || isValid !== '' ? styles.signin_button_disable : styles.signin_button}
-                        disabled={isRegister}
-                    >
-                        <Text style={styles.text_button}>Edit Profile</Text>
-                    </TouchableOpacity>
-                </View>
-
-
-            </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </Modal>
     )
 }

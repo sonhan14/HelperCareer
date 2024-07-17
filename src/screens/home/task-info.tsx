@@ -3,7 +3,6 @@ import { layout } from "../../constants/dimensions/dimension";
 import { useEffect, useRef, useState } from "react";
 import { Gesture, GestureDetector, GestureHandlerRootView, PanGestureHandler, ScrollView } from "react-native-gesture-handler";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { TaskType } from "../../../types/taskType";
 import { images } from "../../images";
 import { formatDate } from "../../constants/formatDate";
 import SweepButton from "../../components/sweep-button";
@@ -12,11 +11,12 @@ import { fetchApplication, hanleAccepted, hanleRejected } from "./home-helper";
 import { EmployeeList } from "./application-item";
 import { Button, Dialog, Portal, Provider } from "react-native-paper";
 import { Applications } from "../../../types/applications.type";
+import { Task } from "../../../types/taskType";
 
 interface imodal {
     isOpen: boolean,
     setClose: () => void,
-    item?: TaskType,
+    item?: Task,
     applicationList: Applications[] | undefined
 }
 
@@ -159,7 +159,7 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
 
                             <View style={styles.des_container}>
                                 <ScrollView showsVerticalScrollIndicator={false}>
-                                    <Text style={styles.text_15}>{item?.task_des}</Text>
+                                    <Text style={styles.text_15}>{item?.task_description}</Text>
                                 </ScrollView>
                             </View>
 

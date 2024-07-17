@@ -9,11 +9,12 @@ import { TaskItem } from "./task-item"
 import { TaskModal } from "./task-modal"
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { Task, TaskType } from "../../../types/taskType"
+
 import { fetchTasks } from "./task-helper"
 import { useSelector } from "react-redux"
 import { selectUserData } from "../../redux/user/userSlice"
 import { images } from "../../images"
+import { Task } from "../../../types/taskType"
 
 const AnimatedCicle = Animated.createAnimatedComponent(Circle)
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -33,9 +34,9 @@ export const TaskScreen = () => {
 
     const [isModal, setIsModal] = useState<boolean>(false)
 
-    const [tasksList, setTasksList] = useState<TaskType[]>([]);
-    const [tasksListFillter, setTasksListFillter] = useState<TaskType[]>([]);
-    const [taskDone, setTaskDone] = useState<TaskType[]>([]);
+    const [tasksList, setTasksList] = useState<Task[]>([]);
+    const [tasksListFillter, setTasksListFillter] = useState<Task[]>([]);
+    const [taskDone, setTaskDone] = useState<Task[]>([]);
 
     const [taskPercent, setTaskPercent] = useState({
         tasks: 1,

@@ -9,7 +9,6 @@ import { images } from "../../images";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TaskInfo } from "./task-info";
 import { fetchApplication, fetchEmployee, fetchUserLocations } from "./home-helper";
-import { TaskType } from "../../../types/taskType";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
 import { iUser } from "../../../types/userType";
@@ -18,6 +17,7 @@ import { color } from "../../constants/colors/color";
 import { EmployeeListHome } from "./employee-list";
 import { useEmployee } from "../../context/EmployeeContext";
 import { Applications } from "../../../types/applications.type";
+import { Task } from "../../../types/taskType";
 
 
 
@@ -32,7 +32,7 @@ export const HomeScreen = () => {
     const [taskGeoJsonData, setTaskGeoJsonData] = useState<any>(null);
     const [employeeList, setEmployeeList] = useState<iUser[]>()
     const [isModal, setIsModal] = useState<boolean>(false);
-    const [currentTask, setCurrentTask] = useState<TaskType>()
+    const [currentTask, setCurrentTask] = useState<Task>()
     const [applicationList, setApplicationList] = useState<Applications[]>()
     const userData = useSelector(selectUserData);
     const isFocused = useIsFocused();
@@ -75,7 +75,7 @@ export const HomeScreen = () => {
     const handleOpenTask = (event: any): void => {
         const features = event.features;
         if (features.length > 0) {
-            const item: TaskType = features[0].properties;
+            const item: Task = features[0].properties;
             fetchApplication(item?.id, setApplicationList)
             setCurrentTask(item)
             setIsModal(true)
