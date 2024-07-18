@@ -1,4 +1,4 @@
-import Animated, { FadeIn, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { FadeIn, interpolateColor, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { layout } from "../../constants/dimensions/dimension";
 import { useEffect, useRef, useState } from "react";
 import { Gesture, GestureDetector, GestureHandlerRootView, PanGestureHandler, ScrollView } from "react-native-gesture-handler";
@@ -14,7 +14,7 @@ import { Applications } from "../../../types/applications.type";
 import { Task } from "../../../types/taskType";
 
 interface imodal {
-    isOpen: boolean,
+    isOpen: number,
     setClose: () => void,
     item?: Task,
     applicationList: Applications[] | undefined
@@ -30,6 +30,7 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
     const threshold = 0
     const isDragging = useSharedValue(true);
     const [showEmployee, setShowEmployee] = useState(false)
+    const animatedValue = useSharedValue(0)
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -82,7 +83,7 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
 
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen === 1) {
             dragY.value = withTiming(0, { duration: 500 });
         }
         else {
@@ -131,6 +132,23 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
         }
     }
 
+    useEffect(() => {
+        animatedValue.value = withRepeat(withTiming(1, { duration: 500 }), withTiming(0, { duration: 500 }))
+    }, [])
+
+    const animatedTextColor = useAnimatedStyle(() => {
+        return {
+            color: interpolateColor(
+                animatedValue.value,
+                [0, 1],
+                ['red', 'blue']
+            ),
+            fontSize: 16,
+            paddingLeft: 10,
+            fontWeight: '500'
+        }
+    })
+
     return (
 
         <GestureDetector gesture={gestureHandle}>
@@ -155,6 +173,12 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
                                             null
                                     }
                                 </View>
+                            </View>
+
+                            <View style={styles.price_container}>
+                                <Text style={[styles.text_16, { paddingLeft: 10 }]}>Price/Employee:</Text>
+                                <Animated.Text style={[animatedTextColor]}>{item?.price}</Animated.Text>
+                                <Text style={styles.text_16}>$</Text>
                             </View>
 
                             <View style={styles.des_container}>
@@ -220,6 +244,16 @@ const styles = StyleSheet.create({
     text_title: {
         fontWeight: '700',
         fontSize: 20,
+        color: 'black'
+    },
+    price_container: {
+        flexDirection: 'row',
+        marginVertical: 5,
+        height: layout.height * 0.04,
+    },
+    text_16: {
+        fontSize: 16,
+        fontWeight: '700',
         color: 'black'
     },
     main_container: {

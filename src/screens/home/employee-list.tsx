@@ -133,7 +133,7 @@ export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, na
         const listHeight = interpolate(
             height.value,
             [40, layout.height * 0.6, layout.height],
-            [0, layout.height * 0.12, employeeList.length < 3 ? (layout.height * 0.12 + 20) * employeeList.length : (layout.height * 0.12 + 20) * 3]
+            [0, layout.height * 0.12, employeeList.length < 5 ? (layout.height * 0.12 + 20) * employeeList.length : (layout.height * 0.12 + 20) * 5]
         );
 
         return {

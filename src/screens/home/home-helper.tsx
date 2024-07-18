@@ -107,6 +107,8 @@ export const convertToTaskGeoJson = (locations: Task[]): GeoJSON.FeatureCollecti
             start_date: location.start_date,
             end_date: location.end_date,
             status: location.status,
+            price: location.price,
+            quantity: location.quantity,
         }
     }));
 

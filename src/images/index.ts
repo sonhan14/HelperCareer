@@ -6,4 +6,9 @@ export const images = {
     task_image: require('./TaskImage.png'),
     list_empty: require('./pablita-list-is-empty.png'),
     task_empty: require('./empty_task.png'),
+    login_gif: require('./login_gif.gif'),
+    sign_up: require('./sign_up.gif'),
+    create_info: require('./create_info.gif'),
+    avatar_animation: require('./avatar_animation.gif'),
+    map_animation: require('./map_animation.gif')
 }

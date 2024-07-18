@@ -5,7 +5,7 @@ import { layout } from "../../constants/dimensions/dimension";
 import { color } from "../../constants/colors/color";
 import Animated, { BounceInRight, LightSpeedInRight, LightSpeedOutLeft, LightSpeedOutRight } from "react-native-reanimated";
 import { images } from "../../images";
-import {RootStackParamList } from "../../navigations/navigation";
+import { RootStackParamList } from "../../navigations/navigation";
 import { useNavigation } from "@react-navigation/native";
 import firestore from '@react-native-firebase/firestore';
 
@@ -14,6 +14,7 @@ import { __isValidEmail, doPasswordsMatch, isValidPassword } from "./register-va
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ProfileModal } from "./register-modal";
 import { CustomButton } from "../../components/custom-button";
+import FastImage from "react-native-fast-image";
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -123,11 +124,11 @@ export const RegisterScreen: React.FC = () => {
     const __doCreateUser = async (email: string, password: string) => {
         setLoading(true);
         try {
-            let response = await auth().createUserWithEmailAndPassword(email, password);
-            if (response) {
-                setIsModal(prev => ({...prev, showModal: true, userId: response.user.uid, email: account.email}))
-            }
-            // setIsModal(prev => ({...prev, showModal: true, userId: '', email: account.email}))
+            // let response = await auth().createUserWithEmailAndPassword(email, password);
+            // if (response) {
+            //     setIsModal(prev => ({ ...prev, showModal: true, userId: response.user.uid, email: account.email }))
+            // }
+            setIsModal(prev => ({ ...prev, showModal: true, userId: '', email: account.email }))
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
             if (error.code === 'auth/email-already-in-use') {
@@ -147,7 +148,7 @@ export const RegisterScreen: React.FC = () => {
     return (
         <View style={{ flex: 1, position: 'relative' }}>
             <View style={styles.login_image_container}>
-                <Image source={images.register_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
+                <FastImage source={images.sign_up} resizeMode='contain' style={{ width: layout.width, height: layout.height * 0.25 }} />
             </View>
             <View style={styles.hello_container}>
                 <View style={styles.wellcome_container}>
@@ -255,12 +256,12 @@ export const RegisterScreen: React.FC = () => {
 
                 </Animated.View>
                 <TouchableOpacity
-                            onPress={() => { __doSignUp() }}
-                            style={isRegister || isValid.emailError !== '' || isValid.passwordError !== ''? styles.signin_button_disable : styles.signin_button}
-                            disabled={isRegister}
-                        >
-                            <Text style={styles.text_button}>Contitnue</Text>
-                        </TouchableOpacity>
+                    onPress={() => { __doSignUp() }}
+                    style={isRegister || isValid.emailError !== '' || isValid.passwordError !== '' ? styles.signin_button_disable : styles.signin_button}
+                    disabled={isRegister}
+                >
+                    <Text style={styles.text_button}>Contitnue</Text>
+                </TouchableOpacity>
                 {/* <CustomButton
                     title="Sign Up"
                     onPress={__doSignUp}

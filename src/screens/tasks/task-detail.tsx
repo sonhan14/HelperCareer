@@ -85,7 +85,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
 
     const renderItem = ({ item }: { item: Applications }) => {
         return (
-            <TouchableOpacity style={styles.employee_container} onPress={() => { handleChat(item.user_id, userData?.id, navigation, item.last_name + ' ' + item.first_name, item.fcmToken) }}>
+            <TouchableOpacity style={styles.employee_container} onPress={() => { }}>
                 <View style={styles.image_container}>
                     <Image source={{ uri: item.avatar }} resizeMode='contain' style={{ height: '100%', width: '100%', borderRadius: 100 }} />
                 </View>
@@ -139,6 +139,11 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
                     <Text style={styles.text_20}>$</Text>
                 </View>
 
+                <View style={styles.price_container}>
+                    <Text style={[styles.text_20, { paddingLeft: 10 }]}>Employee Quantity:</Text>
+                    <Animated.Text style={[animatedTextColor]}>{taskDetail?.quantity}</Animated.Text>
+                </View>
+
                 <View style={styles.des_container}>
                     <View style={styles.des_box}>
                         <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
@@ -146,11 +151,11 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
                         </ScrollView>
                     </View>
                 </View>
-                <Text style={[styles.text_title, { marginLeft: 10 }]}>Active Employees</Text>
+                <Text style={[styles.text_title, { marginLeft: 10 }]}>Employee Applications</Text>
                 <View style={styles.application_container}>
-                    {applicationList && applicationList.filter(app => app.status === 'accepted').length !== 0 ?
+                    {applicationList && applicationList.length !== 0 ?
                         <FlatList
-                            data={applicationList.filter(app => app.status === 'accepted')}
+                            data={applicationList}
                             showsVerticalScrollIndicator={false}
                             keyExtractor={(item) => item.id}
                             renderItem={(renderItem)}
@@ -311,7 +316,7 @@ const styles = StyleSheet.create({
     },
     price_container: {
         flexDirection: 'row',
-        marginVertical: 10
+        marginVertical: 5
     },
     text_20: {
         fontSize: 18,

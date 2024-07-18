@@ -6,5 +6,6 @@ export const color = {
     button_color: '#162D3A',
     text_input: '#CFDFE2',
     light_background: '#eaf2f9',
-    blue_chat: '#2e64e5'
+    blue_chat: '#2e64e5',
+    red_pink: '#CB2F30'
 }

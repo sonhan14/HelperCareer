@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface EmployeeContextProps {
     isEmployee: number;
     setIsEmployee: React.Dispatch<React.SetStateAction<number>>;
+    isTask: number;
+    setIsTask: React.Dispatch<React.SetStateAction<number>>;
 }
 
 interface EmployeeProviderProps {
@@ -14,9 +16,10 @@ const EmployeeContext = createContext<EmployeeContextProps | undefined>(undefine
 
 export const EmployeeProvider: React.FC<EmployeeProviderProps> = ({ children }) => {
     const [isEmployee, setIsEmployee] = useState<number>(0);
+    const [isTask, setIsTask] = useState<number>(0);
 
     return (
-        <EmployeeContext.Provider value={{ isEmployee, setIsEmployee }}>
+        <EmployeeContext.Provider value={{ isEmployee, setIsEmployee, isTask, setIsTask }}>
             {children}
         </EmployeeContext.Provider>
     );
@@ -26,6 +29,14 @@ export const useEmployee = (): EmployeeContextProps => {
     const context = useContext(EmployeeContext);
     if (!context) {
         throw new Error('useEmployee must be used within an EmployeeProvider');
+    }
+    return context;
+};
+
+export const useTask = (): EmployeeContextProps => {
+    const context = useContext(EmployeeContext);
+    if (!context) {
+        throw new Error('useTask must be used within an EmployeeProvider');
     }
     return context;
 };

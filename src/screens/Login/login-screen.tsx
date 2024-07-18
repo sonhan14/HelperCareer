@@ -16,6 +16,8 @@ import { useDispatch } from "react-redux";
 import { setUserData } from "../../redux/user/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import messaging from '@react-native-firebase/messaging';
+import FastImage from 'react-native-fast-image';
+import { layout } from "../../constants/dimensions/dimension";
 
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -107,7 +109,8 @@ export const LoginScreen = () => {
         <View style={{ flex: 1, position: 'relative' }}>
 
             <View style={login_styles.login_image_container}>
-                <Image source={images.wellcome_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
+                {/* <Image source={images.login_gif} resizeMode='contain' style={{ width: '80%', height: '80%' }} /> */}
+                <FastImage source={images.login_gif} style={{ width: layout.width, height: layout.height * 0.25 }} resizeMode='contain' />
             </View>
             <View style={login_styles.hello_container}>
                 <View style={login_styles.wellcome_container}>

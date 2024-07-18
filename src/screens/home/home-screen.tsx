@@ -15,7 +15,7 @@ import { iUser } from "../../../types/userType";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { color } from "../../constants/colors/color";
 import { EmployeeListHome } from "./employee-list";
-import { useEmployee } from "../../context/EmployeeContext";
+import { useEmployee, useTask } from "../../context/EmployeeContext";
 import { Applications } from "../../../types/applications.type";
 import { Task } from "../../../types/taskType";
 
@@ -32,7 +32,6 @@ export const HomeScreen = () => {
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [taskGeoJsonData, setTaskGeoJsonData] = useState<any>(null);
     const [employeeList, setEmployeeList] = useState<iUser[]>()
-    const [isModal, setIsModal] = useState<boolean>(false);
     const [currentTask, setCurrentTask] = useState<Task>()
     const [applicationList, setApplicationList] = useState<Applications[]>()
     const userData = useSelector(selectUserData);
@@ -45,12 +44,13 @@ export const HomeScreen = () => {
 
     useEffect(() => {
         if (!isFocused) {
-            setIsModal(false)
+            setIsTask(0)
             setIsEmployee(0)
         }
     }, [isFocused]);
 
     const { isEmployee, setIsEmployee } = useEmployee();
+    const { isTask, setIsTask } = useTask();
 
     useEffect(() => {
         if (!userData) return;
@@ -66,7 +66,7 @@ export const HomeScreen = () => {
 
     const animationHandle = () => {
         setIsEmployee(isEmployee === 0 ? 1 : 0)
-        setIsModal(false)
+        setIsTask(0)
     }
 
 
@@ -85,13 +85,14 @@ export const HomeScreen = () => {
             const item: Task = features[0].properties;
             fetchApplication(item?.id, setApplicationList)
             setCurrentTask(item)
-            setIsModal(true)
+            setIsEmployee(0)
+            setIsTask(1)
         }
 
     }
 
     const handleCloseModal = () => {
-        setIsModal(false)
+        setIsTask(0)
     }
 
     if (!loading) {
@@ -153,7 +154,7 @@ export const HomeScreen = () => {
                     )}
                 </Mapbox.MapView>
             </View>
-            <TaskInfo isOpen={isModal} setClose={handleCloseModal} item={currentTask} applicationList={applicationList} />
+            <TaskInfo isOpen={isTask} setClose={handleCloseModal} item={currentTask} applicationList={applicationList} />
         </View>
     )
 
