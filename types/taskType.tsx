@@ -20,4 +20,6 @@ export type Task = {
     status: string,
     start_date: string,
     end_date: string,
+    price: string,
+    quantity: string
 }

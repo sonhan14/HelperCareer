@@ -1,9 +1,9 @@
+import { iUser } from "./userType"
+
 export type messagesBox = {
     id: string,
-    received_id: string,
-    avatar: any,
-    name: string,
+    receiver: iUser
     lastMessage: string,
     lastMessageTimestamp: any,
-    fcmToken: string
 }
+

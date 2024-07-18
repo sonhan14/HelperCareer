@@ -22,7 +22,9 @@ export const fetchTasks = (userId: string, setTasksList: any, setTaskPercent: an
                         start_date: formatDate(data.start_date),
                         end_date: formatDate(data.end_date),
                         status: data.status,
-                        location: data.location
+                        location: data.location,
+                        price: data.price.toString(),
+                        quantity: data.quantity.toString()
                     });
                 }
             });
@@ -51,7 +53,9 @@ export const fetchTaskDetail = (taskId: any, setTaskDetail: any,) => {
                     start_date: formatDate(data.start_date),
                     end_date: formatDate(data.end_date),
                     status: data.status,
-                    location: data.location
+                    location: data.location,
+                    price: data.price.toString(),
+                    quantity: data.quantity.toString()
                 }
                 setTaskDetail(taskDetail)
             }
@@ -76,7 +80,9 @@ export const AddNew = (selectedLocation: any, taskItem: Task, user_id: any, hand
                 location: new GeoPoint(selectedLocation.center[1], selectedLocation.center[0]),
                 status: 'process',
                 start_date: parseDate(taskItem.start_date),
-                end_date: parseDate(taskItem.end_date)
+                end_date: parseDate(taskItem.end_date),
+                price: parseFloat(taskItem.price),
+                quantity: parseFloat(taskItem.quantity)
             })
             .then(() => {
                 handleBack()
@@ -93,7 +99,9 @@ export const AddNew = (selectedLocation: any, taskItem: Task, user_id: any, hand
                 location: new GeoPoint(selectedLocation.center[1], selectedLocation.center[0]),
                 status: 'process',
                 start_date: parseDate(taskItem.start_date),
-                end_date: parseDate(taskItem.end_date)
+                end_date: parseDate(taskItem.end_date),
+                price: parseFloat(taskItem.price),
+                quantity: parseFloat(taskItem.quantity)
             })
             .then(() => {
                 handleLoading()

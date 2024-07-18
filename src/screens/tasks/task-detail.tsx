@@ -18,6 +18,7 @@ import auth from '@react-native-firebase/auth';
 import { TaskModal } from "./task-modal"
 import { selectUserData } from "../../redux/user/userSlice"
 import { useSelector } from "react-redux"
+import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated"
 
 type TaskDetailNavigatorProps = {
     route: { params: RootStackParamList['TaskDetail'] };
@@ -30,6 +31,7 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
     const [taskDetail, setTaskDetail] = useState<Task | null>(null);
     const [applicationList, setApplicationList] = useState<Applications[]>()
     const navigation = useNavigation<TaskDetailNavigation>();
+    const animatedValue = useSharedValue(0)
     const handleBack = () => {
         navigation.goBack()
     }
@@ -65,6 +67,11 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
         }
     };
 
+
+    useEffect(() => {
+        animatedValue.value = withRepeat(withTiming(1, { duration: 500 }), withTiming(0, { duration: 500 }))
+    }, [])
+
     useEffect(() => {
         if (!item) return;
         const unsubscribe = fetchTaskDetail(item, setTaskDetail)
@@ -90,10 +97,21 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
         )
     }
 
+    const animatedTextColor = useAnimatedStyle(() => {
+        return {
+            color: interpolateColor(
+                animatedValue.value,
+                [0, 1],
+                ['red', 'blue']
+            ),
+            fontSize: 18,
+            paddingLeft: 10,
+            fontWeight: '500'
+        }
+    })
 
     return (
         <PaperProvider>
-
             <View style={styles.main_container}>
                 <Appbar.Header style={styles.header_container}>
                     <Appbar.BackAction onPress={() => { handleBack() }} />
@@ -115,6 +133,12 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
                     </View>
                 </View>
 
+                <View style={styles.price_container}>
+                    <Text style={[styles.text_20, { paddingLeft: 10 }]}>Price:</Text>
+                    <Animated.Text style={[animatedTextColor]}>{taskDetail?.price}</Animated.Text>
+                    <Text style={styles.text_20}>$</Text>
+                </View>
+
                 <View style={styles.des_container}>
                     <View style={styles.des_box}>
                         <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
@@ -122,7 +146,6 @@ export const TaskDetail = ({ route }: TaskDetailNavigatorProps) => {
                         </ScrollView>
                     </View>
                 </View>
-
                 <Text style={[styles.text_title, { marginLeft: 10 }]}>Active Employees</Text>
                 <View style={styles.application_container}>
                     {applicationList && applicationList.filter(app => app.status === 'accepted').length !== 0 ?
@@ -284,6 +307,15 @@ const styles = StyleSheet.create({
     application_container: {
         height: (layout.height * 0.1 + 20) * 3,
         width: layout.width,
-        padding: 10
+        padding: 10,
+    },
+    price_container: {
+        flexDirection: 'row',
+        marginVertical: 10
+    },
+    text_20: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: 'black'
     }
 })

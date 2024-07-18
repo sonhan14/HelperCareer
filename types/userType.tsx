@@ -12,5 +12,4 @@ export type iUser = {
     fcmToken: string,
     avatar: string | undefined,
     cover: string | undefined
-
 };

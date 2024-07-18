@@ -14,7 +14,7 @@ import ProfileImageSection from "../../components/cover-avatar";
 import SweepButton from "../../components/sweep-button";
 import auth from '@react-native-firebase/auth';
 import { formatDate } from "../../constants/formatDate";
-import { getDetail, getImgae, handleChat } from "./employee-helper";
+import { getDetail, handleChat } from "./employee-helper";
 
 type EmployeeFrofileProps = {
     route: { params: RootStackParamList['EmployeeProfile'] };
@@ -35,10 +35,6 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
         cover: images.background_pic,
     })
 
-    const [loading, setLoading] = useState({
-        avatarLoading: false,
-        coverLoading: false
-    });
 
     const navigation = useNavigation<EmployeeFrofileProp>()
 
@@ -47,12 +43,11 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
         navigation.goBack()
     }
 
-
-
     useEffect(() => {
-        getImgae(setLoading, setImage, employeeID)
-        getDetail(employeeID, setUser)
-    }, [])
+        getDetail(employeeID, setUser, setImage)
+    }, [employeeID])
+
+
 
     return (
         <View style={styles.container}>
@@ -63,13 +58,11 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
             <View style={styles.profile_image}>
                 <ProfileImageSection
                     image={image}
-                    loading={loading}
                     pickImages={() => { }}
                     user={user}
                     isEditable={false}
                 />
             </View>
-
             <SegmentedButtons
                 value={value}
                 onValueChange={setValue}
@@ -102,10 +95,11 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
                 <Text style={styles.text_15}>{user?.introduction ? user?.introduction : 'Hello, My name is ' + user?.first_name}</Text>
             </View>
 
-            <View style={{ width: layout.width - 20 }}>
-                <SweepButton onPress={() => { handleChat(employeeID, currentUser?.uid, navigation, user?.last_name + ' ' + user?.first_name) }} iconName="wechat" label="Tap to Chat" />
-            </View>
-
+            {user && (
+                <View style={{ width: layout.width - 20 }}>
+                    <SweepButton onPress={() => { handleChat(user, currentUser?.uid, navigation) }} iconName="wechat" label="Tap to Chat" />
+                </View>
+            )}
         </View>
     )
 }

@@ -1,4 +1,4 @@
-import { FlatList, Modal, PermissionsAndroid, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, FlatList, Modal, PermissionsAndroid, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 
 import { useEffect, useState } from "react";
 import { RootStackParamList, RootTabParamList } from "../../navigations/navigation";
@@ -8,7 +8,7 @@ import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TaskInfo } from "./task-info";
-import { fetchApplication, fetchEmployee, fetchUserLocations } from "./home-helper";
+import { checkMessage, fetchApplication, fetchEmployee, fetchUserLocations } from "./home-helper";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
 import { iUser } from "../../../types/userType";
@@ -18,6 +18,7 @@ import { EmployeeListHome } from "./employee-list";
 import { useEmployee } from "../../context/EmployeeContext";
 import { Applications } from "../../../types/applications.type";
 import { Task } from "../../../types/taskType";
+
 
 
 
@@ -36,10 +37,16 @@ export const HomeScreen = () => {
     const [applicationList, setApplicationList] = useState<Applications[]>()
     const userData = useSelector(selectUserData);
     const isFocused = useIsFocused();
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        checkMessage(navigation, setLoading)
+    }, [])
 
     useEffect(() => {
         if (!isFocused) {
             setIsModal(false)
+            setIsEmployee(0)
         }
     }, [isFocused]);
 
@@ -86,6 +93,15 @@ export const HomeScreen = () => {
     const handleCloseModal = () => {
         setIsModal(false)
     }
+
+    if (!loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size={'large'} />
+            </View>
+        )
+    }
+
     return (
         <View style={styles.page}>
             <View style={styles.container}>

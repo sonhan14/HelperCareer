@@ -2,15 +2,15 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { layout } from "../../constants/dimensions/dimension"
 import { images } from "../../images"
 import { formatDate } from "../../constants/formatDate"
-import { TaskType } from "../../../types/taskType"
 import { StackNavigationProp } from "@react-navigation/stack"
 import { RootStackParamList } from "../../navigations/navigation"
 import { useNavigation } from "@react-navigation/native"
+import { Task } from "../../../types/taskType"
 
 type TaskItemNavigation = StackNavigationProp<RootStackParamList>
 
 
-export const TaskItem = ({ item }: { item: TaskType }) => {
+export const TaskItem = ({ item }: { item: Task }) => {
     const navigation = useNavigation<TaskItemNavigation>()
 
     return (

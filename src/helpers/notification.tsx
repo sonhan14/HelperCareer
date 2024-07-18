@@ -43,7 +43,7 @@ export const getAccessToken = async (): Promise<string> => {
     }
 };
 
-export const sendNotification = async (): Promise<void> => {
+export const sendNotification = async (fcmToken: string, receiverName: string, bodyMessage: string, dataPayload: { [key: string]: string }): Promise<void> => {
     const url = 'https://fcm.googleapis.com/v1/projects/vmafinalproject/messages:send';
     try {
         const accessToken = await getAccessToken();
@@ -53,11 +53,12 @@ export const sendNotification = async (): Promise<void> => {
         };
         const body = {
             message: {
-                token: "f5rZbisiRkeyBZvTW-xHCM:APA91bFAS5A0aGdZpIj3mI_Qh4GvEm-IqSsWYoqgknT55Wa0lpRDn86RyYHAyfds7wiF0pH2cF_XzIqyOqJbW277n8afYOzbKObT75ksaAwkGrXSxrLBpaicA5unwyGVyR2nuzkCHBGM",
+                token: fcmToken,
                 notification: {
-                    title: "Test Title",
-                    body: "Test Body"
-                }
+                    title: receiverName,
+                    body: bodyMessage
+                },
+                data: dataPayload
             }
         };
 

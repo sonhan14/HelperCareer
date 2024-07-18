@@ -8,8 +8,9 @@ import Animated, { interpolate, useAnimatedStyle, useSharedValue, withTiming } f
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { color } from "../../constants/colors/color";
+import { iUser } from "../../../types/userType";
 
-const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiverId: string, chatBoxId: string, receiverName: string, fcmToken: string) => void }) => {
+const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver: iUser, chatBoxId: string,) => void }) => {
 
     const dragX = useSharedValue(0);
     const height = useSharedValue(layout.height * 0.1);
@@ -85,15 +86,15 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
             </Animated.View>
             <GestureDetector gesture={gestureHandle}>
                 <Animated.View style={[styles.messageBox, animatedStyle]}>
-                    <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.received_id, item.id, item.name, item.fcmToken)} activeOpacity={1}>
+                    <TouchableOpacity style={styles.message_box_container} onPress={() => goToChat(item.receiver, item.id)} activeOpacity={1}>
                         <View style={styles.message_box_avatar}>
                             <Image
-                                source={{ uri: item.avatar }}
+                                source={{ uri: item.receiver.avatar }}
                                 style={{ width: '80%', height: '80%', borderRadius: 50 }}
                             />
                         </View>
                         <View style={styles.message_box_text}>
-                            <Text style={styles.text_name}>{item.name}</Text>
+                            <Text style={styles.text_name}>{item.receiver.last_name + ' ' + item.receiver.first_name}</Text>
                             <Text style={styles.text_message}>{truncateText(item.lastMessage, 20)}</Text>
                         </View>
                         <View style={styles.message_box_time}>
@@ -106,7 +107,7 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
     )
 };
 
-export const MessagesBoxList = ({ boxData, goToChat }: { boxData: messagesBox[], goToChat: (receiverId: string, chatBoxId: string, receiverName: string, fcmToken: string) => void }) => {
+export const MessagesBoxList = ({ boxData, goToChat }: { boxData: messagesBox[], goToChat: (receiver: iUser, chatBoxId: string,) => void }) => {
 
     return (
         <FlatList

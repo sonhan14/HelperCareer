@@ -5,7 +5,10 @@ import { Task } from '../../../types/taskType';
 import { Applications } from '../../../types/applications.type';
 import { iUser } from '../../../types/userType';
 import { formatDate } from '../../constants/formatDate';
-
+import messaging from '@react-native-firebase/messaging';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navigations/navigation';
+type HomeScreenRouteProp = StackNavigationProp<RootStackParamList>;
 
 export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskGeoJsonData: any) => {
     const unsubscribeUsers = firestore()
@@ -43,7 +46,7 @@ export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskG
             taskQuerySnapshot.forEach(doc => {
                 const data = doc.data();
 
-                if (data.location && data.location.latitude !== undefined && data.location.longitude !== undefined) {
+                if (data.location && data.location.latitude !== undefined && data.location.longitude !== undefined && data.status === 'process') {
                     taskLocations.push({
                         location: data.location,
                         id: doc.id,
@@ -51,7 +54,9 @@ export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskG
                         task_description: data.task_description,
                         start_date: formatDate(data.start_date),
                         end_date: formatDate(data.end_date),
-                        status: data.status
+                        status: data.status,
+                        quantity: data.quantity.toString(),
+                        price: data.price.toString()
                     });
                 }
             });
@@ -209,4 +214,41 @@ export const fetchEmployee = (setEmployeeList: any) => {
     return () => {
         unsubscribeEmployee();
     };
+}
+
+export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
+    setLoading(false)
+    const message = await messaging().getInitialNotification();
+    if (message && message.data) {
+        const userId = message.data.userId ? String(message.data.userId) : undefined;
+        const chatId = message.data.chatId ? String(message.data.chatId) : undefined;
+        if (userId && chatId) {
+            const snapshot = await firestore().collection('users').doc(userId).onSnapshot(async (querySnapshot) => {
+                const doc = querySnapshot.data();
+                if (doc) {
+                    const formattedUserData: iUser = {
+                        id: userId,
+                        birthday: formatDate(doc?.birthday),
+                        first_name: doc?.first_name,
+                        last_name: doc?.last_name,
+                        gender: doc?.gender,
+                        introduction: doc?.introduction,
+                        phone: doc?.phone,
+                        rating: doc?.rating,
+                        email: doc?.email,
+                        fcmToken: doc?.fcmToken,
+                        avatar: doc?.avatar,
+                        cover: doc?.cover,
+                    };
+                    navigation.navigate('ChatBox', { receiver: formattedUserData, chatId: chatId })
+                }
+            }, (error) => {
+                console.error('Error fetching user details from Firestore: ', error);
+            })
+            return () => {
+                snapshot();
+            };
+        }
+    }
+    setLoading(true)
 }

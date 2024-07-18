@@ -10,14 +10,12 @@ import firestore, { GeoPoint } from '@react-native-firebase/firestore';
 import axios from 'axios';
 import Mapbox, { LocationPuck } from "@rnmapbox/maps";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { Marker } from "react-native-maps";
 import { images } from "../../images";
-import { KeyboardAvoidingView } from "react-native";
 import { Task } from "../../../types/taskType";
 import { AddNew } from "./task-helper";
 import { selectUserData } from "../../redux/user/userSlice";
 import { useSelector } from "react-redux";
-import { convertStringToDate, parseDate } from "../../constants/formatDate";
+import { parseDate } from "../../constants/formatDate";
 
 
 
@@ -64,15 +62,13 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
         status: 'process',
         start_date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
         end_date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        price: '',
+        quantity: ''
     };
 
 
 
     const [taskItem, setTaskItem] = useState<Task>(item ?? initialTaskData)
-    useEffect(() => {
-        console.log(taskItem);
-
-    }, [taskItem])
     const [query, setQuery] = useState<string>('');
     const [results, setResults] = useState<Feature[]>([]);
     const [selectedLocation, setSelectedLocation] = useState<Feature>();
@@ -193,6 +189,8 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
 
     }
     useEffect(() => {
+        console.log(item);
+
         if (item) {
             ReverseGeocoding()
         }
@@ -230,26 +228,52 @@ export const TaskModal = ({ isModal, closeModal, item }: { isModal: boolean, clo
                     textAlign="center"
                 />
 
-                <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showStartDate: true }))}>
+                <View style={styles.date_container}>
+                    <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showStartDate: true }))}>
+                        <TextInput
+                            mode="outlined"
+                            label="Start Date"
+                            value={taskItem.start_date}
+                            style={[styles.input_container, { width: layout.width * 0.45 }]}
+                            editable={false}
+
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showEndDate: true }))}>
+                        <TextInput
+                            mode="outlined"
+                            label="End Date"
+                            value={taskItem.end_date}
+                            style={[styles.input_container, { width: layout.width * 0.45 }]}
+                            editable={false}
+                        />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.date_container}>
                     <TextInput
                         mode="outlined"
-                        label="Start Date"
-                        value={taskItem.start_date}
-                        style={styles.input_container}
-                        editable={false}
-
+                        label="Task Price ($)"
+                        value={taskItem.price}
+                        onChangeText={(text) => {
+                            setTaskItem(prev => ({ ...prev, price: text }))
+                        }}
+                        style={[styles.input_container, { width: layout.width * 0.45 }]}
+                        keyboardType='numeric'
                     />
-                </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setShowDatePicker(prev => ({ ...prev, showEndDate: true }))}>
                     <TextInput
                         mode="outlined"
-                        label="End Date"
-                        value={taskItem.end_date}
-                        style={styles.input_container}
-                        editable={false}
+                        label="Task Quantity"
+                        value={taskItem.quantity}
+                        onChangeText={(text) => {
+                            setTaskItem(prev => ({ ...prev, quantity: text }))
+                        }}
+                        style={[styles.input_container, { width: layout.width * 0.45 }]}
+                        keyboardType='numeric'
                     />
-                </TouchableOpacity>
+                </View>
+
 
                 <View style={styles.map}>
                     <Animated.View style={[styles.search_container, animatedStyle]}>
@@ -365,6 +389,11 @@ const styles = StyleSheet.create({
         padding: 10,
         width: layout.width
     },
+    date_container: {
+        width: layout.width - 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
     input_container: {
         marginBottom: 20,
         textAlign: 'justify',
@@ -374,7 +403,6 @@ const styles = StyleSheet.create({
         height: 40,
         width: '100%',
         backgroundColor: 'white',
-
     },
     search_container: {
         position: 'absolute',

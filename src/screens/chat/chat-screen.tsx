@@ -15,6 +15,7 @@ import { messagesBox } from "../../../types/messageBox";
 import { MessagesBoxList } from "./chat-box-list";
 import { selectUserData } from "../../redux/user/userSlice";
 import { useSelector } from "react-redux";
+import { iUser } from "../../../types/userType";
 
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -28,12 +29,12 @@ export const ChatScreen = () => {
 
     const AvatarFlatlist = () => {
         const renderItem = ({ item }: { item: messagesBox }) => (
-            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.received_id, item.id, item.name, item.fcmToken)}>
+            <TouchableOpacity style={{ margin: 10, alignItems: 'center' }} onPress={() => goToChat(item.receiver, item.id,)}>
                 <Image
-                    source={{ uri: item.avatar }}
+                    source={{ uri: item.receiver.avatar }}
                     style={{ width: 60, height: 60, borderRadius: 30 }}
                 />
-                <Text style={{ marginTop: 5, color: 'black' }}>{truncateText(item.name, 6)}</Text>
+                <Text style={{ marginTop: 5, color: 'black' }}>{truncateText(item.receiver.last_name + ' ' + item.receiver.first_name, 6)}</Text>
             </TouchableOpacity>
         );
 
@@ -48,55 +49,64 @@ export const ChatScreen = () => {
         );
     };
 
-
-
     const subscribeToChat = () => {
-        const unsubscribe = firestore()
+        const unsubscribeChat = firestore()
             .collection('chats')
             .where('members', 'array-contains', userData?.id)
             .onSnapshot(async (querySnapshot) => {
-                const filteredChats: any[] = [];
-
+                const filteredChats: messagesBox[] = [];
                 const promises = querySnapshot.docs.map(async (documentSnapshot) => {
                     const data = documentSnapshot.data();
                     const members = data.members;
                     const receive_id = members.filter((member: any) => member !== userData?.id);
-
                     firestore().collection('users').doc(receive_id[0]).onSnapshot(async (userSnapshot) => {
-                        const userData = userSnapshot.data()
-                        if (userData) {
+                        const userDoc = userSnapshot.data()
+                        if (userDoc) {
+                            const userData: iUser = {
+                                id: userDoc.id,
+                                birthday: formatDate(userDoc.birthday),
+                                first_name: userDoc.first_name,
+                                last_name: userDoc.last_name,
+                                gender: userDoc.gender,
+                                introduction: userDoc.introduction,
+                                phone: userDoc.phone,
+                                rating: userDoc.rating,
+                                email: userDoc.email,
+                                fcmToken: userDoc.fcmToken,
+                                avatar: userDoc.avatar,
+                                cover: userDoc.cover,
+                            }
                             filteredChats.push({
                                 id: documentSnapshot.id,
-                                name: userData.last_name + ' ' + userData.first_name,
-                                avatar: userData.avatar,
-                                received_id: receive_id[0],
+                                receiver: userData,
                                 lastMessage: data.lastMessage || '',
                                 lastMessageTimestamp: data.lastMessageTimestamp || firestore.Timestamp.now(),
-                                fcmToken: userData.fcmToken
                             });
                         }
                     })
                 });
-
                 await Promise.all(promises);
                 setBoxData(filteredChats);
             }, (error) => {
                 console.error('Error getting documents: ', error);
             });
-
-        return unsubscribe;
+        return () => {
+            unsubscribeChat();
+        };
     };
 
     useEffect(() => {
-        if (userData) {
-            const unsubscribe = subscribeToChat();
-            return () => unsubscribe();
+        if (!userData) return;
 
-        }
+        const unsubscribe = subscribeToChat()
+
+        return () => unsubscribe()
     }, [userData]);
 
-    const goToChat = (receiverId: string, chatBoxId: string, receiverName: string, fcmToken: string) => {
-        navigation.navigate('ChatBox', { receiverId: receiverId, chatId: chatBoxId, receiverName: receiverName, fcmToken: fcmToken })
+
+
+    const goToChat = (receiver: iUser, chatBoxId: string) => {
+        navigation.navigate('ChatBox', { receiver: receiver, chatId: chatBoxId, })
     }
 
 

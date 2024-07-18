@@ -13,13 +13,17 @@ import { useSelector } from 'react-redux';
 import { selectUserData } from '../redux/user/userSlice';
 import VideoProvider from '../context/videoContext';
 import CallProvider from '../context/CallContext';
+import AboutApp from '../screens/about/about-app';
+import messaging from '@react-native-firebase/messaging';
+import firestore from '@react-native-firebase/firestore';
+import { iUser } from '../../types/userType';
+import { formatDate } from '../constants/formatDate';
+
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export function StackNavigator() {
     const user = useSelector(selectUserData)
-    console.log(user);
-
     if (user === null) {
         return (
             <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -31,13 +35,15 @@ export function StackNavigator() {
     return (
         <VideoProvider>
             <CallProvider>
+
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                     <>
                         <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
                         <Stack.Screen name="ChatBox" component={ChatBox} />
                         <Stack.Screen name="EmployeeProfile" component={EmployeeProfile} />
                         <Stack.Screen name="CallScreen" component={CallScreen} />
-                        <Stack.Screen name="TaskDetail" component={TaskDetail} initialParams={{ TaskId: '1' }} />
+                        <Stack.Screen name="TaskDetail" component={TaskDetail} />
+                        <Stack.Screen name="AboutApp" component={AboutApp} />
                     </>
                 </Stack.Navigator>
             </CallProvider>

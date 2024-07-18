@@ -15,6 +15,7 @@ import VideoProvider from '../context/videoContext';
 import CallProvider from '../context/CallContext';
 import messaging from '@react-native-firebase/messaging';
 import { RootStackParamList } from './navigation';
+import { navigationRef } from './navigationRef';
 
 
 export default function AppNavigator() {
@@ -36,17 +37,14 @@ export default function AppNavigator() {
         await AsyncStorage.setItem("FCMToken", token)
     }
 
-
-
     React.useEffect(() => {
         requestUserPermission()
         getToken()
+
     })
 
 
     React.useEffect(() => {
-
-
         const checkuser = async () => {
             try {
                 setLoading(true)
@@ -91,8 +89,8 @@ export default function AppNavigator() {
             }
         }
         checkuser()
-
     }, [])
+
 
     if (loading) {
         return (
@@ -103,7 +101,7 @@ export default function AppNavigator() {
     }
     return (
         <EmployeeProvider>
-            <NavigationContainer>
+            <NavigationContainer ref={navigationRef}>
                 <StackNavigator />
             </NavigationContainer>
         </EmployeeProvider>

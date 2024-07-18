@@ -16,7 +16,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearUserData, selectUserData } from "../../redux/user/userSlice";
 import { EditProfile } from "./profile-edit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getImgae } from "./profile-helper";
 
 
 
@@ -161,7 +160,7 @@ export const ProfileScreen = () => {
             </View>
 
             <SweepButton onPress={() => openEdit()} iconName="edit" label="Edit Profile" />
-            <SweepButton onPress={() => { }} iconName="tasks" label="About" />
+            <SweepButton onPress={() => { navigation.navigate('AboutApp') }} iconName="tasks" label="About" />
 
             <View style={styles.logout_container}>
                 <TouchableOpacity style={styles.logout_button} onPress={() => { handleLogOut() }}>

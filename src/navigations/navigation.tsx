@@ -1,16 +1,13 @@
 import { Call } from "@stream-io/video-react-native-sdk";
-import { TaskType } from "../../types/taskType";
+import { iUser } from "../../types/userType";
 
 export type RootStackParamList = {
     Login: undefined;
     MainTabs: undefined;
     Register: undefined,
     ChatBox: {
-        receiverId: string,
+        receiver: iUser,
         chatId: string,
-        receiverName: string,
-        fcmToken: string
-
     },
     EmployeeProfile: { employeeId: string, },
     TaskDetail: { TaskId: string },
@@ -19,6 +16,7 @@ export type RootStackParamList = {
         receiverName: string,
         call: Call
     },
+    AboutApp: undefined
 };
 
 export type RootTabParamList = {

@@ -17,6 +17,7 @@ import { Call, StreamVideoClient, useStreamVideoClient } from "@stream-io/video-
 import { createUser } from "../../helpers/createUserStrem";
 import { generateRandomId } from "../../helpers/randomId";
 import ImagePicker from 'react-native-image-crop-picker';
+import { sendNotification } from "../../helpers/notification";
 type ChatBoxNavigationProp = StackNavigationProp<RootStackParamList>;
 
 type ChatBoxProps = {
@@ -30,9 +31,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     const userData = useSelector(selectUserData);
 
     const navigation = useNavigation<ChatBoxNavigationProp>()
-    const receiverId = route.params.receiverId
-    const receiverName = route.params.receiverName
-    const fcmToken = route.params.fcmToken
+    const receiver = route.params.receiver
     const [chatBoxId, setChatBoxId] = useState<string>(route.params.chatId)
     const [call, setCall] = useState<Call | null>(null);
     const client = useStreamVideoClient();
@@ -44,14 +43,12 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     })
 
     const [image, setImage] = useState<string>('')
-
     useEffect(() => {
-        console.log(fcmToken);
+        console.log('receiver', receiver);
 
-
-    }, [])
-    useEffect(() => {
-        getImgae()
+        setAvatar(prev => ({
+            ...prev, sender_avatar: userData?.avatar, receiver_avatar: receiver.avatar
+        }));
     }, [chatBoxId])
 
     useLayoutEffect(() => {
@@ -70,35 +67,6 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         return unsubscribe
     }, [])
 
-    // const sendNotification = async (receiverId: string, messageText: string) => {
-    //     // Lấy FCM token của người nhận từ Firestore
-    //     const receiverDoc = await firestore().collection('users').doc(receiverId).get();
-    //     const data = receiverDoc.data()
-    //     const fcmToken = data?.fcmToken;
-
-    //     // Gửi thông báo đến FCM token của người nhận
-    //     if (fcmToken) {
-    //         const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'key=YOUR_SERVER_KEY', // Thay YOUR_SERVER_KEY bằng Server key của bạn
-    //             },
-    //             body: JSON.stringify({
-    //                 to: fcmToken,
-    //                 notification: {
-    //                     title: 'New Message',
-    //                     body: messageText,
-    //                 },
-    //             }),
-    //         });
-
-    //         const responseData = await response.json();
-    //         console.log('Notification response:', responseData);
-    //     } else {
-    //         console.log('No FCM token for receiver.');
-    //     }
-    // };
 
     const onSend = useCallback((messages: IMessage[] = []) => {
         setMessages((previousMessages) =>
@@ -113,17 +81,23 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
 
         const _id = Date.now().toString();
 
+        let dataPayload: { [key: string]: string } = {
+            userId: userData ? userData.id : '',
+            chatId: chatBoxId,
+        };
+
         if (chatBoxId === null) {
             firestore().collection('chats').add({
                 lastMessage: text,
                 lastMessageTimestamp: createdAt,
                 members: [
-                    receiverId,
+                    receiver.id,
                     userData?.id
                 ]
             })
                 .then(newChatRef => {
                     const newChatId = newChatRef.id;
+                    dataPayload.chatId = newChatId
                     setChatBoxId(newChatId);
                     firestore().collection('chats').doc(newChatId).collection('messages').add({
                         _id,
@@ -132,9 +106,9 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         user,
                     })
                 })
-                // .then(() => {
-                //     sendNotification(receiverId, text);
-                // })
+                .then(() => {
+                    sendNotification(receiver.fcmToken, userData?.last_name + ' ' + userData?.first_name, text, dataPayload);
+                })
                 .catch(error => {
                     console.error('Error sending message: ', error);
                 })
@@ -153,44 +127,15 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         lastMessageTimestamp: createdAt
                     });
                 })
-                // .then(() => {
-                //     sendNotification(receiverId, text);
-                // })
+                .then(() => {
+                    sendNotification(receiver.fcmToken, userData?.last_name + ' ' + userData?.first_name, text, dataPayload);
+                })
                 .catch(error => {
                     console.error('Error sending message: ', error);
                 })
         }
 
-    }, [chatBoxId, userData, receiverId, image])
-
-    const getImgae = async () => {
-
-        const sender_avatarRef = storage().ref(`users/${userData?.id}/avatar.jpg`);
-        try {
-            const sender_avatarUrl = await sender_avatarRef.getDownloadURL();
-            setAvatar(prev => ({
-                ...prev, sender_avatar: sender_avatarUrl
-            }));
-        } catch (error) {
-            setAvatar(prev => ({
-                ...prev, sender_avatar: images.avartar_pic
-            }));
-        }
-
-        const receiver_avatarRef = storage().ref(`users/${receiverId}/avatar.jpg`);
-        try {
-            const receiver_avatarURL = await receiver_avatarRef.getDownloadURL();
-            setAvatar(prev => ({
-                ...prev, receiver_avatar: receiver_avatarURL
-            }));
-
-        } catch (error) {
-            setAvatar(prev => ({
-                ...prev, receiver_avatar: images.avartar_pic
-            }));
-
-        }
-    }
+    }, [chatBoxId, userData, receiver, image])
 
     const renderBubble = (props: any) => {
         return (
@@ -299,7 +244,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     }
 
     const handleCall = async () => {
-        createUser(receiverId, receiverName)
+        createUser(receiver.id, receiver.last_name + ' ' + receiver.first_name)
         const callId = generateRandomId();
 
         if (!client || !userData) {
@@ -312,7 +257,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                     ring: true,
                     data: {
                         members: [
-                            { user_id: receiverId },
+                            { user_id: receiver.id },
                             { user_id: userData.id }
                         ]
                     }
@@ -321,7 +266,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
             } catch (error) {
                 console.error("Error creating or joining the call", error);
             }
-            navigation.navigate('CallScreen', { receiverId: receiverId, receiverName: receiverName, call: newCall })
+            navigation.navigate('CallScreen', { receiverId: receiver.id, receiverName: receiver.last_name + ' ' + receiver.first_name, call: newCall })
         }
 
     }
@@ -341,9 +286,9 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
 
         if (chatBoxId === null) {
             const newChatRef = await firestore().collection('chats').add({
-                lastMessage: receiverName + ' sent you a image',
+                lastMessage: receiver.last_name + ' ' + receiver.first_name + ' sent you a image',
                 lastMessageTimestamp: message.createdAt,
-                members: [receiverId, userData?.id],
+                members: [receiver.id, userData?.id],
             });
             setChatBoxId(newChatRef.id);
             await firestore().collection('chats').doc(newChatRef.id).collection('messages').add(message);
@@ -351,7 +296,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         } else {
             await firestore().collection('chats').doc(chatBoxId).collection('messages').add(message);
             await firestore().collection('chats').doc(chatBoxId).update({
-                lastMessage: receiverName + ' sent you a image',
+                lastMessage: receiver.last_name + ' ' + receiver.first_name + ' sent you a image',
                 lastMessageTimestamp: message.createdAt,
             });
             setImage('')
@@ -389,6 +334,9 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         }
     };
 
+    if (!userData) {
+        return null
+    }
     return (
         <View style={styles.container}>
             <View style={styles.header_bar}>
@@ -400,7 +348,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         <Image source={avatar.receiver_avatar === images.avartar_pic ? images.avartar_pic : { uri: avatar.receiver_avatar }} resizeMode='contain' style={{ height: '100%', width: '100%' }} />
                     </View>
                     <View style={styles.user_name_container}>
-                        <Text style={styles.user_name}>{receiverName}</Text>
+                        <Text style={styles.user_name}>{receiver.last_name + ' ' + receiver.first_name}</Text>
                     </View>
                 </View>
                 <TouchableOpacity style={styles.call_container} onPress={() => { }}>
