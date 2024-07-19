@@ -63,7 +63,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
 
         )
         return unsubscribe
-    }, [])
+    }, [chatBoxId])
 
 
     const onSend = useCallback((messages: IMessage[] = []) => {
@@ -77,7 +77,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
             user,
         } = messages[0]
 
-        const _id = Date.now().toString();
+        const _id = new Date();
 
         let dataPayload: { [key: string]: string } = {
             userId: userData ? userData.id : '',
@@ -133,7 +133,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                 })
         }
 
-    }, [chatBoxId, userData, receiver, image])
+    }, [chatBoxId])
 
     const renderBubble = (props: any) => {
         return (

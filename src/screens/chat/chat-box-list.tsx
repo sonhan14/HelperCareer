@@ -130,7 +130,11 @@ const styles = StyleSheet.create({
         width: layout.width - 20,
         flexDirection: 'row',
         backgroundColor: color.light_background,
-        borderRadius: 10
+        borderRadius: 10,
+        shadowColor: 'black',
+        shadowOpacity: 1,
+        elevation: 5,
+        shadowRadius: 20
     },
     message_box_avatar: {
         height: '100%',
@@ -140,9 +144,9 @@ const styles = StyleSheet.create({
     },
     message_box_text: {
         height: '100%',
-        width: '60%',
+        width: '55%',
         paddingLeft: 5,
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
 
     text_name: {
@@ -157,13 +161,15 @@ const styles = StyleSheet.create({
     },
 
     message_box_time: {
-        width: '20%',
+        width: '25%',
         height: '100%',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     text_time: {
         color: 'black',
-        fontWeight: '200'
+        fontWeight: '200',
+        textAlign: 'right',
+        paddingRight: 10
     },
     delete_swipe: {
         borderRadius: 15,

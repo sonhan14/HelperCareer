@@ -34,10 +34,6 @@ export const ProfileScreen = () => {
         cover: images.background_pic,
     })
     const dispatch = useDispatch()
-    // const [loading, setLoading] = useState({
-    //     avatarLoading: false,
-    //     coverLoading: false
-    // });
 
     const openEdit = () => {
         if (userData) {
@@ -79,7 +75,6 @@ export const ProfileScreen = () => {
                 mediaType: 'photo',
             });
             if (!pickedImage) {
-                // User canceled image picking
                 return;
             }
             if (pickedImage) {
@@ -179,7 +174,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         padding: 10,
-        position: 'relative'
+        position: 'relative',
+        backgroundColor: 'white'
     },
     text_30: {
         color: 'black',

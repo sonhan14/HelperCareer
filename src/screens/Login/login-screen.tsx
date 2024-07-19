@@ -111,7 +111,6 @@ export const LoginScreen = () => {
             <View style={{ flex: 1, position: 'relative' }}>
 
                 <View style={login_styles.login_image_container}>
-                    {/* <Image source={images.login_gif} resizeMode='contain' style={{ width: '80%', height: '80%' }} /> */}
                     <FastImage source={images.login_gif} style={{ width: layout.width, height: layout.height * 0.25 }} resizeMode='contain' />
                 </View>
                 <View style={login_styles.hello_container}>

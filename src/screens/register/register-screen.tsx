@@ -16,6 +16,7 @@ import { ProfileModal } from "./register-modal";
 import { CustomButton } from "../../components/custom-button";
 import FastImage from "react-native-fast-image";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { __doCreateUser } from "./register-helper";
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -120,30 +121,10 @@ export const RegisterScreen: React.FC = () => {
             return;
         }
 
-        __doCreateUser(account.email, account.password,);
+        __doCreateUser({ setLoading, setIsModal, setErrorMessage, setNotificationVisible, account });
     };
 
-    const __doCreateUser = async (email: string, password: string) => {
-        setLoading(true);
-        try {
-            let response = await auth().createUserWithEmailAndPassword(email, password);
-            if (response) {
-                setIsModal(prev => ({ ...prev, showModal: true, userId: response.user.uid, email: account.email, password: account.password }))
-            }
-            // setIsModal(prev => ({ ...prev, showModal: true, userId: '', email: account.email }))
-        } catch (e: unknown) {
-            const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
-            if (error.code === 'auth/email-already-in-use') {
-                setErrorMessage('That email address is already in use!')
-            }
-            if (error.code === 'auth/invalid-email') {
-                setErrorMessage('That email address is invalid!')
-            }
-            setNotificationVisible(true)
-        } finally {
-            setLoading(false);
-        }
-    };
+
 
 
 

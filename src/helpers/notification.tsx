@@ -21,9 +21,9 @@ export const getAccessToken = async (): Promise<string> => {
     };
 
     try {
-        // Kiểm tra nếu assertionToken chưa được khởi tạo hoặc đã hết hạn
+
         if (!assertionToken || tokenExpiry === null || Date.now() >= tokenExpiry) {
-            await generateToken(); // Refresh assertionToken
+            await generateToken();
         }
 
         const data = new URLSearchParams();
@@ -45,6 +45,9 @@ export const getAccessToken = async (): Promise<string> => {
 
 export const sendNotification = async (fcmToken: string, receiverName: string, bodyMessage: string, dataPayload: { [key: string]: string }): Promise<void> => {
     const url = 'https://fcm.googleapis.com/v1/projects/vmafinalproject/messages:send';
+    if (fcmToken === 'abc') {
+        return
+    }
     try {
         const accessToken = await getAccessToken();
         const headers = {

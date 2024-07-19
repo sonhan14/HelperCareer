@@ -20,6 +20,23 @@ interface iAddInfo {
     setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
+interface doCreateUserProps {
+    setLoading: any,
+    setIsModal: React.Dispatch<React.SetStateAction<{
+        showModal: boolean;
+        userId: string;
+        email: string;
+        password: string;
+    }>>,
+    setErrorMessage: React.Dispatch<React.SetStateAction<string>>
+    setNotificationVisible: React.Dispatch<React.SetStateAction<boolean>>
+    account: {
+        email: string;
+        password: string;
+        rePassword: string;
+    }
+}
+
 export const AddInfo = async ({ password, userId, account, email, image, selectedLocation, dispatch, setLoading }: iAddInfo) => {
     setLoading(true)
     await firestore()
@@ -77,3 +94,25 @@ export const AddInfo = async ({ password, userId, account, email, image, selecte
             }
         })
 }
+
+export const __doCreateUser = async ({ setLoading, setIsModal, setErrorMessage, setNotificationVisible, account }: doCreateUserProps) => {
+    setLoading(true);
+    try {
+        let response = await auth().createUserWithEmailAndPassword(account.email, account.password);
+        if (response) {
+            setIsModal(prev => ({ ...prev, showModal: true, userId: response.user.uid, email: account.email, password: account.password }))
+        }
+        // setIsModal(prev => ({ ...prev, showModal: true, userId: '', email: account.email }))
+    } catch (e: unknown) {
+        const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
+        if (error.code === 'auth/email-already-in-use') {
+            setErrorMessage('That email address is already in use!')
+        }
+        if (error.code === 'auth/invalid-email') {
+            setErrorMessage('That email address is invalid!')
+        }
+        setNotificationVisible(true)
+    } finally {
+        setLoading(false);
+    }
+};

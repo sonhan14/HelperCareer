@@ -1,4 +1,4 @@
-import Animated, { FadeIn, interpolateColor, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
+import Animated, { FadeIn, interpolate, interpolateColor, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { layout } from "../../constants/dimensions/dimension";
 import { useEffect, useRef, useState } from "react";
 import { Gesture, GestureDetector, GestureHandlerRootView, PanGestureHandler, ScrollView } from "react-native-gesture-handler";
@@ -12,6 +12,7 @@ import { EmployeeList } from "./application-item";
 import { Button, Dialog, Portal, Provider } from "react-native-paper";
 import { Applications } from "../../../types/applications.type";
 import { Task } from "../../../types/taskType";
+import { color } from "../../constants/colors/color";
 
 interface imodal {
     isOpen: number,
@@ -30,13 +31,22 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
     const threshold = 0
     const isDragging = useSharedValue(true);
     const [showEmployee, setShowEmployee] = useState(false)
-    const animatedValue = useSharedValue(0)
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
             transform: [
                 { translateY: dragY.value },
             ],
+            borderTopLeftRadius: interpolate(
+                dragY.value,
+                [0, -layout.height * 0.6],
+                [25, 0]
+            ),
+            borderTopRightRadius: interpolate(
+                dragY.value,
+                [0, -layout.height * 0.6],
+                [25, 0]
+            ),
         };
     });
     const [visible, setVisible] = useState(false);
@@ -132,22 +142,6 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
         }
     }
 
-    useEffect(() => {
-        animatedValue.value = withRepeat(withTiming(1, { duration: 500 }), withTiming(0, { duration: 500 }))
-    }, [])
-
-    const animatedTextColor = useAnimatedStyle(() => {
-        return {
-            color: interpolateColor(
-                animatedValue.value,
-                [0, 1],
-                ['red', 'blue']
-            ),
-            fontSize: 16,
-            paddingLeft: 10,
-            fontWeight: '500'
-        }
-    })
 
     return (
 
@@ -160,7 +154,10 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
                         </View>
 
                         <View style={styles.main_container}>
-                            <View style={styles.task_name_container}>
+                            <View style={[styles.name_container,]}>
+                                <Text style={styles.text_title}>{item?.task_name}</Text>
+                            </View>
+                            {/* <View style={styles.task_name_container}>
                                 <View style={styles.image_container}>
                                     <Image source={images.task_image} resizeMode='cover' style={{ height: '100%', width: '100%' }} />
                                 </View>
@@ -173,30 +170,48 @@ export const TaskInfo = ({ isOpen, setClose, item, applicationList }: imodal) =>
                                             null
                                     }
                                 </View>
+                            </View> */}
+                            <View style={styles.price_container}>
+                                <Text style={[styles.text_16, { paddingLeft: 10 }]}>Duration: </Text>
+                                <Text style={[styles.text_16, { color: 'green' }]}>{item?.start_date} - {item?.end_date}</Text>
                             </View>
 
                             <View style={styles.price_container}>
-                                <Text style={[styles.text_16, { paddingLeft: 10 }]}>Price/Employee:</Text>
-                                <Animated.Text style={[animatedTextColor]}>{item?.price}</Animated.Text>
-                                <Text style={styles.text_16}>$</Text>
+                                <Text style={[styles.text_16, { paddingLeft: 10 }]}>Budget: </Text>
+                                <Text style={[styles.text_16, { color: color.red_pink }]}>{item?.price}</Text>
+                                <Text style={styles.text_16}>$/employee</Text>
+                            </View>
+
+                            <View style={styles.price_container}>
+                                <Text style={[styles.text_16, { paddingLeft: 10 }]}>Employees Needed: </Text>
+                                <Text style={styles.text_16}>{item?.quantity}</Text>
+                            </View>
+
+                            <View style={styles.price_container}>
+                                <Text style={[styles.text_16, { paddingLeft: 10 }]}>Applications Needed: </Text>
+                                <Text style={[styles.text_16, { color: 'red' }]}>{parseFloat(item?.quantity ?? '0') - (applicationList?.filter(app => app.status === 'accepted').length ?? 0)}</Text>
                             </View>
 
                             <View style={styles.des_container}>
                                 <ScrollView showsVerticalScrollIndicator={false}>
-                                    <Text style={styles.text_15}>{item?.task_description}</Text>
+                                    <Text style={[styles.text_16, { textAlign: 'left' }]}>{item?.task_description}</Text>
                                 </ScrollView>
                             </View>
 
                             <TouchableOpacity style={styles.manage_container} onPress={() => { pressEmployee() }}>
                                 <View style={styles.manage_title}>
                                     <Icon name={'tasks'} size={20} color={'black'} style={{ marginRight: 10 }} />
-                                    <Text style={styles.text_15}>Manage Employee</Text>
+                                    <Text style={[styles.text_16]}>Manage Applications ({applicationList?.length}) </Text>
                                 </View>
                                 <Animated.View style={[IconAnimated]}>
                                     <Icon name="angle-right" size={30} color={'black'} />
                                 </Animated.View>
                             </TouchableOpacity>
-                            <EmployeeList showEmployee={showEmployee} employeeList={applicationList} handleAction={handleAction} />
+                            {(parseFloat(item?.quantity ?? '0') - (applicationList?.filter(app => app.status === 'accepted').length ?? 0)) === 0 ?
+                                <EmployeeList showEmployee={showEmployee} employeeList={applicationList?.filter(app => app.status === 'accepted')} handleAction={handleAction} />
+                                :
+                                <EmployeeList showEmployee={showEmployee} employeeList={applicationList} handleAction={handleAction} />
+                            }
                         </View>
                     </View>
                     <Portal>
@@ -242,18 +257,19 @@ const styles = StyleSheet.create({
         borderRadius: 10
     },
     text_title: {
-        fontWeight: '700',
-        fontSize: 20,
-        color: 'black'
+        fontWeight: '500',
+        fontSize: 25,
+        color: 'black',
+        paddingLeft: 5,
     },
     price_container: {
         flexDirection: 'row',
-        marginVertical: 5,
-        height: layout.height * 0.04,
+        marginBottom: 5,
+        height: layout.height * 0.03,
     },
     text_16: {
         fontSize: 16,
-        fontWeight: '700',
+        fontWeight: '400',
         color: 'black'
     },
     main_container: {
@@ -276,24 +292,16 @@ const styles = StyleSheet.create({
         fontSize: 15
     },
     name_container: {
-        height: '100%',
-        justifyContent: 'center'
+        height: layout.height * 0.05,
+        marginBottom: 10
     },
     des_container: {
         height: layout.height * 0.3,
         width: layout.width - 20,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: 'black',
-        marginTop: 10,
         padding: 10,
-        marginBottom: 20
-    },
-    text_15: {
-        color: 'black',
-        fontSize: 15,
-        fontWeight: '500',
-        textAlign: 'justify'
+        marginBottom: 20,
+        borderWidth: 0.5,
+        borderRadius: 20
     },
     manage_container: {
         width: '100%',
@@ -309,7 +317,7 @@ const styles = StyleSheet.create({
     manage_title: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: '40%'
+        width: '80%'
     },
 
 

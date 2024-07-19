@@ -107,7 +107,8 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: 'white'
     },
     header_container: {
         height: layout.height * 0.06,

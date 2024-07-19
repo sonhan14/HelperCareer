@@ -10,5 +10,7 @@ export const images = {
     sign_up: require('./sign_up.gif'),
     create_info: require('./create_info.gif'),
     avatar_animation: require('./avatar_animation.gif'),
-    map_animation: require('./map_animation.gif')
+    map_animation: require('./map_animation.gif'),
+    budget_icon: require('./budget_icon.png'),
+    address_location: require('./address_location.gif')
 }

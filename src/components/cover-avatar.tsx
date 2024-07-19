@@ -4,6 +4,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { iUser } from '../../types/userType';
 import { images } from '../images';
 import { layout } from '../constants/dimensions/dimension';
+import FastImage from 'react-native-fast-image';
 
 
 interface ProfileImageSectionProps {
@@ -40,7 +41,6 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({ image, pickIm
 
 
             <View style={styles.avatar_info_container}>
-
                 <TouchableOpacity
                     style={styles.avatar_container}
                     onPress={() => isEditable && pickImages && pickImages(0)}
@@ -66,6 +66,10 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({ image, pickIm
                     <Text style={styles.text_15}>
                         {user?.birthday}
                     </Text>
+                    <TouchableOpacity style={styles.address_button}>
+                        <FastImage source={images.address_location} resizeMode='contain' style={{ height: 20, width: 20 }} />
+                        <Text style={styles.text_address}>Ha Noi</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </>
@@ -93,9 +97,11 @@ const styles = StyleSheet.create({
     },
     name_info_container: {
         height: layout.height * 0.12,
-        width: '50%',
-        justifyContent: 'center',
-        marginLeft: 15
+        width: '70%',
+        justifyContent: 'flex-end',
+        marginLeft: 15,
+        paddingBottom: 5
+        // backgroundColor: 'red',
     },
     text_20: {
         color: 'black',
@@ -130,6 +136,16 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         bottom: 10,
         right: 10
+    },
+    address_button: {
+        height: 20,
+        width: '100%',
+        flexDirection: 'row'
+    },
+    text_address: {
+        color: 'green',
+        fontSize: 16,
+        fontWeight: '500'
     }
 });
 

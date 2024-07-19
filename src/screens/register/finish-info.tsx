@@ -168,7 +168,7 @@ export const FinishInfo = ({ account, setAccount, isRegister, isValid, selectedL
                     <View style={[styles.input_container, { height: layout.height * 0.2 }]}>
                         <Text style={styles.text_input_blue}>Introduction</Text>
                         <TextInput
-                            style={[styles.text_input1, { height: layout.height * 0.15 }]}
+                            style={[styles.text_input1, { height: layout.height * 0.15, textAlignVertical: 'top' }]}
                             placeholder="Hi, I'm William"
                             placeholderTextColor={'#8897AD'}
                             onChangeText={(text) => { setAccount(prev => ({ ...prev, intro: text })) }}
