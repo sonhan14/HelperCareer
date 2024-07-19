@@ -15,6 +15,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { ProfileModal } from "./register-modal";
 import { CustomButton } from "../../components/custom-button";
 import FastImage from "react-native-fast-image";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -33,7 +34,8 @@ export const RegisterScreen: React.FC = () => {
     const [isModal, setIsModal] = useState({
         showModal: false,
         userId: '',
-        email: ''
+        email: '',
+        password: ''
     });
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigation = useNavigation<RegisterScreenNavigationProp>();
@@ -124,11 +126,11 @@ export const RegisterScreen: React.FC = () => {
     const __doCreateUser = async (email: string, password: string) => {
         setLoading(true);
         try {
-            // let response = await auth().createUserWithEmailAndPassword(email, password);
-            // if (response) {
-            //     setIsModal(prev => ({ ...prev, showModal: true, userId: response.user.uid, email: account.email }))
-            // }
-            setIsModal(prev => ({ ...prev, showModal: true, userId: '', email: account.email }))
+            let response = await auth().createUserWithEmailAndPassword(email, password);
+            if (response) {
+                setIsModal(prev => ({ ...prev, showModal: true, userId: response.user.uid, email: account.email, password: account.password }))
+            }
+            // setIsModal(prev => ({ ...prev, showModal: true, userId: '', email: account.email }))
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
             if (error.code === 'auth/email-already-in-use') {
@@ -146,155 +148,157 @@ export const RegisterScreen: React.FC = () => {
 
 
     return (
-        <View style={{ flex: 1, position: 'relative' }}>
-            <View style={styles.login_image_container}>
-                <FastImage source={images.sign_up} resizeMode='contain' style={{ width: layout.width, height: layout.height * 0.25 }} />
-            </View>
-            <View style={styles.hello_container}>
-                <View style={styles.wellcome_container}>
-                    <Text style={styles.text_title}>New Owner</Text>
+        <KeyboardAwareScrollView>
+            <View style={{ flex: 1, position: 'relative' }}>
+                <View style={styles.login_image_container}>
+                    <FastImage source={images.sign_up} resizeMode='contain' style={{ width: layout.width, height: layout.height * 0.25 }} />
                 </View>
-            </View>
+                <View style={styles.hello_container}>
+                    <View style={styles.wellcome_container}>
+                        <Text style={styles.text_title}>New Owner</Text>
+                    </View>
+                </View>
 
-            <View style={styles.sign_in_container}>
-                <View style={styles.input_container}>
-                    <Text style={styles.text_input_blue}>Email: </Text>
-                    <TextInput
-                        style={[styles.text_input]}
-                        placeholder="Example@email.com"
-                        placeholderTextColor={'#8897AD'}
-                        onChangeText={(text) => { setAccount(prev => ({ ...prev, email: text })) }}
-                        value={account.email}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
+                <View style={styles.sign_in_container}>
+                    <View style={styles.input_container}>
+                        <Text style={styles.text_input_blue}>Email: </Text>
+                        <TextInput
+                            style={[styles.text_input]}
+                            placeholder="Example@email.com"
+                            placeholderTextColor={'#8897AD'}
+                            onChangeText={(text) => { setAccount(prev => ({ ...prev, email: text })) }}
+                            value={account.email}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                        />
+                    </View>
+                    {isValid.emailError ? (
+                        <Animated.View
+                            entering={LightSpeedInRight.duration(500)}
+                            exiting={LightSpeedOutRight.duration(500)}
+                            style={styles.error_container}>
+                            <Text style={styles.error_text}>{isValid.emailError}</Text>
+                        </Animated.View>
+
+                    ) : <Animated.View
+                        entering={LightSpeedInRight.duration(500)}
+                        exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                    }
+                    <View style={styles.input_container}>
+                        <Text style={styles.text_input_blue}>Password: </Text>
+                        <View style={styles.text_input_container}>
+                            <TextInput
+                                style={[styles.text_input]}
+                                placeholder="At least 8 characters"
+                                placeholderTextColor={'#8897AD'}
+                                onChangeText={(text) => { setAccount(prev => ({ ...prev, password: text })) }}
+                                value={account.password}
+                                autoCapitalize="none"
+                                secureTextEntry={!showPassword.showPassword}
+                            />
+                            <TouchableOpacity
+                                style={styles.eyeIconContainer}
+                                onPress={() => {
+                                    setShowPassword(prev => ({
+                                        ...prev,
+                                        showPassword: !showPassword.showPassword
+                                    }))
+                                }}
+                            >
+                                <Icon
+                                    name={showPassword.showPassword ? 'eye' : 'eye-slash'}
+                                    size={20}
+                                    color="black"
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+
+                    </View>
+                    {isValid.passwordError ? (
+                        <Animated.View
+                            entering={LightSpeedInRight.duration(500)}
+                            exiting={LightSpeedOutRight.duration(500)}
+                            style={styles.error_container}>
+                            <Text style={styles.error_text}>{isValid.passwordError}</Text>
+                        </Animated.View>
+
+                    ) : <Animated.View
+                        entering={LightSpeedInRight.duration(500)}
+                        exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                    }
+
+                    <Animated.View style={[styles.input_container]}>
+                        <Text style={styles.text_input_blue}>Re-Password: </Text>
+                        <View style={styles.text_input_container}>
+                            <TextInput
+                                style={[styles.text_input]}
+                                placeholder="At least 8 characters"
+                                placeholderTextColor={'#8897AD'}
+                                onChangeText={(text) => { setAccount(prev => ({ ...prev, rePassword: text })) }}
+                                value={account.rePassword}
+                                autoCapitalize="none"
+                                secureTextEntry={!showPassword.showRePassword}
+                            />
+                            <TouchableOpacity
+                                style={styles.eyeIconContainer}
+                                onPress={() => {
+                                    setShowPassword(prev => ({
+                                        ...prev,
+                                        showRePassword: !showPassword.showRePassword
+                                    }))
+                                }}
+                            >
+                                <Icon
+                                    name={showPassword.showPassword ? 'eye' : 'eye-slash'}
+                                    size={20}
+                                    color="black"
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+                    </Animated.View>
+                    {/* <TouchableOpacity
+                        onPress={() => { __doSignUp() }}
+                        style={isRegister || isValid.emailError !== '' || isValid.passwordError !== '' ? styles.signin_button_disable : styles.signin_button}
+                        disabled={isRegister}
+                    >
+                        <Text style={styles.text_button}>Contitnue</Text>
+                    </TouchableOpacity> */}
+                    <CustomButton
+                        title="Sign Up"
+                        onPress={__doSignUp}
+                        style={styles.signin_button}
+                        disabled={isRegister || isValid.emailError !== '' || isValid.passwordError !== ''}
+                        disabledStyle={styles.signin_button_disable}
+                        loading={loading}
                     />
                 </View>
-                {isValid.emailError ? (
-                    <Animated.View
-                        entering={LightSpeedInRight.duration(500)}
-                        exiting={LightSpeedOutRight.duration(500)}
-                        style={styles.error_container}>
-                        <Text style={styles.error_text}>{isValid.emailError}</Text>
-                    </Animated.View>
 
-                ) : <Animated.View
-                    entering={LightSpeedInRight.duration(500)}
-                    exiting={LightSpeedOutRight.duration(500)}></Animated.View>
-                }
-                <View style={styles.input_container}>
-                    <Text style={styles.text_input_blue}>Password: </Text>
-                    <View style={styles.text_input_container}>
-                        <TextInput
-                            style={[styles.text_input]}
-                            placeholder="At least 8 characters"
-                            placeholderTextColor={'#8897AD'}
-                            onChangeText={(text) => { setAccount(prev => ({ ...prev, password: text })) }}
-                            value={account.password}
-                            autoCapitalize="none"
-                            secureTextEntry={!showPassword.showPassword}
-                        />
-                        <TouchableOpacity
-                            style={styles.eyeIconContainer}
-                            onPress={() => {
-                                setShowPassword(prev => ({
-                                    ...prev,
-                                    showPassword: !showPassword.showPassword
-                                }))
-                            }}
-                        >
-                            <Icon
-                                name={showPassword.showPassword ? 'eye' : 'eye-slash'}
-                                size={20}
-                                color="black"
-                            />
+                <View style={styles.sign_up_container}>
+                    <View style={styles.sign_up_title}>
+                        <Text style={styles.text_15}>I have an account!!! </Text>
+                        <TouchableOpacity onPress={() => { navigation.navigate('Login') }}>
+                            <Text style={styles.text_blue}>Sign in</Text>
                         </TouchableOpacity>
                     </View>
 
-
                 </View>
-                {isValid.passwordError ? (
-                    <Animated.View
-                        entering={LightSpeedInRight.duration(500)}
-                        exiting={LightSpeedOutRight.duration(500)}
-                        style={styles.error_container}>
-                        <Text style={styles.error_text}>{isValid.passwordError}</Text>
-                    </Animated.View>
 
-                ) : <Animated.View
-                    entering={LightSpeedInRight.duration(500)}
-                    exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                {notificationVisible ?
+                    <Animated.View
+                        entering={BounceInRight.duration(500)}
+                        exiting={LightSpeedOutRight.duration(500)}
+                        style={styles.noti_container}>
+                        <Text style={[styles.text_15]}>{errorMessage}</Text>
+                    </Animated.View>
+                    :
+                    null
                 }
 
-                <Animated.View style={[styles.input_container]}>
-                    <Text style={styles.text_input_blue}>Re-Password: </Text>
-                    <View style={styles.text_input_container}>
-                        <TextInput
-                            style={[styles.text_input]}
-                            placeholder="At least 8 characters"
-                            placeholderTextColor={'#8897AD'}
-                            onChangeText={(text) => { setAccount(prev => ({ ...prev, rePassword: text })) }}
-                            value={account.rePassword}
-                            autoCapitalize="none"
-                            secureTextEntry={!showPassword.showRePassword}
-                        />
-                        <TouchableOpacity
-                            style={styles.eyeIconContainer}
-                            onPress={() => {
-                                setShowPassword(prev => ({
-                                    ...prev,
-                                    showRePassword: !showPassword.showRePassword
-                                }))
-                            }}
-                        >
-                            <Icon
-                                name={showPassword.showPassword ? 'eye' : 'eye-slash'}
-                                size={20}
-                                color="black"
-                            />
-                        </TouchableOpacity>
-                    </View>
-
-                </Animated.View>
-                <TouchableOpacity
-                    onPress={() => { __doSignUp() }}
-                    style={isRegister || isValid.emailError !== '' || isValid.passwordError !== '' ? styles.signin_button_disable : styles.signin_button}
-                    disabled={isRegister}
-                >
-                    <Text style={styles.text_button}>Contitnue</Text>
-                </TouchableOpacity>
-                {/* <CustomButton
-                    title="Sign Up"
-                    onPress={__doSignUp}
-                    style={styles.signin_button}
-                    disabled={isRegister}
-                    disabledStyle={styles.signin_button_disable}
-                    loading={loading}
-                /> */}
+                {isModal ? <ProfileModal isModal={isModal.showModal} userId={isModal.userId} email={isModal.email} navigation={navigation} password={isModal.password} /> : null}
             </View>
-
-            <View style={styles.sign_up_container}>
-                <View style={styles.sign_up_title}>
-                    <Text style={styles.text_15}>I have an account!!! </Text>
-                    <TouchableOpacity onPress={() => { navigation.navigate('Login') }}>
-                        <Text style={styles.text_blue}>Sign in</Text>
-                    </TouchableOpacity>
-                </View>
-
-            </View>
-
-            {notificationVisible ?
-                <Animated.View
-                    entering={BounceInRight.duration(500)}
-                    exiting={LightSpeedOutRight.duration(500)}
-                    style={styles.noti_container}>
-                    <Text style={[styles.text_15]}>{errorMessage}</Text>
-                </Animated.View>
-                :
-                null
-            }
-
-            {isModal ? <ProfileModal isModal={isModal.showModal} userId={isModal.userId} email={isModal.email} navigation={navigation} /> : null}
-        </View>
+        </KeyboardAwareScrollView>
     )
 };
 

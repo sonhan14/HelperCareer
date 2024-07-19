@@ -44,8 +44,6 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
 
     const [image, setImage] = useState<string>('')
     useEffect(() => {
-        console.log('receiver', receiver);
-
         setAvatar(prev => ({
             ...prev, sender_avatar: userData?.avatar, receiver_avatar: receiver.avatar
         }));

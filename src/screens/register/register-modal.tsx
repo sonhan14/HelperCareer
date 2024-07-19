@@ -10,7 +10,11 @@ import { validateVietnamesePhoneNumber } from "./register-validation"
 import FastImage from "react-native-fast-image"
 import { StartInfo } from "./start-info"
 import { FinishInfo } from "./finish-info"
-
+import ImagePicker from 'react-native-image-crop-picker';
+import storage from '@react-native-firebase/storage';
+import { Feature } from "../../../types/homeTypes"
+import { AddInfo } from "./register-helper"
+import { useDispatch } from "react-redux"
 
 
 export type accountInfo = {
@@ -22,7 +26,7 @@ export type accountInfo = {
     gender: string,
 }
 
-export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: boolean, userId: string, navigation: any, email: string }) => {
+export const ProfileModal = ({ isModal, userId, navigation, email, password }: { isModal: boolean, userId: string, navigation: any, email: string, password: string }) => {
 
     const [step, setStep] = useState<number>(0)
     const [account, setAccount] = useState<accountInfo>({
@@ -33,9 +37,18 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
         intro: '',
         gender: '',
     })
+    const [loading, setLoading] = useState<boolean>(false)
+    const dispatch = useDispatch();
     const [isValid, setIsValid] = useState('')
+    const [image, setImage] = useState<string>('')
     const animationValue = useSharedValue(0)
-
+    const [selectedLocation, setSelectedLocation] = useState<Feature>(
+        {
+            id: '',
+            full_address: 'string',
+            center: [0, 0]
+        }
+    );
     const animationStyle = useAnimatedStyle(() => {
         return {
             height: animationValue.value,
@@ -61,27 +74,37 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
         setShowGenderOptions(false); // Hide gender options after selection
     };
 
-    const handleAddInfo = async () => {
-
-        firestore()
-            .collection('users')
-            .doc(userId)
-            .set({
-                first_name: account.first_name,
-                last_name: account.last_name,
-                gender: account.gender,
-                birthday: account.birth_day,
-                introduction: account.intro,
-                phone: account.phone,
-                rating: 5.0,
-                email: email,
-                role: 'Owner',
-                fcmToken: 'abc'
-            })
-            .then(() => {
-                navigation.replace('MainTabs', { userId: userId })
-            })
+    const handleAddInfo = () => {
+        AddInfo({ password, userId, account, email, image, selectedLocation, dispatch, setLoading })
     }
+
+    const pickImages = async () => {
+        const currentImageState = image;
+        try {
+            const pickedImage = await ImagePicker.openPicker({
+                mediaType: 'photo',
+            });
+            if (!pickedImage) {
+                return;
+            }
+            if (pickedImage) {
+                const imagePath = pickedImage.path;
+                const uploadUri = Platform.OS === 'ios' ? imagePath.replace('file://', '') : imagePath;
+                const storageRef = await storage().ref(`users/${userId}/avatar.jpg`);
+                await storageRef.putFile(uploadUri);
+
+                try {
+                    const imageUrl = await storageRef.getDownloadURL();
+                    setImage(imageUrl);
+                } catch (error) {
+                    console.error('Image upload error: ', error);
+                }
+
+            }
+        } catch (error) {
+            setImage(currentImageState);
+        }
+    };
 
     useEffect(() => {
         if (account.phone) {
@@ -100,7 +123,9 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
     }, [showGenderOptions])
 
     const isRegister = !account.last_name || !account.first_name || !account.birth_day || !account.intro || !account.phone;
-    const isButton = !account.last_name || !account.first_name || !account.birth_day || !account.gender
+    const isButton = !account.last_name || !account.first_name || !account.birth_day || !account.gender || image === ''
+
+
     return (
         <Modal
             animationType={'slide'}
@@ -112,8 +137,8 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                         <Animated.View style={styles.container} entering={LightSpeedInRight.duration(500)} exiting={StretchOutX.duration(500)}>
                             <View style={styles.login_image_container}>
                                 <Text style={styles.text_title}>Complete your profile</Text>
-                                <TouchableOpacity style={styles.avatar_container}>
-                                    <FastImage source={images.avatar_animation} resizeMode="contain" style={styles.avatar} />
+                                <TouchableOpacity style={styles.avatar_container} onPress={() => pickImages()}>
+                                    <FastImage source={image === '' ? images.avatar_animation : { uri: image }} resizeMode={'cover'} style={styles.avatar} />
                                 </TouchableOpacity>
                             </View>
 
@@ -152,43 +177,6 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                                         <Text style={[styles.text_input, { height: '100%', textAlignVertical: 'center' }]}>{account.gender || 'Select Gender'}</Text>
                                     </TouchableOpacity>
                                 </View>
-                                {/* <View style={[styles.name_input, { height: '13%' }]}>
-                                <View style={styles.first_name_container}>
-                                    <Text style={styles.text_name}>First Name: </Text>
-                                    <TextInput
-                                        style={[styles.text_input]}
-                                        placeholder="William"
-                                        placeholderTextColor={'#8897AD'}
-                                        onChangeText={(text) => { setAccount(prev => ({ ...prev, first_name: text })) }}
-                                        value={account.first_name}
-                                        autoCapitalize='words'
-                                    />
-                                </View>
-
-                                <View style={styles.first_name_container}>
-                                    <Text style={styles.text_name}>Last Name: </Text>
-                                    <TextInput
-                                        style={[styles.text_input,]}
-                                        placeholder="Fang"
-                                        placeholderTextColor={'#8897AD'}
-                                        onChangeText={(text) => { setAccount(prev => ({ ...prev, last_name: text })) }}
-                                        value={account.last_name}
-                                        autoCapitalize='words'
-                                    />
-                                </View>
-                            </View> */}
-                                {/* 
-                            <View style={styles.birthday_container}>
-                                <Text style={styles.text_birthday}>Birthday: </Text>
-                                <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowDatePicker(true) }}>
-                                    <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.birth_day.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>
-                                </TouchableOpacity>
-
-                                <Text style={[styles.text_birthday]}>Gender: </Text>
-                                <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowGenderOptions(true) }}>
-                                    <Text style={[styles.text_input, { textAlignVertical: 'center' }]}>{account.gender || 'Select Gender'}</Text>
-                                </TouchableOpacity>
-                            </View> */}
 
                                 <Animated.View style={[styles.genderOptions, animationStyle]} >
                                     <TouchableOpacity style={styles.genderOption} onPress={() => selectGender('Male')}>
@@ -213,33 +201,6 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                                         onChange={onChangeDate}
                                     />
                                 )}
-                                {/* 
-                            <View style={[styles.input_container]}>
-                                <Text style={styles.text_input_blue}>Phone: </Text>
-                                <TextInput
-                                    style={[styles.text_input]}
-                                    placeholder="0123456789"
-                                    placeholderTextColor={'#8897AD'}
-                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, phone: text })) }}
-                                    value={account.phone}
-                                    keyboardType='numeric'
-                                />
-                            </View> */}
-                                {/* 
-
-                            <View style={[styles.input_container]}>
-                                <Text style={styles.text_input_blue}>Introduce: </Text>
-                                <TextInput
-                                    style={[styles.text_input, { height: 100 }]}
-                                    placeholder="Hi, I'm William"
-                                    placeholderTextColor={'#8897AD'}
-                                    onChangeText={(text) => { setAccount(prev => ({ ...prev, intro: text })) }}
-                                    value={account.intro}
-                                    numberOfLines={4}
-                                    multiline={true}
-                                />
-                            </View> */}
-
                             </View>
                             <TouchableOpacity
                                 onPress={() => { setStep(2) }}
@@ -251,7 +212,7 @@ export const ProfileModal = ({ isModal, userId, navigation, email }: { isModal: 
                         </Animated.View>
                     </ScrollView>
                     :
-                    <FinishInfo account={account} setAccount={setAccount} isRegister={isRegister} isValid={isValid} />
+                    <FinishInfo account={account} setAccount={setAccount} isRegister={isRegister} isValid={isValid} selectedLocation={selectedLocation} setSelectedLocation={setSelectedLocation} handleAddInfo={handleAddInfo} loading={loading} />
             }
         </Modal >
     )
@@ -380,10 +341,13 @@ const styles = StyleSheet.create({
     },
     avatar_container: {
         height: layout.height * 0.15,
-        width: layout.height * 0.15
+        width: layout.height * 0.15,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     avatar: {
-        height: layout.height * 0.15,
-        width: layout.height * 0.15
+        height: layout.height * 0.12,
+        width: layout.height * 0.12,
+        borderRadius: 100,
     }
 })
