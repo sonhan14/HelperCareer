@@ -5,7 +5,7 @@ let tokenExpiry: number | null = null;
 
 export const generateToken = async (): Promise<void> => {
     try {
-        const response = await axios.post<{ token: string }>('http://10.8.0.218:3000/generate-token', {});
+        const response = await axios.post<{ token: string }>('https://helpercareer.onrender.com/generate-token', {});
         assertionToken = response.data.token;
         tokenExpiry = Date.now() + (60 * 60 * 1000); // Set token expiry to 1 hour from now
     } catch (error) {
