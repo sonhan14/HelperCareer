@@ -15,7 +15,6 @@ import VideoProvider from '../context/videoContext';
 import CallProvider from '../context/CallContext';
 import messaging from '@react-native-firebase/messaging';
 import { RootStackParamList } from './navigation';
-import { navigationRef } from './navigationRef';
 
 
 export default function AppNavigator() {
@@ -103,7 +102,7 @@ export default function AppNavigator() {
     }
     return (
         <EmployeeProvider>
-            <NavigationContainer ref={navigationRef}>
+            <NavigationContainer >
                 <StackNavigator />
             </NavigationContainer>
         </EmployeeProvider>

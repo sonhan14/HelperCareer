@@ -1,4 +1,4 @@
-import { Call, CallContent, RingingCallContent, StreamCall, useCalls, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
+import { Call, CallContent, CallingState, RingingCallContent, StreamCall, useCalls, useCallStateHooks, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
 import { useSelector } from "react-redux";
 import { selectUserData } from "../../redux/user/userSlice";
 import { useEffect, useState } from "react";
@@ -17,46 +17,18 @@ type ChatBoxProps = {
 export const CallScreen = ({ route }: ChatBoxProps) => {
     const currentUser = useSelector(selectUserData);
     const navigation = useNavigation<ChatBoxNavigationProp>()
+
     if (!currentUser) {
         return null;
     }
-    const calls = useCalls();
-    const call = calls[0]
-
-    // const [call, setCall] = useState<Call>(route.params.call)
+    const call = route.params.call
 
     useEffect(() => {
-        // const handleCall = async () => {
-        //     try {
-        //         await call.get()
-        //         await call.join({ create: true });
-        //     } catch (error) {
-        //         console.error("Error creating or joining the call", error);
-        //     }
-        // };
-        // handleCall();
+        console.log(call);
 
-        // return () => {
-        //     if (call) {
-        //         call.leave();
-        //     }
-        // };
-        if (!call) {
-            navigation.goBack()
-        }
-    }, [call]);
-
-    if (!call) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.text}>Joining call...</Text>
-            </View>
-        );
-    }
-
+    }, [call])
     return (
         <StreamCall call={call}>
-            {/* <CallContent onHangupCallHandler={() => { navigation.goBack() }} /> */}
             <RingingCallContent />
         </StreamCall>
     );

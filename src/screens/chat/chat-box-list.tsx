@@ -9,6 +9,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { color } from "../../constants/colors/color";
 import { iUser } from "../../../types/userType";
+import firestore from '@react-native-firebase/firestore';
 
 const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver: iUser, chatBoxId: string,) => void }) => {
 
@@ -26,9 +27,6 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
             transform: [{ translateX: dragX.value }],
             height: height.value,
             marginVertical: marginVertical.value,
-            // marginBottom: marginBottom.value,
-            // width: contaierWidth.value,
-            // opacity: contaierOpacity.value
         };
     });
 
@@ -42,7 +40,16 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
         };
     });
 
-    const handleDeleteChat = () => {
+    const handleDeleteChat = async () => {
+        try {
+            await firestore()
+                .collection('chats')
+                .doc(item.id)
+                .delete()
+
+        } catch (error) {
+            console.error('Error deleting document: ', error);
+        }
         height.value = withTiming(0, { duration: 500 })
         marginVertical.value = withTiming(0, { duration: 500 })
 
@@ -52,8 +59,6 @@ const RenderItem = ({ item, goToChat }: { item: messagesBox, goToChat: (receiver
         .onUpdate((e) => {
             if (isSwiped.value) {
                 dragX.value = e.translationX + threshold
-                console.log('dragx', dragX.value);
-                console.log(e.translationX);
             }
             else {
                 dragX.value = e.translationX;
