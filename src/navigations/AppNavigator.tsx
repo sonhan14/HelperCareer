@@ -70,7 +70,9 @@ export default function AppNavigator() {
                                 email: userEmail,
                                 fcmToken: check?.fcmToken,
                                 avatar: check?.avatar,
-                                cover: check?.cover
+                                cover: check?.cover,
+                                longitude: check?.location.longitude,
+                                latitude: check?.location.latitude
                             };
                             await dispatch(setUserData(formattedUserData));
                             // }

@@ -15,6 +15,9 @@ import SweepButton from "../../components/sweep-button";
 import auth from '@react-native-firebase/auth';
 import { formatDate } from "../../constants/formatDate";
 import { getDetail, handleChat } from "./employee-helper";
+import { createUser } from "../../helpers/createUserStrem";
+import { generateRandomId } from "../../helpers/randomId";
+import { Call, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
 
 type EmployeeFrofileProps = {
     route: { params: RootStackParamList['EmployeeProfile'] };
@@ -29,6 +32,8 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
     const [user, setUser] = useState<iUser | null>(null);
     const [value, setValue] = useState('dicuss');
     const currentUser = auth().currentUser
+    const client = useStreamVideoClient();
+    const [call, setCall] = useState<Call | null>(null);
 
     const [image, setImage] = useState({
         avatar: images.avartar_pic,
@@ -46,6 +51,35 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
     useEffect(() => {
         getDetail(employeeID, setUser, setImage)
     }, [employeeID])
+
+    const handleCall = async () => {
+        if (user) {
+            createUser(user.id, user.last_name + ' ' + user.first_name)
+            const callId = generateRandomId();
+
+            if (!client || !currentUser) {
+                return null
+            }
+            else {
+                const newCall = client.call('default', callId);
+                try {
+                    await newCall.getOrCreate({
+                        ring: true,
+                        data: {
+                            members: [
+                                { user_id: currentUser.uid },
+                                { user_id: user.id }
+                            ]
+                        }
+                    });
+                    setCall(newCall);
+                } catch (error) {
+                    console.error("Error creating or joining the call", error);
+                }
+                navigation.navigate('CallScreen', { receiverId: user.id, receiverName: user.last_name + ' ' + user.first_name, call: newCall })
+            }
+        }
+    }
 
 
 
@@ -96,9 +130,18 @@ export const EmployeeProfile = ({ route }: EmployeeFrofileProps) => {
             </View>
 
             {user && (
-                <View style={{ width: layout.width - 20 }}>
-                    <SweepButton onPress={() => { handleChat(user, currentUser?.uid, navigation) }} iconName="wechat" label="Tap to Chat" />
-                </View>
+                <>
+                    <View style={{ width: layout.width - 20 }}>
+                        <SweepButton onPress={() => { handleChat(user, currentUser?.uid, navigation) }} iconName="wechat" label="Tap to Chat" />
+                    </View>
+
+                    <View style={{ width: layout.width - 20 }}>
+                        <SweepButton onPress={() => { handleCall() }} iconName="video-camera" label="Tap to Call Video" />
+                    </View>
+                    <View style={{ width: layout.width - 20 }}>
+                        <SweepButton onPress={() => { handleChat(user, currentUser?.uid, navigation) }} iconName="phone" label="Tap to Call" />
+                    </View>
+                </>
             )}
         </View>
     )

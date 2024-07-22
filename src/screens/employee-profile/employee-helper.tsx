@@ -51,6 +51,8 @@ export const getDetail = (employeeID: string, setUser: any, setImage: any) => {
                 fcmToken: doc?.fcmToken,
                 avatar: doc?.avatar,
                 cover: doc?.cover,
+                longitude: doc?.location.longitude,
+                latitude: doc?.location.latitude
             };
 
             setImage((prev: any) => ({

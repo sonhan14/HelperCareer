@@ -16,6 +16,7 @@ import { MessagesBoxList } from "./chat-box-list";
 import { selectUserData } from "../../redux/user/userSlice";
 import { useSelector } from "react-redux";
 import { iUser } from "../../../types/userType";
+import FastImage from "react-native-fast-image";
 
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -58,42 +59,51 @@ export const ChatScreen = () => {
                 const promises = querySnapshot.docs.map(async (documentSnapshot) => {
                     const data = documentSnapshot.data();
                     const members = data.members;
-                    const receive_id = members.filter((member: any) => member !== userData?.id);
-                    firestore().collection('users').doc(receive_id[0]).onSnapshot(async (userSnapshot) => {
-                        const userDoc = userSnapshot.data()
-                        if (userDoc) {
-                            const userData: iUser = {
-                                id: userDoc.id,
-                                birthday: formatDate(userDoc.birthday),
-                                first_name: userDoc.first_name,
-                                last_name: userDoc.last_name,
-                                gender: userDoc.gender,
-                                introduction: userDoc.introduction,
-                                phone: userDoc.phone,
-                                rating: userDoc.rating,
-                                email: userDoc.email,
-                                fcmToken: userDoc.fcmToken,
-                                avatar: userDoc.avatar,
-                                cover: userDoc.cover,
-                            }
-                            filteredChats.push({
-                                id: documentSnapshot.id,
-                                receiver: userData,
-                                lastMessage: data.lastMessage || '',
-                                lastMessageTimestamp: data.lastMessageTimestamp || firestore.Timestamp.now(),
-                            });
-                        }
-                    })
+                    const receive_id = members.filter((member: any) => member !== userData?.id)[0];
+
+                    // Fetch user details synchronously
+                    const userSnapshot = await firestore().collection('users').doc(receive_id).get();
+                    const userDoc = userSnapshot.data();
+
+                    if (userDoc) {
+                        const userData: iUser = {
+                            id: receive_id,
+                            birthday: formatDate(userDoc.birthday),
+                            first_name: userDoc.first_name,
+                            last_name: userDoc.last_name,
+                            gender: userDoc.gender,
+                            introduction: userDoc.introduction,
+                            phone: userDoc.phone,
+                            rating: userDoc.rating,
+                            email: userDoc.email,
+                            fcmToken: userDoc.fcmToken,
+                            avatar: userDoc.avatar,
+                            cover: userDoc.cover,
+                            longitude: userDoc?.location.longitude,
+                            latitude: userDoc?.location.latitude
+                        };
+
+                        filteredChats.push({
+                            id: documentSnapshot.id,
+                            receiver: userData,
+                            lastMessage: data.lastMessage || '',
+                            lastMessageTimestamp: data.lastMessageTimestamp || firestore.Timestamp.now(),
+                        });
+                    }
                 });
+
                 await Promise.all(promises);
+                filteredChats.sort((a, b) => b.lastMessageTimestamp.toMillis() - a.lastMessageTimestamp.toMillis());
                 setBoxData(filteredChats);
             }, (error) => {
                 console.error('Error getting documents: ', error);
             });
+
         return () => {
             unsubscribeChat();
         };
     };
+
 
     useEffect(() => {
         if (!userData) return;
@@ -124,10 +134,19 @@ export const ChatScreen = () => {
                     <Icon name="plus" size={30} color={'black'} />
                 </TouchableOpacity>
             </View>
-            <View style={styles.avatar_list_container}>
-                <AvatarFlatlist />
-            </View>
-            <MessagesBoxList boxData={boxData} goToChat={goToChat} />
+            {boxData.length !== 0 ?
+                <>
+                    <View style={styles.avatar_list_container}>
+                        <AvatarFlatlist />
+                    </View>
+                    <MessagesBoxList boxData={boxData} goToChat={goToChat} />
+                </>
+                :
+                <View style={styles.image_container}>
+                    <FastImage source={images.chat_empty} resizeMode="contain" style={{ height: layout.height * 0.5, width: layout.width - 20 }} />
+                </View>
+            }
+
         </View>
     )
 }
@@ -136,7 +155,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        paddingHorizontal: 10
+        paddingHorizontal: 10,
+        backgroundColor: 'white'
     },
     header_container: {
         height: layout.height * 0.05,
@@ -169,4 +189,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
     },
+
+    image_container: {
+        flex: 1,
+        justifyContent: 'center'
+    }
 })

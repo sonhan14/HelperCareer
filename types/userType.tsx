@@ -1,3 +1,5 @@
+
+
 export type iUser = {
     id: string,
     birthday: string;
@@ -11,5 +13,7 @@ export type iUser = {
     email: string,
     fcmToken: string,
     avatar: string | undefined,
-    cover: string | undefined
+    cover: string | undefined,
+    longitude: number,
+    latitude: number
 };

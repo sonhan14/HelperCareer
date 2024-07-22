@@ -72,7 +72,9 @@ export const LoginScreen = () => {
                     email: email,
                     fcmToken: check?.fcmToken,
                     avatar: check?.avatar,
-                    cover: check?.cover
+                    cover: check?.cover,
+                    longitude: check?.location.longitude,
+                    latitude: check?.location.latitude
                 };
                 dispatch(setUserData(formattedUserData));
                 await AsyncStorage.setItem('userEmail', email);

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { iUser } from '../../types/userType';
 import { images } from '../images';
 import { layout } from '../constants/dimensions/dimension';
 import FastImage from 'react-native-fast-image';
+import axios from 'axios';
+import { truncateText } from '../helpers/truncateText';
 
 
 interface ProfileImageSectionProps {
@@ -15,9 +17,41 @@ interface ProfileImageSectionProps {
     pickImages?: (type: number) => void;
     user: iUser | null;
     isEditable: boolean;
+    openMap?: () => void
 }
 
-const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({ image, pickImages, user, isEditable }) => {
+
+
+const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({ image, pickImages, user, isEditable, openMap }) => {
+    const [location, setLocation] = useState<string>()
+    const ReverseGeocoding = async () => {
+        try {
+            if (user) {
+                const response = await axios.get('https://api.mapbox.com/search/geocode/v6/reverse', {
+                    params: {
+                        longitude: user.longitude,
+                        latitude: user.latitude,
+                        access_token: 'sk.eyJ1Ijoic29uaGFuMTQiLCJhIjoiY2x4dHI1N2Y1MDh3cDJxc2NteTBibjJkaSJ9.prG3DQ46R1SMRD80ztH3Mg',
+                        proximity: '105.7827,21.0285', // Center point in Hanoi
+                        bbox: '102.14441,8.17966,109.46464,23.393395', // Bounding box around Vietnam
+                        language: 'vi',
+                        country: 'VN',
+                        limit: 1
+                    },
+                });
+                // console.log(response.data.features[0].properties.full_address);
+                setLocation(response.data.features[0].properties.place_formatted)
+            }
+        } catch (error) {
+            console.error('Error fetching data from Mapbox:', error);
+        }
+    }
+
+    useEffect(() => {
+        ReverseGeocoding()
+    }, [user])
+
+
     return (
         <>
 
@@ -66,9 +100,11 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({ image, pickIm
                     <Text style={styles.text_15}>
                         {user?.birthday}
                     </Text>
-                    <TouchableOpacity style={styles.address_button}>
+
+                    <TouchableOpacity style={styles.address_button} disabled={!isEditable ? true : false} onPress={openMap}>
                         <FastImage source={images.address_location} resizeMode='contain' style={{ height: 20, width: 20 }} />
-                        <Text style={styles.text_address}>Ha Noi</Text>
+                        {location ? <Text style={styles.text_address}>{truncateText(location, 22)}</Text> : null}
+
                     </TouchableOpacity>
                 </View>
             </View>

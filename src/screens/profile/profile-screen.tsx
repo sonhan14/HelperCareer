@@ -16,6 +16,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearUserData, selectUserData } from "../../redux/user/userSlice";
 import { EditProfile } from "./profile-edit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { Feature } from "../../../types/homeTypes";
+import { ProfileAdress } from "./profile-address";
 
 
 
@@ -29,10 +32,12 @@ export const ProfileScreen = () => {
     const userData = useSelector(selectUserData);
     const navigation = useNavigation<LoginScreenNavigationProp>();
     const [isModal, setIsModal] = useState(false);
+    const [isAddress, setIsAddress] = useState(false);
     const [image, setImage] = useState({
         avatar: images.avartar_pic,
         cover: images.background_pic,
     })
+
     const dispatch = useDispatch()
 
     const openEdit = () => {
@@ -43,6 +48,17 @@ export const ProfileScreen = () => {
 
     const closeEdit = () => {
         setIsModal(false)
+    }
+
+    const openAddress = () => {
+        if (userData) {
+            setIsAddress(true)
+        }
+    }
+
+    const closeAddress = () => {
+        setIsAddress(false)
+
     }
 
     const handleLogOut = async () => {
@@ -121,6 +137,8 @@ export const ProfileScreen = () => {
     };
 
 
+
+
     return (
         <SafeAreaView style={styles.container}>
             <ProfileImageSection
@@ -128,6 +146,7 @@ export const ProfileScreen = () => {
                 pickImages={pickImages}
                 user={userData}
                 isEditable={true}
+                openMap={openAddress}
             />
             <View style={styles.review_container}>
                 <View style={styles.task_container}>
@@ -164,7 +183,8 @@ export const ProfileScreen = () => {
             </View>
 
             {isModal && userData ? <EditProfile isModal={isModal} userData={userData} closeModal={closeEdit} /> : null}
-            {/* <Net_dut/> */}
+            {isAddress && userData ? <ProfileAdress isAddress={isAddress} closeModal={closeAddress} /> : null}
+
         </SafeAreaView>
     );
 };

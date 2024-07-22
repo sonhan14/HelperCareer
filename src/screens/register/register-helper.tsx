@@ -76,7 +76,9 @@ export const AddInfo = async ({ password, userId, account, email, image, selecte
                         email: email,
                         fcmToken: check?.fcmToken,
                         avatar: check?.avatar,
-                        cover: check?.cover
+                        cover: check?.cover,
+                        longitude: check?.location.longitude,
+                        latitude: check?.location.latitude
                     };
                     dispatch(setUserData(formattedUserData));
                     await AsyncStorage.setItem('userEmail', email);

@@ -12,5 +12,6 @@ export const images = {
     avatar_animation: require('./avatar_animation.gif'),
     map_animation: require('./map_animation.gif'),
     budget_icon: require('./budget_icon.png'),
-    address_location: require('./address_location.gif')
+    address_location: require('./address_location.gif'),
+    chat_empty: require('./chat_empty.gif')
 }

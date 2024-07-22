@@ -206,7 +206,9 @@ export const fetchEmployee = (setEmployeeList: any) => {
                         email: data.email,
                         fcmToken: data.fcmToken,
                         avatar: data.avatar,
-                        cover: data.cover
+                        cover: data.cover,
+                        longitude: data?.location.longitude,
+                        latitude: data?.location.latitude
                     };
                     employeeList.push(formattedUserData)
                 }
@@ -241,6 +243,8 @@ export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: 
                         fcmToken: doc?.fcmToken,
                         avatar: doc?.avatar,
                         cover: doc?.cover,
+                        longitude: doc?.location.longitude,
+                        latitude: doc?.location.latitude
                     };
                     navigation.navigate('ChatBox', { receiver: formattedUserData, chatId: chatId })
                 }
