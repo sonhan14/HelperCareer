@@ -18,6 +18,7 @@ import { EmployeeListHome } from "./employee-list";
 import { useEmployee, useTask } from "../../context/EmployeeContext";
 import { Applications } from "../../../types/applications.type";
 import { Task } from "../../../types/taskType";
+import { Call, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
 
 
 
@@ -37,10 +38,13 @@ export const HomeScreen = () => {
     const userData = useSelector(selectUserData);
     const isFocused = useIsFocused();
     const [loading, setLoading] = useState(true)
-
+    const [call, setCall] = useState<Call | null>(null);
+    const client = useStreamVideoClient();
     useEffect(() => {
-        checkMessage(navigation, setLoading)
-    }, [])
+        if (userData) {
+            checkMessage(navigation, setLoading, client, setCall, userData)
+        }
+    }, [userData])
 
     useEffect(() => {
         if (!isFocused) {

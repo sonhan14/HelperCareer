@@ -23,7 +23,11 @@ export const createJWT = (payload: JWTPayload, secretKey: string): string => {
     const encodedPayload = base64url.encode(JSON.stringify(payload));
 
     const data = `${encodedHeader}.${encodedPayload}`;
-    const signature = base64url.encode(CryptoJS.HmacSHA256(data, secretKey).toString(CryptoJS.enc.Base64));
+    const signature = CryptoJS.HmacSHA256(data, secretKey)
+        .toString(CryptoJS.enc.Base64)
+        .replace(/=+$/, '')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
 
     return `${data}.${signature}`;
 };

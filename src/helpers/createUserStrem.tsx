@@ -2,8 +2,8 @@ import { StreamChat } from "stream-chat";
 import { JWTPayload } from "../../types/JwtPayload";
 import { createJWT } from "./randomId";
 
-const apiKey = '9puabwjb5p2p';
-const apiSecret = 'xs93ftx87nujrm35z6eat7uzge5jky74hcby9umye2g4sdcdurkc25hmj8jf3gak';
+const apiKey = 'j4afxwujxm3t';
+const apiSecret = 'ppysy4acrw6jcu6ej328en4rmasxekv9d7yeqwyb2n5886cwv9pxz25uvapng5zm';
 const serverClient = StreamChat.getInstance(apiKey);
 
 

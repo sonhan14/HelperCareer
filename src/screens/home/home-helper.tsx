@@ -8,6 +8,7 @@ import { formatDate } from '../../constants/formatDate';
 import messaging from '@react-native-firebase/messaging';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigations/navigation';
+import { useStreamVideoClient } from '@stream-io/video-react-native-sdk';
 type HomeScreenRouteProp = StackNavigationProp<RootStackParamList>;
 
 export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskGeoJsonData: any) => {
@@ -220,12 +221,15 @@ export const fetchEmployee = (setEmployeeList: any) => {
     };
 }
 
-export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
+export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: React.Dispatch<React.SetStateAction<boolean>>, client: any, setCall: any, userData: iUser) => {
     setLoading(false)
     const message = await messaging().getInitialNotification();
+
     if (message && message.data) {
         const userId = message.data.userId ? String(message.data.userId) : undefined;
         const chatId = message.data.chatId ? String(message.data.chatId) : undefined;
+        const callId = message.data.callId ? String(message.data.callId) : undefined;
+
         if (userId && chatId) {
             const snapshot = await firestore().collection('users').doc(userId).onSnapshot(async (querySnapshot) => {
                 const doc = querySnapshot.data();
@@ -255,6 +259,40 @@ export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: 
                 snapshot();
             };
         }
+        if (callId) {
+            const newCall = client.call('default', callId);
+            try {
+                await newCall.join()
+            } catch (error) {
+                console.error("Error creating or joining the call", error);
+            }
+            navigation.navigate('CallScreen', { receiverId: userData.id, receiverName: userData.last_name + ' ' + userData.first_name, call: newCall })
+        }
     }
     setLoading(true)
 }
+
+// export const checkCallMessage = async (setCall: any, setLoading: React.Dispatch<React.SetStateAction<boolean>>, client: any) => {
+//     setLoading(false)
+
+//     const message = await messaging().getInitialNotification();
+
+//     if (message && message.data) {
+//         const callId = message.data.userId ? String(message.data.callId) : undefined;
+
+
+//         if (callId && client) {
+//             const newCall = client.call('default', callId);
+//             try {
+//                 await newCall.getOrCreate({
+//                     ring: true,
+//                 });
+//                 setCall(newCall);
+//             } catch (error) {
+//                 console.error("Error creating or joining the call", error);
+//             }
+//         }
+//         navigation.navigate('CallScreen', { receiverId: userData.id, receiverName: userData.last_name + ' ' + userData.first_name, call: call })
+//     }
+//     setLoading(true)
+// }

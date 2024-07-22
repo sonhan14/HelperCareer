@@ -33,7 +33,6 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
     const navigation = useNavigation<ChatBoxNavigationProp>()
     const receiver = route.params.receiver
     const [chatBoxId, setChatBoxId] = useState<string>(route.params.chatId)
-    const [call, setCall] = useState<Call | null>(null);
     const client = useStreamVideoClient();
 
 
@@ -250,6 +249,10 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         }
         else {
             const newCall = client.call('default', callId);
+            let dataPayload: { [key: string]: string } = {
+                callId: callId,
+            };
+
             try {
                 await newCall.getOrCreate({
                     ring: true,
@@ -260,7 +263,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
                         ]
                     }
                 });
-                setCall(newCall);
+                sendNotification(receiver.fcmToken, userData?.last_name + ' ' + userData?.first_name, 'joining call', dataPayload);
             } catch (error) {
                 console.error("Error creating or joining the call", error);
             }

@@ -8,9 +8,9 @@ import { JWTPayload } from "../../types/JwtPayload";
 
 export default function VideoProvider({ children }: PropsWithChildren) {
     const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(null)
-    const apiKey = '9puabwjb5p2p';
+    const apiKey = 'j4afxwujxm3t';
     const userData = useSelector(selectUserData)
-    const secretKey = 'xs93ftx87nujrm35z6eat7uzge5jky74hcby9umye2g4sdcdurkc25hmj8jf3gak';
+    const secretKey = 'ppysy4acrw6jcu6ej328en4rmasxekv9d7yeqwyb2n5886cwv9pxz25uvapng5zm';
 
     useEffect(() => {
         if (!userData) {
@@ -23,7 +23,8 @@ export default function VideoProvider({ children }: PropsWithChildren) {
                 exp: Math.floor(Date.now() / 1000) + (60 * 10)
             };
             const token = createJWT(payload, secretKey);
-            const user: User = { id: userData.id, name: userData.last_name + ' ' + userData.first_name, type: 'authenticated' };
+
+            const user: User = { id: userData.id, name: userData.last_name + ' ' + userData.first_name, };
             const client = new StreamVideoClient({ apiKey, user, token })
             setVideoClient(client)
         }

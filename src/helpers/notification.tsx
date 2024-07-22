@@ -45,6 +45,7 @@ export const getAccessToken = async (): Promise<string> => {
 
 export const sendNotification = async (fcmToken: string, receiverName: string, bodyMessage: string, dataPayload: { [key: string]: string }): Promise<void> => {
     const url = 'https://fcm.googleapis.com/v1/projects/vmafinalproject/messages:send';
+
     if (fcmToken === 'abc') {
         return
     }
@@ -72,3 +73,5 @@ export const sendNotification = async (fcmToken: string, receiverName: string, b
         throw error;
     }
 };
+
+
