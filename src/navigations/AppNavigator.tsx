@@ -55,29 +55,29 @@ export default function AppNavigator() {
                         if (response?.user) {
                             const currentUser = await firestore().collection('users').doc(response.user.uid).get()
                             const check = currentUser.data()
-                            // if (check?.role === 'Owner') {
-                            const formattedUserData: iUser = {
-                                id: response.user.uid,
-                                birthday: formatDate(check?.birthday),
-                                first_name: check?.first_name,
-                                last_name: check?.last_name,
-                                gender: check?.gender,
-                                introduction: check?.introduction,
-                                phone: check?.phone,
-                                rating: check?.rating,
-                                role: check?.role,
-                                email: userEmail,
-                                fcmToken: check?.fcmToken,
-                                avatar: check?.avatar,
-                                cover: check?.cover,
-                                longitude: check?.location.longitude,
-                                latitude: check?.location.latitude
-                            };
-                            await dispatch(setUserData(formattedUserData));
-                            // }
-                            // else {
-                            //     auth().signOut()
-                            // }
+                            if (check?.role === 'Owner') {
+                                const formattedUserData: iUser = {
+                                    id: response.user.uid,
+                                    birthday: formatDate(check?.birthday),
+                                    first_name: check?.first_name,
+                                    last_name: check?.last_name,
+                                    gender: check?.gender,
+                                    introduction: check?.introduction,
+                                    phone: check?.phone,
+                                    rating: check?.rating,
+                                    role: check?.role,
+                                    email: userEmail,
+                                    fcmToken: check?.fcmToken,
+                                    avatar: check?.avatar,
+                                    cover: check?.cover,
+                                    longitude: check?.location.longitude,
+                                    latitude: check?.location.latitude
+                                };
+                                await dispatch(setUserData(formattedUserData));
+                            }
+                            else {
+                                auth().signOut()
+                            }
                         }
 
                     } catch (error) {

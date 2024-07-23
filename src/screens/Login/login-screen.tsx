@@ -58,37 +58,37 @@ export const LoginScreen = () => {
                 const check = currentUser.data()
 
 
-                // if (check?.role === 'Owner') {
-                const formattedUserData: iUser = {
-                    id: response.user.uid,
-                    birthday: formatDate(check?.birthday),
-                    first_name: check?.first_name,
-                    last_name: check?.last_name,
-                    gender: check?.gender,
-                    introduction: check?.introduction,
-                    phone: check?.phone,
-                    rating: check?.rating,
-                    role: check?.role,
-                    email: email,
-                    fcmToken: check?.fcmToken,
-                    avatar: check?.avatar,
-                    cover: check?.cover,
-                    longitude: check?.location.longitude,
-                    latitude: check?.location.latitude
-                };
-                dispatch(setUserData(formattedUserData));
-                await AsyncStorage.setItem('userEmail', email);
-                await AsyncStorage.setItem('userPassword', password);
-                const fcmToken = await messaging().getToken();
-                if (fcmToken) {
-                    await firestore().collection('users').doc(response.user.uid).update({ fcmToken });
+                if (check?.role === 'Owner') {
+                    const formattedUserData: iUser = {
+                        id: response.user.uid,
+                        birthday: formatDate(check?.birthday),
+                        first_name: check?.first_name,
+                        last_name: check?.last_name,
+                        gender: check?.gender,
+                        introduction: check?.introduction,
+                        phone: check?.phone,
+                        rating: check?.rating,
+                        role: check?.role,
+                        email: email,
+                        fcmToken: check?.fcmToken,
+                        avatar: check?.avatar,
+                        cover: check?.cover,
+                        longitude: check?.location.longitude,
+                        latitude: check?.location.latitude
+                    };
+                    dispatch(setUserData(formattedUserData));
+                    await AsyncStorage.setItem('userEmail', email);
+                    await AsyncStorage.setItem('userPassword', password);
+                    const fcmToken = await messaging().getToken();
+                    if (fcmToken) {
+                        await firestore().collection('users').doc(response.user.uid).update({ fcmToken });
+                    }
                 }
-                // }
-                // else {
-                //     setErrorMessage('You do not have permission!!');
-                //     setNotificationVisible(true);
-                //     auth().signOut()
-                // }
+                else {
+                    setErrorMessage('You do not have permission!!');
+                    setNotificationVisible(true);
+                    auth().signOut()
+                }
             }
         } catch (e: unknown) {
             const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;

@@ -38,11 +38,22 @@ export const HomeScreen = () => {
     const userData = useSelector(selectUserData);
     const isFocused = useIsFocused();
     const [loading, setLoading] = useState(true)
-    const [call, setCall] = useState<Call | null>(null);
     const client = useStreamVideoClient();
+
+    useEffect(() => {
+        if (!userData) return;
+
+        const unsubscribe = fetchUserLocations(userData.id, setGeoJsonData, setTaskGeoJsonData);
+        const unsubscribeEmployee = fetchEmployee(setEmployeeList)
+
+        return () => {
+            unsubscribeEmployee();
+            unsubscribe()
+        }
+    }, [userData]);
     useEffect(() => {
         if (userData) {
-            checkMessage(navigation, setLoading, client, setCall, userData)
+            checkMessage(navigation, setLoading, client)
         }
     }, [userData])
 
@@ -56,17 +67,6 @@ export const HomeScreen = () => {
     const { isEmployee, setIsEmployee } = useEmployee();
     const { isTask, setIsTask } = useTask();
 
-    useEffect(() => {
-        if (!userData) return;
-
-        const unsubscribe = fetchUserLocations(userData.id, setGeoJsonData, setTaskGeoJsonData);
-        const unsubscribeEmployee = fetchEmployee(setEmployeeList)
-
-        return () => {
-            unsubscribeEmployee();
-            unsubscribe()
-        }
-    }, [userData]);
 
     const animationHandle = () => {
         setIsEmployee(isEmployee === 0 ? 1 : 0)
@@ -138,7 +138,7 @@ export const HomeScreen = () => {
                                     // textAnchor: 'top',
                                     // textOffset: [0, -1.5],
                                     // textColor: 'red'
-                                }} // Adjust iconSize as needed
+                                }}
                             />
                             <Mapbox.Images images={{ avatar: images.avartar_pic }}>
 

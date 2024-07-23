@@ -26,7 +26,8 @@ export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskG
                         latitude: data.location.latitude,
                         longitude: data.location.longitude,
                         id: doc.id,
-                        name: data.last_name + ' ' + data.first_name
+                        name: data.last_name + ' ' + data.first_name,
+                        avatar: data.avatar
                     });
                 }
             });
@@ -61,7 +62,6 @@ export const fetchUserLocations = (userID: string, setGeoJsonData: any, setTaskG
                     });
                 }
             });
-            // console.log('taskLocations', taskLocations);
 
             const taskGeoJson = convertToTaskGeoJson(taskLocations);
             setTaskGeoJsonData(taskGeoJson);
@@ -84,7 +84,8 @@ export const convertToGeoJson = (locations: Location[]): GeoJSON.FeatureCollecti
         },
         properties: {
             title: location.name,
-            userId: location.id, // Add user ID
+            userId: location.id,
+            avatar: location.avatar // Add user ID
         }
     }));
 
@@ -221,13 +222,14 @@ export const fetchEmployee = (setEmployeeList: any) => {
     };
 }
 
-export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: React.Dispatch<React.SetStateAction<boolean>>, client: any, setCall: any, userData: iUser) => {
+export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: React.Dispatch<React.SetStateAction<boolean>>, client: any) => {
     setLoading(false)
     const message = await messaging().getInitialNotification();
 
+
     if (message && message.data) {
-        const userId = message.data.userId ? String(message.data.userId) : undefined;
-        const chatId = message.data.chatId ? String(message.data.chatId) : undefined;
+        const userId = message.data.senderId ? String(message.data.senderId) : undefined;
+        const chatId = message.data.chatboxId ? String(message.data.chatboxId) : undefined;
         const callId = message.data.callId ? String(message.data.callId) : undefined;
 
         if (userId && chatId) {
@@ -250,6 +252,7 @@ export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: 
                         longitude: doc?.location.longitude,
                         latitude: doc?.location.latitude
                     };
+                    setLoading(true)
                     navigation.navigate('ChatBox', { receiver: formattedUserData, chatId: chatId })
                 }
             }, (error) => {
@@ -262,11 +265,12 @@ export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: 
         if (callId) {
             const newCall = client.call('default', callId);
             try {
+                setLoading(true)
                 await newCall.join()
             } catch (error) {
                 console.error("Error creating or joining the call", error);
             }
-            navigation.navigate('CallScreen', { receiverId: userData.id, receiverName: userData.last_name + ' ' + userData.first_name, call: newCall })
+            // navigation.navigate('CallScreen', { receiverId: userData.id, receiverName: userData.last_name + ' ' + userData.first_name, call: newCall })
         }
     }
     setLoading(true)
