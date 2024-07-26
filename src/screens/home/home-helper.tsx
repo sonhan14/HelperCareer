@@ -222,7 +222,7 @@ export const fetchEmployee = (setEmployeeList: any) => {
     };
 }
 
-export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: React.Dispatch<React.SetStateAction<boolean>>, client: any) => {
+export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: React.Dispatch<React.SetStateAction<boolean>>, client: any, userData: iUser) => {
     setLoading(false)
     const message = await messaging().getInitialNotification();
 
@@ -270,7 +270,7 @@ export const checkMessage = async (navigation: HomeScreenRouteProp, setLoading: 
             } catch (error) {
                 console.error("Error creating or joining the call", error);
             }
-            // navigation.navigate('CallScreen', { receiverId: userData.id, receiverName: userData.last_name + ' ' + userData.first_name, call: newCall })
+            navigation.navigate('CallScreen', { receiverId: userData.id, receiverName: userData.last_name + ' ' + userData.first_name, call: newCall })
         }
     }
     setLoading(true)

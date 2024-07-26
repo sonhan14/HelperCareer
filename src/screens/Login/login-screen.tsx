@@ -38,7 +38,7 @@ export const LoginScreen = () => {
         if (notificationVisible) {
             setTimeout(() => {
                 setNotificationVisible(false);
-            }, 2000);
+            }, 5000);
         }
     }, [notificationVisible]);
 
@@ -111,7 +111,6 @@ export const LoginScreen = () => {
     return (
         <KeyboardAwareScrollView>
             <View style={{ flex: 1, position: 'relative' }}>
-
                 <View style={login_styles.login_image_container}>
                     <FastImage source={images.login_gif} style={{ width: layout.width, height: layout.height * 0.25 }} resizeMode='contain' />
                 </View>

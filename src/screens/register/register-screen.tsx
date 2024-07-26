@@ -29,6 +29,7 @@ export const RegisterScreen: React.FC = () => {
     })
     const [isValid, setIsValid] = useState({
         passwordError: '',
+        rePasswordError: '',
         emailError: ''
     })
     const [notificationVisible, setNotificationVisible] = useState(false);
@@ -55,7 +56,7 @@ export const RegisterScreen: React.FC = () => {
         if (notificationVisible) {
             setTimeout(() => {
                 setNotificationVisible(false);
-            }, 2000);
+            }, 5000);
         }
     }, [notificationVisible]);
 
@@ -79,6 +80,27 @@ export const RegisterScreen: React.FC = () => {
             }));
         }
     }, [account.password]);
+
+    useEffect(() => {
+        if (account.rePassword) {
+            if (!doPasswordsMatch(account.password, account.rePassword)) {
+                setIsValid(prev => ({
+                    ...prev,
+                    rePasswordError: 'Password and Re-password are not the same'
+                }));
+            } else {
+                setIsValid(prev => ({
+                    ...prev,
+                    rePasswordError: ''
+                }));
+            }
+        } else {
+            setIsValid(prev => ({
+                ...prev,
+                rePasswordError: ''
+            }));
+        }
+    }, [account.rePassword]);
 
     useEffect(() => {
         if (account.email) {
@@ -115,12 +137,7 @@ export const RegisterScreen: React.FC = () => {
             setErrorMessage("Password must contain at least 8 characters, including uppercase, lowercase, number, and special character.")
             setNotificationVisible(true)
             return;
-        } else if (!doPasswordsMatch(account.password, account.rePassword)) {
-            setErrorMessage("Password and Re-password are not the same")
-            setNotificationVisible(true)
-            return;
         }
-
         __doCreateUser({ setLoading, setIsModal, setErrorMessage, setNotificationVisible, account });
     };
 
@@ -157,13 +174,18 @@ export const RegisterScreen: React.FC = () => {
                         <Animated.View
                             entering={LightSpeedInRight.duration(500)}
                             exiting={LightSpeedOutRight.duration(500)}
+
                             style={styles.error_container}>
                             <Text style={styles.error_text}>{isValid.emailError}</Text>
                         </Animated.View>
 
-                    ) : <Animated.View
-                        entering={LightSpeedInRight.duration(500)}
-                        exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                    ) :
+                        <Animated.View
+                            entering={LightSpeedInRight.duration(500)}
+                            exiting={LightSpeedOutRight.duration(500)}
+                        >
+
+                        </Animated.View>
                     }
                     <View style={styles.input_container}>
                         <Text style={styles.text_input_blue}>Password: </Text>
@@ -206,10 +228,13 @@ export const RegisterScreen: React.FC = () => {
 
                     ) : <Animated.View
                         entering={LightSpeedInRight.duration(500)}
-                        exiting={LightSpeedOutRight.duration(500)}></Animated.View>
+                        exiting={LightSpeedOutRight.duration(500)}
+                    >
+
+                    </Animated.View>
                     }
 
-                    <Animated.View style={[styles.input_container]}>
+                    <View style={[styles.input_container]}>
                         <Text style={styles.text_input_blue}>Re-Password: </Text>
                         <View style={styles.text_input_container}>
                             <TextInput
@@ -231,21 +256,27 @@ export const RegisterScreen: React.FC = () => {
                                 }}
                             >
                                 <Icon
-                                    name={showPassword.showPassword ? 'eye' : 'eye-slash'}
+                                    name={showPassword.showRePassword ? 'eye' : 'eye-slash'}
                                     size={20}
                                     color="black"
                                 />
                             </TouchableOpacity>
                         </View>
+                    </View>
+                    {isValid.rePasswordError ? (
+                        <Animated.View
+                            entering={LightSpeedInRight.duration(500)}
+                            exiting={LightSpeedOutRight.duration(500)}
+                            style={styles.error_container}>
+                            <Text style={styles.error_text}>{isValid.rePasswordError}</Text>
+                        </Animated.View>
 
-                    </Animated.View>
-                    {/* <TouchableOpacity
-                        onPress={() => { __doSignUp() }}
-                        style={isRegister || isValid.emailError !== '' || isValid.passwordError !== '' ? styles.signin_button_disable : styles.signin_button}
-                        disabled={isRegister}
-                    >
-                        <Text style={styles.text_button}>Contitnue</Text>
-                    </TouchableOpacity> */}
+                    ) : <Animated.View
+                        entering={LightSpeedInRight.duration(500)}
+                        exiting={LightSpeedOutRight.duration(500)}
+                    ></Animated.View>
+                    }
+
                     <CustomButton
                         title="Sign Up"
                         onPress={__doSignUp}
@@ -353,13 +384,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     signin_button_disable: {
-        backgroundColor: color.button_color,
+        backgroundColor: '#49B4F1',
         width: '100%',
         height: '15%',
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 20
+        marginTop: 20,
+        opacity: 0.5
     },
     signin_button: {
         backgroundColor: '#49B4F1',
@@ -381,11 +413,10 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     sign_up_container: {
-        flex: 1,
+        height: layout.height * 0.1,
         width: layout.width,
         paddingHorizontal: 20,
         justifyContent: 'center',
-
     },
     sign_up_title: {
         height: '30%',
@@ -419,9 +450,11 @@ const styles = StyleSheet.create({
     },
     eyeIconContainer: {
         height: '70%',
+        width: layout.width * 0.1,
         justifyContent: 'center',
         marginTop: 5,
         position: 'absolute',
-        right: 10
+        right: 10,
+        alignItems: 'center'
     },
 })

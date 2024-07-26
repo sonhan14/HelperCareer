@@ -64,12 +64,13 @@ export const login_styles = StyleSheet.create({
         justifyContent: 'center'
     },
     signin_button_disable: {
-        backgroundColor: color.button_color,
+        backgroundColor: '#49B4F1',
         width: '100%',
         height: '20%',
         borderRadius: 10,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        opacity: 0.5
     },
     signin_button: {
         backgroundColor: '#49B4F1',
@@ -121,9 +122,11 @@ export const login_styles = StyleSheet.create({
     },
     eyeIconContainer: {
         height: '70%',
+        width: layout.width * 0.1,
         justifyContent: 'center',
         marginTop: 5,
         position: 'absolute',
-        right: 10
+        right: 10,
+        alignItems: 'center',
     },
 })

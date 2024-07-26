@@ -7,6 +7,8 @@ import { formatDate } from '../../constants/formatDate';
 import { setUserData } from '../../redux/user/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
+import { Platform } from 'react-native';
+import storage from '@react-native-firebase/storage';
 
 
 interface iAddInfo {
@@ -39,6 +41,9 @@ interface doCreateUserProps {
 
 export const AddInfo = async ({ password, userId, account, email, image, selectedLocation, dispatch, setLoading }: iAddInfo) => {
     setLoading(true)
+    const uploadUri = Platform.OS === 'ios' ? image.replace('file://', '') : image;
+    const storageRef = await storage().ref(`users/${userId}/avatar.jpg`);
+    await storageRef.putFile(uploadUri);
     await firestore()
         .collection('users')
         .doc(userId)
@@ -100,11 +105,11 @@ export const AddInfo = async ({ password, userId, account, email, image, selecte
 export const __doCreateUser = async ({ setLoading, setIsModal, setErrorMessage, setNotificationVisible, account }: doCreateUserProps) => {
     setLoading(true);
     try {
-        let response = await auth().createUserWithEmailAndPassword(account.email, account.password);
-        if (response) {
-            setIsModal(prev => ({ ...prev, showModal: true, userId: response.user.uid, email: account.email, password: account.password }))
-        }
-        // setIsModal(prev => ({ ...prev, showModal: true, userId: '', email: account.email }))
+        // let response = await auth().createUserWithEmailAndPassword(account.email, account.password);
+        // if (response) {
+        //     setIsModal(prev => ({ ...prev, showModal: true, userId: response.user.uid, email: account.email, password: account.password }))
+        // }
+        setIsModal(prev => ({ ...prev, showModal: true, userId: '', email: account.email }))
     } catch (e: unknown) {
         const error = e as FirebaseAuthTypes.NativeFirebaseAuthError;
         if (error.code === 'auth/email-already-in-use') {

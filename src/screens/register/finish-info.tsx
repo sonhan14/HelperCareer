@@ -9,8 +9,9 @@ import Mapbox, { LocationPuck, PointAnnotation } from "@rnmapbox/maps"
 import { Feature } from "../../../types/homeTypes"
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { KeyboardAwareFlatList, KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
+import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view"
 import { CustomButton } from "../../components/custom-button"
+import Geolocation from '@react-native-community/geolocation';
 
 interface FinishInfoProps {
     account: accountInfo,
@@ -26,6 +27,7 @@ export const FinishInfo = ({ account, setAccount, isRegister, isValid, selectedL
     const [results, setResults] = useState<Feature[]>([]);
     const [query, setQuery] = useState<string>('');
     const animatedValue = useSharedValue(40)
+    const [userLocation, setuserLocation] = useState<[number, number]>([0, 0])
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -45,6 +47,44 @@ export const FinishInfo = ({ account, setAccount, isRegister, isValid, selectedL
     const searchLocation = () => {
         animatedValue.value = withTiming(layout.height * 0.15, { duration: 1000 })
     }
+    useEffect(() => {
+
+        const getCurrentLocation = async () => {
+            await Geolocation.getCurrentPosition(
+                async (position) => {
+                    try {
+                        const response = await axios.get('https://api.mapbox.com/search/geocode/v6/reverse', {
+                            params: {
+                                longitude: position.coords.longitude,
+                                latitude: position.coords.latitude,
+                                access_token: 'sk.eyJ1Ijoic29uaGFuMTQiLCJhIjoiY2x4dHI1N2Y1MDh3cDJxc2NteTBibjJkaSJ9.prG3DQ46R1SMRD80ztH3Mg',
+                                proximity: '105.7827,21.0285', // Center point in Hanoi
+                                bbox: '102.14441,8.17966,109.46464,23.393395', // Bounding box around Vietnam
+                                language: 'vi',
+                                country: 'VN',
+                                limit: 1
+                            },
+                        });
+
+                        setSelectedLocation({
+                            id: response.data.features[0].id,
+                            full_address: response.data.features[0].properties.full_address,
+                            center: response.data.features[0].geometry.coordinates,
+                        })
+                        setQuery(response.data.features[0].properties.full_address)
+
+                    } catch (error) {
+                        console.error('Error fetching data from Mapbox:', error);
+                    }
+                },
+                (error) => {
+                    console.log(error.message);
+                },
+                { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+            );
+        };
+        getCurrentLocation()
+    }, [])
 
     const selectLocation = (location: Feature) => {
         setSelectedLocation(location);
@@ -123,7 +163,6 @@ export const FinishInfo = ({ account, setAccount, isRegister, isValid, selectedL
                         <Mapbox.MapView style={styles.map_box} >
                             <Mapbox.Camera
                                 zoomLevel={12}
-                                // followUserLocation
                                 centerCoordinate={selectedLocation ? selectedLocation.center : [0, 0]}
                             />
                             <LocationPuck puckBearingEnabled puckBearing='heading' />
@@ -259,13 +298,14 @@ const styles = StyleSheet.create({
         shadowOffset: { height: 100, width: 0 }
     },
     signin_button_disable: {
-        backgroundColor: color.button_color,
+        backgroundColor: '#49B4F1',
         width: layout.width - 40,
         height: layout.height * 0.07,
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 10
+        marginTop: 10,
+        opacity: 0.5
     },
     signin_button: {
         backgroundColor: '#49B4F1',

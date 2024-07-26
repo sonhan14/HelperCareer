@@ -5,13 +5,11 @@ import { color } from "../../constants/colors/color"
 import { useEffect, useState } from "react"
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Animated, { FadeIn, FlipInXDown, FlipOutXDown, interpolate, LightSpeedInRight, LightSpeedOutRight, RollInLeft, RollOutLeft, RollOutRight, StretchOutX, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
-import firestore from '@react-native-firebase/firestore';
 import { validateVietnamesePhoneNumber } from "./register-validation"
 import FastImage from "react-native-fast-image"
 import { StartInfo } from "./start-info"
 import { FinishInfo } from "./finish-info"
 import ImagePicker from 'react-native-image-crop-picker';
-import storage from '@react-native-firebase/storage';
 import { Feature } from "../../../types/homeTypes"
 import { AddInfo } from "./register-helper"
 import { useDispatch } from "react-redux"
@@ -89,17 +87,7 @@ export const ProfileModal = ({ isModal, userId, navigation, email, password }: {
             }
             if (pickedImage) {
                 const imagePath = pickedImage.path;
-                const uploadUri = Platform.OS === 'ios' ? imagePath.replace('file://', '') : imagePath;
-                const storageRef = await storage().ref(`users/${userId}/avatar.jpg`);
-                await storageRef.putFile(uploadUri);
-
-                try {
-                    const imageUrl = await storageRef.getDownloadURL();
-                    setImage(imageUrl);
-                } catch (error) {
-                    console.error('Image upload error: ', error);
-                }
-
+                setImage(imagePath);
             }
         } catch (error) {
             setImage(currentImageState);
@@ -167,15 +155,19 @@ export const ProfileModal = ({ isModal, userId, navigation, email, password }: {
                                 </View>
                                 <View style={styles.input_container}>
                                     <Text style={styles.text_input_blue}>Birthday</Text>
-                                    <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowDatePicker(true) }}>
-                                        <Text style={[styles.text_input, { height: '100%', textAlignVertical: 'center' }]}>{account.birth_day.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>
-                                    </TouchableOpacity>
+                                    <View style={styles.button_shadow}>
+                                        <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowDatePicker(true) }}>
+                                            <Text style={[styles.text_input_birthday]}>{account.birth_day.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                                 <View style={styles.input_container}>
                                     <Text style={styles.text_input_blue}>Gender</Text>
-                                    <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowGenderOptions(true) }}>
-                                        <Text style={[styles.text_input, { height: '100%', textAlignVertical: 'center' }]}>{account.gender || 'Select Gender'}</Text>
-                                    </TouchableOpacity>
+                                    <View style={styles.button_shadow}>
+                                        <TouchableOpacity style={[styles.input_birthday]} onPress={() => { setShowGenderOptions(true) }}>
+                                            <Text style={[styles.text_input_birthday]}>{account.gender || 'Select Gender'}</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
 
                                 <Animated.View style={[styles.genderOptions, animationStyle]} >
@@ -261,9 +253,8 @@ const styles = StyleSheet.create({
 
     },
     input_birthday: {
-        height: '70%',
+        height: '100%',
         width: '100%',
-        marginTop: 5,
     },
     input_container: {
         width: '100%',
@@ -284,20 +275,35 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         paddingHorizontal: 10,
         borderRadius: 10,
-        marginTop: 5,
         shadowColor: 'black',
-        shadowOpacity: 1,
+        shadowOpacity: 0.3,
         elevation: 5,
-        shadowRadius: 10
+    },
+    text_input_birthday: {
+        height: '100%',
+        textAlignVertical: 'center',
+        width: '100%',
+        backgroundColor: 'white',
+    },
+    button_shadow: {
+        width: '100%',
+        height: '70%',
+        backgroundColor: 'white',
+        paddingHorizontal: 10,
+        borderRadius: 10,
+        shadowColor: 'black',
+        shadowOpacity: 0.3,
+        elevation: 5,
     },
     signin_button_disable: {
-        backgroundColor: color.button_color,
+        backgroundColor: '#49B4F1',
         width: layout.width - 20,
         height: layout.height * 0.07,
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 50
+        marginTop: 50,
+        opacity: 0.5
     },
     signin_button: {
         backgroundColor: '#49B4F1',

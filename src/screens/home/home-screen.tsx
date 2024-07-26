@@ -53,7 +53,7 @@ export const HomeScreen = () => {
     }, [userData]);
     useEffect(() => {
         if (userData) {
-            checkMessage(navigation, setLoading, client)
+            checkMessage(navigation, setLoading, client, userData)
         }
     }, [userData])
 

@@ -3066,6 +3066,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-community/geolocation@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@react-native-community/geolocation@npm:3.3.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: a0920ff7ff2f9f24300a8eabd641fd5bd9124a8a5274f0077d64bc143111c925986eaf7c29fa25b6b0daaebb780ebf1aeee12e908584fe200fc619e30de330c6
+  languageName: node
+  linkType: hard
+
 "@react-native-community/netinfo@npm:^11.3.2":
   version: 11.3.2
   resolution: "@react-native-community/netinfo@npm:11.3.2"
@@ -4294,6 +4304,7 @@ __metadata:
     "@notifee/react-native": ^7.8.2
     "@react-native-async-storage/async-storage": ^1.23.1
     "@react-native-community/datetimepicker": ^8.1.1
+    "@react-native-community/geolocation": ^3.3.0
     "@react-native-community/netinfo": ^11.3.2
     "@react-native-firebase/app": ^20.1.0
     "@react-native-firebase/auth": ^20.1.0
@@ -4328,6 +4339,7 @@ __metadata:
     react: 18.2.0
     react-native: 0.74.2
     react-native-crypto: ^2.2.0
+    react-native-dotenv: ^3.4.11
     react-native-fast-image: ^8.6.3
     react-native-gesture-handler: ^2.17.0
     react-native-gifted-chat: ^2.4.0
@@ -5943,6 +5955,13 @@ __metadata:
     domelementtype: ^2.3.0
     domhandler: ^5.0.3
   checksum: e5757456ddd173caa411cfc02c2bb64133c65546d2c4081381a3bafc8a57411a41eed70494551aa58030be9e58574fcc489828bebd673863d39924fb4878f416
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.4.5":
+  version: 16.4.5
+  resolution: "dotenv@npm:16.4.5"
+  checksum: 301a12c3d44fd49888b74eb9ccf9f07a1f5df43f489e7fcb89647a2edcd84c42d6bc349dc8df099cd18f07c35c7b04685c1a4f3e6a6a9e6b30f8d48c15b7f49c
   languageName: node
   linkType: hard
 
@@ -10410,6 +10429,17 @@ __metadata:
   peerDependencies:
     react-native-randombytes: ">=2.0.0 <4.0.0"
   checksum: 52631bf32e5d3e0aad9329e3271808a30b91f8a072d4a0c2791105cd3c3aac5d1a63a4016a570790342baa7fc4b10f15024e4d6df47e57906197d7587af450e1
+  languageName: node
+  linkType: hard
+
+"react-native-dotenv@npm:^3.4.11":
+  version: 3.4.11
+  resolution: "react-native-dotenv@npm:3.4.11"
+  dependencies:
+    dotenv: ^16.4.5
+  peerDependencies:
+    "@babel/runtime": ^7.20.6
+  checksum: 3ebac2c2ed79dd7e4920fd3fc2da9187413b7190231618e4858b46c47833677838b96d531afe7bd5c4b0a60454dba40cb8708722210df5d522e30aefbf41da05
   languageName: node
   linkType: hard
 
