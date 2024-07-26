@@ -27,7 +27,6 @@ export const FinishInfo = ({ account, setAccount, isRegister, isValid, selectedL
     const [results, setResults] = useState<Feature[]>([]);
     const [query, setQuery] = useState<string>('');
     const animatedValue = useSharedValue(40)
-    const [userLocation, setuserLocation] = useState<[number, number]>([0, 0])
 
     const animatedStyle = useAnimatedStyle(() => {
         return {

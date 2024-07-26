@@ -1,7 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { RootStackParamList } from "../../navigations/navigation";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { layout } from "../../constants/dimensions/dimension";
 import Icon from "react-native-vector-icons/AntDesign"
 import { images } from "../../images";
@@ -14,9 +14,11 @@ import { truncateText } from "../../helpers/truncateText";
 import { messagesBox } from "../../../types/messageBox";
 import { MessagesBoxList } from "./chat-box-list";
 import { selectUserData } from "../../redux/user/userSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { iUser } from "../../../types/userType";
 import FastImage from "react-native-fast-image";
+import { useTask } from "../../context/EmployeeContext";
+import { setNewChat } from "../../redux/chat/chatSlice";
 
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -27,6 +29,8 @@ export const ChatScreen = () => {
     const navigation = useNavigation<ChatScreenNavigationProp>()
     const userData = useSelector(selectUserData);
     const [boxData, setBoxData] = useState<messagesBox[]>([])
+    const disptach = useDispatch()
+    const isFocused = useIsFocused();
 
     const AvatarFlatlist = () => {
         const renderItem = ({ item }: { item: messagesBox }) => (
@@ -60,7 +64,6 @@ export const ChatScreen = () => {
                     const data = documentSnapshot.data();
                     const members = data.members;
                     const receive_id = members.filter((member: any) => member !== userData?.id)[0];
-
                     // Fetch user details synchronously
                     const userSnapshot = await firestore().collection('users').doc(receive_id).get();
                     const userDoc = userSnapshot.data();
@@ -105,6 +108,7 @@ export const ChatScreen = () => {
     };
 
 
+
     useEffect(() => {
         if (!userData) return;
 
@@ -113,6 +117,11 @@ export const ChatScreen = () => {
         return () => unsubscribe()
     }, [userData]);
 
+    useEffect(() => {
+        if (isFocused) {
+            disptach(setNewChat(0))
+        }
+    }, [isFocused])
 
 
     const goToChat = (receiver: iUser, chatBoxId: string) => {

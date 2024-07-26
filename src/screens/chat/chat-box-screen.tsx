@@ -339,6 +339,7 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
         return null
     }
     return (
+
         <View style={styles.container}>
             <View style={styles.header_bar}>
                 <TouchableOpacity style={styles.back_button} onPress={() => handleBack()}>
@@ -374,7 +375,6 @@ export const ChatBox = ({ route }: ChatBoxProps) => {
 
             />
         </View>
-
     )
 }
 

@@ -11,6 +11,7 @@ import { iUser } from "../../../types/userType"
 import { convertStringToDate, formatDate } from "../../constants/formatDate"
 import { useDispatch } from "react-redux"
 import { setUserData } from "../../redux/user/userSlice"
+import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view"
 
 
 type editModal = {
@@ -96,12 +97,15 @@ export const EditProfile = ({ isModal, userData, closeModal }: editModal) => {
             animationType={'slide'}
             visible={isModal}
         >
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-            >
-                <ScrollView >
+            <KeyboardAwareFlatList
+                data={[{ key: 'main' }]}
+                keyExtractor={(item) => item.key}
+                showsVerticalScrollIndicator={false}
+                renderItem={() => (
                     <View style={styles.container}>
+                        <TouchableOpacity style={styles.back_container} onPress={() => { closeModal() }}>
+                            <Image source={images.back_icon} resizeMode='cover' style={styles.back_icon} />
+                        </TouchableOpacity>
                         <View style={styles.login_image_container}>
                             <Image source={images.register_pic} resizeMode='contain' style={{ width: '80%', height: '80%' }} />
                         </View>
@@ -203,7 +207,7 @@ export const EditProfile = ({ isModal, userData, closeModal }: editModal) => {
                             <View style={[styles.input_container]}>
                                 <Text style={styles.text_input_blue}>Introduce: </Text>
                                 <TextInput
-                                    style={[styles.text_input, { height: 100 }]}
+                                    style={[styles.text_input, { height: 100, textAlignVertical: 'top' }]}
                                     placeholder="Hi, I'm William"
                                     placeholderTextColor={'#8897AD'}
                                     onChangeText={(text) => { setAccount(prev => ({ ...prev, intro: text })) }}
@@ -217,21 +221,20 @@ export const EditProfile = ({ isModal, userData, closeModal }: editModal) => {
                                 style={isRegister || isValid !== '' ? styles.signin_button_disable : styles.signin_button}
                                 disabled={isRegister}
                             >
-                                <Text style={styles.text_button}>Edit Profile</Text>
+                                <Text style={styles.text_button}>Confirm</Text>
                             </TouchableOpacity>
                         </View>
-
-
                     </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                )}
+            />
         </Modal>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        height: layout.height,
+        width: layout.width,
     },
     login_image_container: {
         width: layout.width,
@@ -317,13 +320,14 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     signin_button_disable: {
-        backgroundColor: color.button_color,
+        backgroundColor: '#49B4F1',
         width: '100%',
         height: '10%',
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 50
+        marginTop: 50,
+        opacity: 0.5
     },
     signin_button: {
         backgroundColor: '#49B4F1',
@@ -366,5 +370,20 @@ const styles = StyleSheet.create({
         color: color.link_text,
         fontSize: 15,
         fontWeight: '500',
+    },
+    back_container: {
+        position: 'absolute',
+        height: 50,
+        width: 50,
+        borderRadius: 50,
+        backgroundColor: color.light_background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        top: 5,
+        left: 5
+    },
+    back_icon: {
+        height: 20,
+        width: 20
     }
 })

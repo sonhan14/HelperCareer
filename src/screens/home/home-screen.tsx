@@ -1,9 +1,9 @@
-import { ActivityIndicator, FlatList, Modal, PermissionsAndroid, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, StyleSheet, Image, TouchableOpacity, View } from "react-native"
 
 import { useEffect, useState } from "react";
 import { RootStackParamList, RootTabParamList } from "../../navigations/navigation";
 import { RouteProp, useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
-import Mapbox, { Image, Images, LocationPuck, ShapeSource, SymbolLayer } from '@rnmapbox/maps';
+import Mapbox, { Images, LocationPuck, ShapeSource, SymbolLayer } from '@rnmapbox/maps';
 import { layout } from "../../constants/dimensions/dimension";
 import { images } from "../../images";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -15,7 +15,7 @@ import { iUser } from "../../../types/userType";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { color } from "../../constants/colors/color";
 import { EmployeeListHome } from "./employee-list";
-import { useEmployee, useTask } from "../../context/EmployeeContext";
+import { useTask } from "../../context/EmployeeContext";
 import { Applications } from "../../../types/applications.type";
 import { Task } from "../../../types/taskType";
 import { Call, useStreamVideoClient } from "@stream-io/video-react-native-sdk";
@@ -39,6 +39,7 @@ export const HomeScreen = () => {
     const isFocused = useIsFocused();
     const [loading, setLoading] = useState(true)
     const client = useStreamVideoClient();
+    const [isEmployee, setIsEmployee] = useState<boolean>(false)
 
     useEffect(() => {
         if (!userData) return;
@@ -60,18 +61,9 @@ export const HomeScreen = () => {
     useEffect(() => {
         if (!isFocused) {
             setIsTask(0)
-            setIsEmployee(0)
         }
     }, [isFocused]);
-
-    const { isEmployee, setIsEmployee } = useEmployee();
     const { isTask, setIsTask } = useTask();
-
-
-    const animationHandle = () => {
-        setIsEmployee(isEmployee === 0 ? 1 : 0)
-        setIsTask(0)
-    }
 
 
     const handleOpenEmployee = (event: any): void => {
@@ -89,15 +81,18 @@ export const HomeScreen = () => {
             const item: Task = features[0].properties;
             fetchApplication(item?.id, setApplicationList)
             setCurrentTask(item)
-            setIsEmployee(0)
             setIsTask(1)
         }
-
     }
 
     const handleCloseModal = () => {
         setIsTask(0)
     }
+
+    const handleCloseEmployeeModal = () => {
+        setIsEmployee(false)
+    }
+
 
     if (!loading) {
         return (
@@ -110,13 +105,9 @@ export const HomeScreen = () => {
     return (
         <View style={styles.page}>
             <View style={styles.container}>
-                {employeeList ?
-                    <EmployeeListHome isEmployee={isEmployee} animationHandle={animationHandle} employeeList={employeeList} naigation={navigation} />
-                    :
-                    null
-                }
-
-
+                <TouchableOpacity style={styles.search_container} onPress={() => setIsEmployee(true)}>
+                    <Image source={images.search_icon} style={styles.search_icon} />
+                </TouchableOpacity>
                 <Mapbox.MapView style={styles.map} >
                     <Mapbox.Camera
                         followZoomLevel={11}
@@ -159,6 +150,9 @@ export const HomeScreen = () => {
                 </Mapbox.MapView>
             </View>
             <TaskInfo isOpen={isTask} setClose={handleCloseModal} item={currentTask} applicationList={applicationList} />
+            {employeeList && (
+                <EmployeeListHome isEmployee={isEmployee} employeeList={employeeList} naigation={navigation} handleCloseEmployeeModal={handleCloseEmployeeModal} />
+            )}
         </View>
     )
 
@@ -186,5 +180,21 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
-
+    search_container: {
+        position: 'absolute',
+        height: 50,
+        width: 50,
+        backgroundColor: 'white',
+        zIndex: 2,
+        borderRadius: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 0.5,
+        right: 5,
+        top: 5
+    },
+    search_icon: {
+        height: 25,
+        width: 25,
+    }
 })

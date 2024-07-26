@@ -7,5 +7,6 @@ export const color = {
     text_input: '#CFDFE2',
     light_background: '#eaf2f9',
     blue_chat: '#2e64e5',
-    red_pink: '#CB2F30'
+    red_pink: '#CB2F30',
+    main_blue: '#49B4F1'
 }

@@ -36,10 +36,11 @@ export default function AppNavigator() {
         await AsyncStorage.setItem("FCMToken", token)
     }
 
+
+
     React.useEffect(() => {
         requestUserPermission()
         getToken()
-
     })
 
 

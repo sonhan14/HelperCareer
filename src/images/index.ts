@@ -13,5 +13,7 @@ export const images = {
     map_animation: require('./map_animation.gif'),
     budget_icon: require('./budget_icon.png'),
     address_location: require('./address_location.gif'),
-    chat_empty: require('./chat_empty.gif')
+    chat_empty: require('./chat_empty.gif'),
+    back_icon: require('./back_icon.png'),
+    search_icon: require('./search_icon.png')
 }

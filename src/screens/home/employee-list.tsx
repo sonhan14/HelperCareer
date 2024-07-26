@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Animated, { interpolate, interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { layout } from "../../constants/dimensions/dimension";
@@ -13,20 +13,23 @@ import { RootStackParamList } from "../../navigations/navigation";
 type HomeScreenRouteProp = StackNavigationProp<RootStackParamList>;
 
 interface EmployeeListHomeProps {
-    isEmployee: number,
-    animationHandle: () => void,
+    isEmployee: boolean,
     employeeList: iUser[],
-    naigation: HomeScreenRouteProp
+    naigation: HomeScreenRouteProp,
+    handleCloseEmployeeModal: () => void
 }
 
-const EmployeeItem = ({ item, naigation }: { item: iUser, naigation: HomeScreenRouteProp }) => {
+const EmployeeItem = ({ item, naigation, handleCloseEmployeeModal }: { item: iUser, naigation: HomeScreenRouteProp, handleCloseEmployeeModal: () => void }) => {
     if (!item) {
         return
     }
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.header_container} onPress={() => naigation.navigate('EmployeeProfile', { employeeId: item.id })}>
-                <Image source={item.avatar === undefined ? images.avartar_pic : { uri: item.avatar }} resizeMode='contain' style={styles.image_style} />
+            <TouchableOpacity style={styles.header_container} onPress={() => {
+                handleCloseEmployeeModal()
+                naigation.navigate('EmployeeProfile', { employeeId: item.id })
+            }}>
+                <Image source={item.avatar === undefined ? images.avartar_pic : { uri: item.avatar }} resizeMode='cover' style={styles.image_style} />
                 <View style={styles.task_info_container}>
                     <Text style={styles.text_black_20}>{item.last_name} {item.first_name}</Text>
                     <Text style={styles.text_black_15}>{item.birthday}</Text>
@@ -37,8 +40,7 @@ const EmployeeItem = ({ item, naigation }: { item: iUser, naigation: HomeScreenR
     )
 }
 
-export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, naigation }: EmployeeListHomeProps) => {
-    const height = useSharedValue(0);
+export const EmployeeListHome = ({ isEmployee, employeeList, naigation, handleCloseEmployeeModal }: EmployeeListHomeProps) => {
     const [query, setQuery] = useState<string>('');
     const [filteredEmployeeList, setFilteredEmployeeList] = useState<iUser[]>(employeeList);
 
@@ -47,7 +49,7 @@ export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, na
     }, [employeeList]);
 
     useEffect(() => {
-        if (isEmployee === 0) {
+        if (!isEmployee) {
             setQuery('')
             setFilteredEmployeeList(employeeList)
         }
@@ -61,127 +63,41 @@ export const EmployeeListHome = ({ isEmployee, animationHandle, employeeList, na
         setFilteredEmployeeList(filteredList);
     };
 
-    const searchAnimation = useAnimatedStyle(() => {
-        const borderRadius = interpolate(
-            height.value,
-            [40, layout.height * 0.6, layout.height],
-            [20, 10, 0]
-        );
-
-        const width = interpolate(
-            height.value,
-            [40, layout.height * 0.6, layout.height],
-            [40, layout.width * 0.5, layout.width]
-        );
-
-        const bgColor = interpolateColor(
-            height.value,
-            [40, layout.height * 0.5, layout.height],
-            ['#478CCF', '#36C2CE', color.light_background]
-        );
-
-        return {
-            height: height.value,
-            width,
-            borderRadius,
-            backgroundColor: bgColor,
-        };
-    });
-
-    const inputAnimation = useAnimatedStyle(() => {
-        const opacity = interpolate(
-            height.value,
-            [40, layout.height * 0.9, layout.height],
-            [0, 0.2, 1]
-        );
-        const translateX = interpolate(
-            height.value,
-            [40, layout.height],
-            [-layout.width, 0]
-        );
-
-        const width = interpolate(
-            height.value,
-            [40, layout.height * 0.6, layout.height],
-            [40, layout.width * 0.5, layout.width]
-        );
-        return {
-            opacity,
-            transform: [{ translateX }],
-            width
-        };
-    });
-
-    const employeeAnimation = useAnimatedStyle(() => {
-        const opacity = interpolate(
-            height.value,
-            [40, layout.height * 0.9, layout.height],
-            [0, 0.2, 1]
-        );
-        const translateX = interpolate(
-            height.value,
-            [40, layout.height],
-            [-layout.width, 0]
-        );
-
-        const width = interpolate(
-            height.value,
-            [40, layout.height * 0.6, layout.height],
-            [40, layout.width * 0.5, layout.width]
-        );
-
-        const listHeight = interpolate(
-            height.value,
-            [40, layout.height * 0.6, layout.height],
-            [0, layout.height * 0.12, employeeList.length < 5 ? (layout.height * 0.12 + 20) * employeeList.length : (layout.height * 0.12 + 20) * 5]
-        );
-
-        return {
-            opacity,
-            transform: [{ translateX }],
-            width,
-            height: listHeight
-        };
-    });
-
-    useEffect(() => {
-        height.value = withTiming(isEmployee === 0 ? 40 : layout.height, { duration: 2000 });
-    }, [isEmployee]);
-
     return (
-        <Animated.View style={[styles.employee_container, searchAnimation]}>
-            <TouchableOpacity onPress={animationHandle} style={styles.search_button}>
-                {isEmployee === 0 ?
-                    <Icon name="search" color={'black'} size={25} />
-                    :
+        <Modal
+            animationType={'slide'}
+            visible={isEmployee}
+        >
+            <View style={[styles.employee_container,]}>
+                <TouchableOpacity style={styles.search_button} onPress={() => handleCloseEmployeeModal()}>
                     <Icon name="remove" color={'black'} size={25} />
-                }
-            </TouchableOpacity>
-            <Animated.View style={[styles.input_container, inputAnimation]}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Search for an employee"
-                    value={query}
-                    onChangeText={handleSearch}
-                />
-            </Animated.View>
-            <Animated.View style={[styles.employee_list, employeeAnimation]}>
-                <Text style={[styles.text_black_15, { marginBottom: 10 }]}>Number of employees: {filteredEmployeeList.length}</Text>
-                <FlatList
-                    data={filteredEmployeeList}
-                    renderItem={({ item }) => <EmployeeItem item={item} naigation={naigation} />}
-                    keyExtractor={(item) => item.id}
-                    showsVerticalScrollIndicator={false}
-                />
-            </Animated.View>
-        </Animated.View>
+                </TouchableOpacity>
+                <View style={[styles.input_container]}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Search for an employee"
+                        value={query}
+                        onChangeText={handleSearch}
+                    />
+                </View>
+                <View style={[styles.employee_list,]}>
+                    <Text style={[styles.text_black_15, { marginBottom: 10 }]}>Number of employees: {filteredEmployeeList.length}</Text>
+                    <FlatList
+                        data={filteredEmployeeList}
+                        renderItem={({ item }) => <EmployeeItem item={item} naigation={naigation} handleCloseEmployeeModal={handleCloseEmployeeModal} />}
+                        keyExtractor={(item) => item.id}
+                        showsVerticalScrollIndicator={false}
+                    />
+                </View>
+            </View>
+        </Modal>
+
     );
 }
 
 const styles = StyleSheet.create({
     employee_container: {
-        position: 'absolute',
-        zIndex: 1,
+        flex: 1
     },
     search_button: {
         height: 40,
@@ -190,6 +106,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 0.5,
         borderRadius: 20,
+        top: 5,
+        left: 5
     },
     input_container: {
         marginTop: 10,
@@ -216,7 +134,8 @@ const styles = StyleSheet.create({
         padding: 10,
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 15
+        marginBottom: 15,
+        borderBottomWidth: 0.5
     },
     header_container: {
         height: '100%',
